@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prower · 四颗灵魂，同一个家</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #000;
+      --glass-bg: rgba(255,255,255,0.05);
+      --glass-border: rgba(255,255,255,0.12);
+      --text-primary: #fff;
+      --text-secondary: rgba(255,255,255,0.6);
+      --accent: #a78bfa;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', 'Inter', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── Ambient background orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+      will-change: transform;
+    }
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, #6366f1, #8b5cf6);
+      top: -200px; left: -150px;
+      animation: drift1 18s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #06b6d4, #0ea5e9);
+      top: 30%; right: -100px;
+      animation: drift2 22s ease-in-out infinite alternate;
+    }
+    .orb-3 {
+      width: 450px; height: 450px;
+      background: radial-gradient(circle, #ec4899, #f43f5e);
+      bottom: 10%; left: 20%;
+      animation: drift3 19s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(60px, 40px) scale(1.1); }
+    }
+    @keyframes drift2 {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(-50px, 60px) scale(0.95); }
+    }
+    @keyframes drift3 {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(40px, -50px) scale(1.05); }
+    }
+
+    /* ── Layout ── */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px;
+    }
+
+    .hero-eyebrow {
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.2s forwards;
+    }
+
+    .hero-title {
+      font-size: clamp(64px, 12vw, 120px);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.4s forwards;
+    }
+
+    .hero-subtitle {
+      margin-top: 20px;
+      font-size: clamp(18px, 3vw, 26px);
+      font-weight: 300;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.6s forwards;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeUp 1s ease 1s forwards;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(1); }
+      50%       { opacity: 1;   transform: scaleY(1.1); }
+    }
+
+    /* ── Cat sections ── */
+    .cat-section {
+      padding: 100px 0;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .cat-header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 60px;
+      flex-wrap: wrap;
+    }
+
+    .cat-name {
+      font-size: clamp(40px, 7vw, 72px);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .cat-breed {
+      font-size: clamp(14px, 2vw, 18px);
+      font-weight: 400;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    /* ── Glass card ── */
+    .cat-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  box-shadow 0.4s ease,
+                  border-color 0.4s ease;
+      opacity: 0;
+      transform: translateY(40px);
+    }
+
+    .cat-card.revealed {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  box-shadow 0.4s ease, border-color 0.4s ease;
+    }
+
+    .cat-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(167, 139, 250, 0.4);
+      box-shadow: 0 20px 60px rgba(167, 139, 250, 0.15), 0 0 40px rgba(167, 139, 250, 0.08);
+    }
+
+    .cat-photo {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--glass-border);
+      display: block;
+    }
+
+    .cat-poem {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.6;
+      font-style: italic;
+      letter-spacing: 0.02em;
+    }
+
+    .cat-poem::before { content: '「'; }
+    .cat-poem::after  { content: '」'; }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 120px 24px;
+      text-align: center;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .cta-title {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .cta-sub {
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 300;
+    }
+
+    /* ── Scroll reveal ── */
+    .reveal-target {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .reveal-target.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .cat-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .cat-photo { width: 120px; height: 120px; }
+      .cat-card { padding: 16px; }
+    }
+
+    @media (max-width: 400px) {
+      .cat-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <p class="hero-eyebrow">Four souls, one home</p>
+    <h1 class="hero-title">Prower</h1>
+    <p class="hero-subtitle">四颗灵魂，同一个家</p>
+    <div class="hero-scroll">
+      <span>scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <div class="container">
+
+    <!-- Dou -->
+    <section class="cat-section reveal-target" id="dou">
+      <div class="cat-header">
+        <h2 class="cat-name">Dou</h2>
+        <span class="cat-breed">孟加拉豹猫 Bengal</span>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/01_Dou.jpg" alt="Dou" loading="lazy">
+          <p class="cat-poem">一道闪电划过叶面</p>
+        </div>
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/10_Dou.jpg" alt="Dou" loading="lazy">
+          <p class="cat-poem">永不落地的爪子</p>
+        </div>
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/13_Dou.jpg" alt="Dou" loading="lazy">
+          <p class="cat-poem">野性寄居于家宅</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lan -->
+    <section class="cat-section reveal-target" id="lan">
+      <div class="cat-header">
+        <h2 class="cat-name">Lan</h2>
+        <span class="cat-breed">英短蓝猫 British Shorthair</span>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/02_Lan.jpg" alt="Lan" loading="lazy">
+          <p class="cat-poem">暮色里的沉默守卫</p>
+        </div>
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/04_Lan.jpg" alt="Lan" loading="lazy">
+          <p class="cat-poem">盛着雨水的眼睛</p>
+        </div>
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/06_Lan.jpg" alt="Lan" loading="lazy">
+          <p class="cat-poem">柔软的毛发，柔软的静默</p>
+        </div>
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/07_Lan.jpg" alt="Lan" loading="lazy">
+          <p class="cat-poem">如古老山脉的耐心</p>
+        </div>
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/08_Lan.jpg" alt="Lan" loading="lazy">
+          <p class="cat-poem">在梦与梦之间浅眠</p>
+        </div>
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/11_Lan.jpg" alt="Lan" loading="lazy">
+          <p class="cat-poem">对孤独轻轻颔首</p>
+        </div>
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/12_Lan.jpg" alt="Lan" loading="lazy">
+          <p class="cat-poem">静水，深流</p>
+        </div>
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/14_Lan.jpg" alt="Lan" loading="lazy">
+          <p class="cat-poem">胡须轻尝空气</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tuan -->
+    <section class="cat-section reveal-target" id="tuan">
+      <div class="cat-header">
+        <h2 class="cat-name">Tuan</h2>
+        <span class="cat-breed">布偶猫 Ragdoll</span>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/03_Tuan.jpg" alt="Tuan" loading="lazy">
+          <p class="cat-poem">两颗灵魂共一颗心跳</p>
+        </div>
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/05_Tuan.jpg" alt="Tuan" loading="lazy">
+          <p class="cat-poem">你的影子，你的影子</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 小7 -->
+    <section class="cat-section reveal-target" id="xiao7">
+      <div class="cat-header">
+        <h2 class="cat-name">小7</h2>
+        <span class="cat-breed">中华田园猫 Chinese Shorthair</span>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-card">
+          <img class="cat-photo" src="./imgs/09_小7.jpg" alt="小7" loading="lazy">
+          <p class="cat-poem">记忆深处一个清晨</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section reveal-target">
+      <h2 class="cta-title">领养代替购买</h2>
+      <p class="cta-sub">每一个生命都值得被温柔以待</p>
+    </section>
+
+  </div>
+
+  <script>
+    // Scroll reveal via Intersection Observer
+    const revealSelectors = '.cat-section, .cta-section';
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry, i) => {
+          if (entry.isIntersecting) {
+            // Stagger card reveals inside this section
+            const cards = entry.target.querySelectorAll('.cat-card');
+            cards.forEach((card, j) => {
+              setTimeout(() => card.classList.add('revealed'), j * 120);
+            });
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -60px 0px' }
+    );
+
+    document.querySelectorAll(revealSelectors).forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
