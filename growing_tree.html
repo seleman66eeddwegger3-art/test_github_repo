@@ -5,17 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Growing Tree</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            overflow: hidden;
-        }
-        canvas {
-            display: block;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
@@ -31,137 +23,187 @@
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        const GROWTH_DURATION = 15000; // 15 seconds
-        const MAX_DEPTH = 10;
+        const GROWTH_DURATION = 15000;
+        const MAX_DEPTH = 9;
         const BRANCH_ANGLE = Math.PI / 6;
-        const LENGTH_DECAY = 0.7;
-        const WIDTH_DECAY = 0.7;
+        const LENGTH_DECAY = 0.72;
+        const WIDTH_DECAY = 0.68;
+        const LEAF_RADIUS = 6;
 
         let startTime = null;
-        let branches = [];
+
+        // --- branch data ---
+        // Each node: { x, y, length, angle, width, depth, startProgress }
+        // startProgress = the global progress (0..1) when this branch begins growing
+        // Its own completion is staggered so deeper branches start later.
+        function buildTree(x, y, length, angle, width, depth, startProgress, branches) {
+            branches.push({ x, y, length, angle, width, depth, startProgress });
+            if (depth >= MAX_DEPTH) return;
+
+            const childStart = startProgress + (1 - startProgress) * 0.22;
+            const endX = x + Math.cos(angle) * length;
+            const endY = y - Math.sin(angle) * length;
+            const newLength = length * LENGTH_DECAY;
+            const newWidth = Math.max(width * WIDTH_DECAY, 1);
+            const spread = BRANCH_ANGLE + (Math.random() - 0.5) * 0.25;
+
+            buildTree(endX, endY, newLength, angle + spread, newWidth, depth + 1, childStart, branches);
+            buildTree(endX, endY, newLength, angle - spread, newWidth, depth + 1, childStart, branches);
+
+            if (depth >= MAX_DEPTH - 2) {
+                // extra small offshoots near the tips
+                const skinnyLen = newLength * 0.5;
+                const skinnyWidth = Math.max(newWidth * 0.5, 0.6);
+                const skinnyStart = childStart + 0.04;
+                buildTree(endX, endY, skinnyLen, angle + spread * 1.6, skinnyWidth, depth + 1, skinnyStart, branches);
+                buildTree(endX, endY, skinnyLen, angle - spread * 1.6, skinnyWidth, depth + 1, skinnyStart, branches);
+            }
+        }
 
         function drawBackground() {
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#87CEEB');
-            gradient.addColorStop(0.5, '#B0E0E6');
-            gradient.addColorStop(1, '#E0F7FA');
-            ctx.fillStyle = gradient;
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#4A90D9');
+            grad.addColorStop(0.35, '#87CEEB');
+            grad.addColorStop(0.7, '#B8E4F0');
+            grad.addColorStop(1, '#E8F8F5');
+            ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        function getBranchColor(depth, maxDepth) {
-            const brownBase = { r: 139, g: 90, b: 43 };
-            const lightness = 1 - (depth / maxDepth) * 0.5;
-            return `rgb(${Math.floor(brownBase.r * lightness)}, ${Math.floor(brownBase.g * lightness)}, ${Math.floor(brownBase.b * lightness)})`;
+        function drawGround() {
+            const groundY = canvas.height;
+            ctx.beginPath();
+            ctx.moveTo(0, groundY);
+            // gentle rolling ground
+            const points = 20;
+            for (let i = 0; i <= points; i++) {
+                const px = (i / points) * canvas.width;
+                const py = groundY - 4 - Math.sin(i * 0.7) * 3 - Math.sin(i * 1.9) * 2;
+                ctx.lineTo(px, py);
+            }
+            ctx.lineTo(canvas.width, groundY);
+            ctx.closePath();
+            const groundGrad = ctx.createLinearGradient(0, canvas.height - 30, 0, canvas.height);
+            groundGrad.addColorStop(0, '#5D8233');
+            groundGrad.addColorStop(1, '#3E5C1E');
+            ctx.fillStyle = groundGrad;
+            ctx.fill();
         }
 
-        function getLeafColor() {
-            const greens = [
-                { r: 34, g: 139, b: 34 },
-                { r: 50, g: 205, b: 50 },
-                { r: 0, g: 128, b: 0 },
-                { r: 107, g: 142, b: 35 },
-                { r: 85, g: 107, b: 47 }
+        function woodColor(depth) {
+            const t = depth / MAX_DEPTH;
+            const r = Math.floor(139 - t * 30);
+            const g = Math.floor(90 - t * 20);
+            const b = Math.floor(43 - t * 18);
+            return `rgb(${r},${g},${b})`;
+        }
+
+        function leafColor() {
+            const palette = [
+                [34, 139, 34],
+                [46, 160, 46],
+                [60, 179, 60],
+                [75, 160, 40],
+                [85, 140, 35],
+                [50, 150, 50],
+                [100, 170, 30],
+                [30, 130, 30],
             ];
-            const color = greens[Math.floor(Math.random() * greens.length)];
-            return `rgb(${color.r}, ${color.g}, ${color.b})`;
+            const c = palette[Math.floor(Math.random() * palette.length)];
+            return `rgb(${c[0]},${c[1]},${c[2]})`;
         }
 
-        function drawBranch(x, y, length, angle, width, depth, progress) {
-            const endX = x + Math.cos(angle) * length * progress;
-            const endY = y - Math.sin(angle) * length * progress;
+        function branchProgress(globalP, startP) {
+            if (globalP <= startP) return 0;
+            // each branch segment grows over ~15% of the total duration
+            const seg = 0.15;
+            return Math.min((globalP - startP) / seg, 1);
+        }
+
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        function drawBranch(branch, globalP) {
+            const raw = branchProgress(globalP, branch.startProgress);
+            const p = easeOutCubic(raw);
+            if (p <= 0) return;
+
+            const endX = branch.x + Math.cos(branch.angle) * branch.length * p;
+            const endY = branch.y - Math.sin(branch.angle) * branch.length * p;
 
             ctx.beginPath();
-            ctx.moveTo(x, y);
+            ctx.moveTo(branch.x, branch.y);
             ctx.lineTo(endX, endY);
-            ctx.strokeStyle = getBranchColor(depth, MAX_DEPTH);
-            ctx.lineWidth = width * progress;
+            ctx.strokeStyle = woodColor(branch.depth);
+            ctx.lineWidth = branch.width * (1 - branch.depth / (MAX_DEPTH + 3)) + 0.5;
             ctx.lineCap = 'round';
             ctx.stroke();
 
-            if (depth < MAX_DEPTH && progress >= 1) {
-                const newLength = length * LENGTH_DECAY;
-                const newWidth = width * WIDTH_DECAY;
-                const leftAngle = angle + BRANCH_ANGLE + (Math.random() - 0.5) * 0.3;
-                const rightAngle = angle - BRANCH_ANGLE + (Math.random() - 0.5) * 0.3;
-
-                branches.push({
-                    x: endX,
-                    y: endY,
-                    length: newLength,
-                    angle: leftAngle,
-                    width: newWidth,
-                    depth: depth + 1,
-                    startTime: Date.now()
-                });
-
-                branches.push({
-                    x: endX,
-                    y: endY,
-                    length: newLength,
-                    angle: rightAngle,
-                    width: newWidth,
-                    depth: depth + 1,
-                    startTime: Date.now()
-                });
+            // draw leaf clusters at branch tips when fully grown
+            if (p >= 0.95 && branch.depth >= MAX_DEPTH - 2) {
+                const tipX = branch.x + Math.cos(branch.angle) * branch.length;
+                const tipY = branch.y - Math.sin(branch.angle) * branch.length;
+                drawLeafCluster(tipX, tipY, branch.depth);
             }
+        }
 
-            if (depth === MAX_DEPTH && progress >= 1) {
-                const leafSize = 3 + Math.random() * 4;
+        function drawLeafCluster(cx, cy, depth) {
+            const count = 4 + Math.floor(Math.random() * 4);
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = Math.random() * LEAF_RADIUS * 1.5;
+                const lx = cx + Math.cos(angle) * dist;
+                const ly = cy + Math.sin(angle) * dist;
+                const size = 2 + Math.random() * 5;
+
                 ctx.beginPath();
-                ctx.arc(endX, endY, leafSize, 0, Math.PI * 2);
-                ctx.fillStyle = getLeafColor();
+                ctx.ellipse(lx, ly, size, size * 0.55, Math.random() * Math.PI, 0, Math.PI * 2);
+                ctx.fillStyle = leafColor();
                 ctx.fill();
             }
+        }
+
+        let branches = [];
+        let built = false;
+
+        function build() {
+            branches = [];
+            const trunkLength = canvas.height * 0.28;
+            const trunkWidth = 16;
+            const startX = canvas.width / 2;
+            const startY = canvas.height;
+            buildTree(startX, startY, trunkLength, Math.PI / 2, trunkWidth, 0, 0, branches);
+            built = true;
         }
 
         function animate(timestamp) {
             if (!startTime) startTime = timestamp;
             const elapsed = timestamp - startTime;
-            const globalProgress = Math.min(elapsed / GROWTH_DURATION, 1);
+            const globalP = Math.min(elapsed / GROWTH_DURATION, 1);
 
+            if (!built) build();
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawBackground();
+            drawGround();
 
-            if (branches.length === 0) {
-                const trunkLength = canvas.height * 0.25;
-                const trunkWidth = 20;
-                const startX = canvas.width / 2;
-                const startY = canvas.height;
-
-                branches.push({
-                    x: startX,
-                    y: startY,
-                    length: trunkLength,
-                    angle: Math.PI / 2,
-                    width: trunkWidth,
-                    depth: 0,
-                    startTime: Date.now()
-                });
+            for (const b of branches) {
+                drawBranch(b, globalP);
             }
 
-            const branchesToDraw = [...branches];
-            branches = [];
-
-            for (const branch of branchesToDraw) {
-                const branchElapsed = Date.now() - branch.startTime;
-                const branchProgress = Math.min(branchElapsed / (GROWTH_DURATION / (MAX_DEPTH + 2)), 1);
-
-                if (branchProgress < 1) {
-                    branches.push(branch);
-                }
-
-                drawBranch(
-                    branch.x,
-                    branch.y,
-                    branch.length,
-                    branch.angle,
-                    branch.width,
-                    branch.depth,
-                    branchProgress
-                );
+            // draw central leaf cluster at top for fullness
+            if (globalP > 0.5) {
+                const trunkEndX = canvas.width / 2;
+                const trunkEndY = canvas.height - canvas.height * 0.28;
+                const extraP = Math.min((globalP - 0.5) / 0.5, 1);
+                const alpha = extraP * 0.4;
+                ctx.globalAlpha = alpha;
+                drawLeafCluster(trunkEndX, trunkEndY - 20, MAX_DEPTH - 1);
+                ctx.globalAlpha = 1;
             }
 
-            if (globalProgress < 1 || branches.length > 0) {
+            if (globalP < 1) {
                 requestAnimationFrame(animate);
             }
         }
