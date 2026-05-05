@@ -109,7 +109,7 @@
 
     /* ── Horizontal scrollable cards ── */
     .cat-strip {
-      max-width:1200px;margin:40px auto 0;padding:0 32px;
+      max-width:1200px;margin:52px auto 0;padding:0 32px;
       display:flex;gap:20px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px;
       scroll-snap-type:x mandatory;
     }
@@ -117,13 +117,26 @@
 
     .cat-thumb {
       flex:0 0 160px;scroll-snap-align:start;
-      background:var(--glass-bg);border:1px solid var(--glass-border);
+      background:var(--glass-bg);border:1px solid rgba(255,255,255,0.08);
       backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
       border-radius:18px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:12px;
-      cursor:pointer;transition:transform .35s cubic-bezier(.25,.46,.45,.94),border-color .3s,box-shadow .3s;
+      cursor:pointer;
+      transition: transform .35s cubic-bezier(.25,.46,.45,.94),
+                  border-color .3s,
+                  box-shadow .35s;
     }
-    .cat-thumb:hover { transform:translateY(-6px);border-color:rgba(167,139,250,.4);box-shadow:0 12px 40px rgba(167,139,250,.12); }
-    .cat-thumb.active { border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 16px 48px rgba(167,139,250,.2);transform:translateY(-6px); }
+    .cat-thumb:hover {
+      transform:translateY(-5px);
+      border-color:rgba(255,255,255,0.2);
+      box-shadow:0 12px 40px rgba(255,255,255,0.06);
+    }
+    .cat-thumb.active {
+      border-color:rgba(255,255,255,0.35);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.18),
+        0 16px 48px rgba(255,255,255,0.1),
+        inset 0 1px 0 rgba(255,255,255,0.25);
+    }
     .cat-thumb-img { width:120px;height:120px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.1); }
     .cat-thumb-poem { font-size:12px;font-weight:300;color:var(--text-secondary);text-align:center;line-height:1.5;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%; }
     .cat-thumb-poem::before{content:'「'}.cat-thumb-poem::after{content:'」'}
