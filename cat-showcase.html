@@ -115,42 +115,58 @@
     }
     .cat-strip::-webkit-scrollbar { display:none; }
 
-    .cat-thumb {
+    /* wrapper: holds backdrop-filter, stays still */
+    .cat-thumb-glass {
       flex:0 0 160px;scroll-snap-align:start;
-      background:var(--glass-bg);border:1px solid rgba(255,255,255,0.08);
+      background:var(--glass-bg);
       backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-      border-radius:18px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:12px;
-      cursor:pointer;
-      transition: transform .35s cubic-bezier(.25,.46,.45,.94),
-                  border-color .3s,
-                  box-shadow .35s;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,0.08);
       position:relative;
+      transition: border-color .3s, box-shadow .35s;
     }
-    .cat-thumb::before {
-      content:'';position:absolute;top:-1px;left:10%;right:10%;
-      height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.65),transparent);
-      border-radius:0 0 2px 2px;
-      opacity:0;transition:opacity .3s;
-      z-index:2;
-    }
-    .cat-thumb:hover {
-      transform:translateY(-4px);
-      border-color:rgba(255,255,255,0.2);
+    .cat-thumb-glass:hover {
+      border-color:rgba(255,255,255,0.18);
       box-shadow:0 12px 40px rgba(255,255,255,0.07);
     }
-    .cat-thumb.active {
-      border-color:rgba(255,255,255,0.5);
+    .cat-thumb-glass.active {
+      border-color:rgba(255,255,255,0.45);
       box-shadow:0 8px 32px rgba(255,255,255,0.08);
     }
-    .cat-thumb.active::before { opacity:1; }
+    /* top glow line — now outside cat-thumb, escapes backdrop-filter clipping */
+    .cat-thumb-glass::before {
+      content:'';position:absolute;top:-1px;left:10%;right:10%;
+      height:2px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.7),transparent);
+      border-radius:0 0 2px 2px;
+      opacity:0;transition:opacity .3s;
+      z-index:10;
+      pointer-events:none;
+    }
+    .cat-thumb-glass.active::before { opacity:1; }
+
+    /* inner card: handles layout and hover transform only */
+    .cat-thumb {
+      padding:14px 14px 16px;
+      display:flex;flex-direction:column;align-items:center;gap:12px;
+      cursor:pointer;
+      transition:transform .35s cubic-bezier(.25,.46,.45,.94);
+      border-radius:18px;
+    }
+    .cat-thumb:hover { transform:translateY(-4px); }
+
     .cat-thumb-img {
       width:120px;height:120px;border-radius:50%;
       object-fit:cover;object-position:center top;
       border:1px solid rgba(255,255,255,.1);display:block;
-      transition:opacity .25s ease;
     }
-    .cat-thumb-poem { font-size:12px;font-weight:300;color:var(--text-secondary);text-align:center;line-height:1.5;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%; }
-    .cat-thumb-poem::before{content:'「'}.cat-thumb-poem::after{content:'」'}
+    .cat-thumb-poem {
+      font-size:12px;font-weight:300;color:var(--text-secondary);
+      text-align:center;line-height:1.5;font-style:italic;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;
+    }
+    .cat-thumb-poem::before{content:'「'}
+    .cat-thumb-poem::after{content:'」'}
 
     /* ── CTA ── */
     .cta-section { padding:120px 32px;text-align:center;border-top:1px solid var(--glass-border);position:relative;z-index:1; }
@@ -160,8 +176,9 @@
     /* ── Responsive ── */
     @media(max-width:640px){
       .cat-strip{ padding:0 16px;gap:14px; }
-      .cat-thumb{ flex:0 0 130px; }
+      .cat-thumb-glass{ flex:0 0 130px; }
       .cat-thumb-img{ width:90px;height:90px; }
+      .cat-thumb{ padding:12px 10px 14px; }
       .cat-intro,.cat-hero-img-wrap{ padding:0 16px; }
     }
   </style>
@@ -192,17 +209,23 @@
         <img class="cat-hero-img" id="hero-img-dou" src="./imgs/01_Dou.jpg" alt="Dou">
       </div>
       <div class="cat-strip" id="strip-dou">
-        <div class="cat-thumb active" data-hero="./imgs/01_Dou.jpg" onclick="switchHero(this,'dou')">
-          <img class="cat-thumb-img" src="./imgs/01_Dou.jpg" alt="Dou">
-          <p class="cat-thumb-poem">一道闪电划过叶面</p>
+        <div class="cat-thumb-glass active">
+          <div class="cat-thumb" data-hero="./imgs/01_Dou.jpg" onclick="switchHero(this,'dou')">
+            <img class="cat-thumb-img" src="./imgs/01_Dou.jpg" alt="Dou">
+            <p class="cat-thumb-poem">一道闪电划过叶面</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/10_Dou.jpg" onclick="switchHero(this,'dou')">
-          <img class="cat-thumb-img" src="./imgs/10_Dou.jpg" alt="Dou">
-          <p class="cat-thumb-poem">永不落地的爪子</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/10_Dou.jpg" onclick="switchHero(this,'dou')">
+            <img class="cat-thumb-img" src="./imgs/10_Dou.jpg" alt="Dou">
+            <p class="cat-thumb-poem">永不落地的爪子</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/13_Dou.jpg" onclick="switchHero(this,'dou')">
-          <img class="cat-thumb-img" src="./imgs/13_Dou.jpg" alt="Dou">
-          <p class="cat-thumb-poem">野性寄居于家宅</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/13_Dou.jpg" onclick="switchHero(this,'dou')">
+            <img class="cat-thumb-img" src="./imgs/13_Dou.jpg" alt="Dou">
+            <p class="cat-thumb-poem">野性寄居于家宅</p>
+          </div>
         </div>
       </div>
     </section>
@@ -217,37 +240,53 @@
         <img class="cat-hero-img" id="hero-img-lan" src="./imgs/02_Lan.jpg" alt="Lan">
       </div>
       <div class="cat-strip" id="strip-lan">
-        <div class="cat-thumb active" data-hero="./imgs/02_Lan.jpg" onclick="switchHero(this,'lan')">
-          <img class="cat-thumb-img" src="./imgs/02_Lan.jpg" alt="Lan">
-          <p class="cat-thumb-poem">暮色里的沉默守卫</p>
+        <div class="cat-thumb-glass active">
+          <div class="cat-thumb" data-hero="./imgs/02_Lan.jpg" onclick="switchHero(this,'lan')">
+            <img class="cat-thumb-img" src="./imgs/02_Lan.jpg" alt="Lan">
+            <p class="cat-thumb-poem">暮色里的沉默守卫</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/04_Lan.jpg" onclick="switchHero(this,'lan')">
-          <img class="cat-thumb-img" src="./imgs/04_Lan.jpg" alt="Lan">
-          <p class="cat-thumb-poem">盛着雨水的眼睛</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/04_Lan.jpg" onclick="switchHero(this,'lan')">
+            <img class="cat-thumb-img" src="./imgs/04_Lan.jpg" alt="Lan">
+            <p class="cat-thumb-poem">盛着雨水的眼睛</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/06_Lan.jpg" onclick="switchHero(this,'lan')">
-          <img class="cat-thumb-img" src="./imgs/06_Lan.jpg" alt="Lan">
-          <p class="cat-thumb-poem">柔软的毛发，柔软的静默</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/06_Lan.jpg" onclick="switchHero(this,'lan')">
+            <img class="cat-thumb-img" src="./imgs/06_Lan.jpg" alt="Lan">
+            <p class="cat-thumb-poem">柔软的毛发，柔软的静默</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/07_Lan.jpg" onclick="switchHero(this,'lan')">
-          <img class="cat-thumb-img" src="./imgs/07_Lan.jpg" alt="Lan">
-          <p class="cat-thumb-poem">如古老山脉的耐心</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/07_Lan.jpg" onclick="switchHero(this,'lan')">
+            <img class="cat-thumb-img" src="./imgs/07_Lan.jpg" alt="Lan">
+            <p class="cat-thumb-poem">如古老山脉的耐心</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/08_Lan.jpg" onclick="switchHero(this,'lan')">
-          <img class="cat-thumb-img" src="./imgs/08_Lan.jpg" alt="Lan">
-          <p class="cat-thumb-poem">在梦与梦之间浅眠</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/08_Lan.jpg" onclick="switchHero(this,'lan')">
+            <img class="cat-thumb-img" src="./imgs/08_Lan.jpg" alt="Lan">
+            <p class="cat-thumb-poem">在梦与梦之间浅眠</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/11_Lan.jpg" onclick="switchHero(this,'lan')">
-          <img class="cat-thumb-img" src="./imgs/11_Lan.jpg" alt="Lan">
-          <p class="cat-thumb-poem">对孤独轻轻颔首</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/11_Lan.jpg" onclick="switchHero(this,'lan')">
+            <img class="cat-thumb-img" src="./imgs/11_Lan.jpg" alt="Lan">
+            <p class="cat-thumb-poem">对孤独轻轻颔首</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/12_Lan.jpg" onclick="switchHero(this,'lan')">
-          <img class="cat-thumb-img" src="./imgs/12_Lan.jpg" alt="Lan">
-          <p class="cat-thumb-poem">静水，深流</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/12_Lan.jpg" onclick="switchHero(this,'lan')">
+            <img class="cat-thumb-img" src="./imgs/12_Lan.jpg" alt="Lan">
+            <p class="cat-thumb-poem">静水，深流</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/14_Lan.jpg" onclick="switchHero(this,'lan')">
-          <img class="cat-thumb-img" src="./imgs/14_Lan.jpg" alt="Lan">
-          <p class="cat-thumb-poem">胡须轻尝空气</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/14_Lan.jpg" onclick="switchHero(this,'lan')">
+            <img class="cat-thumb-img" src="./imgs/14_Lan.jpg" alt="Lan">
+            <p class="cat-thumb-poem">胡须轻尝空气</p>
+          </div>
         </div>
       </div>
     </section>
@@ -262,21 +301,29 @@
         <img class="cat-hero-img" id="hero-img-tuan" src="./imgs/03_Tuan.jpg" alt="Tuan">
       </div>
       <div class="cat-strip" id="strip-tuan">
-        <div class="cat-thumb active" data-hero="./imgs/03_Tuan.jpg" onclick="switchHero(this,'tuan')">
-          <img class="cat-thumb-img" src="./imgs/03_Tuan.jpg" alt="Tuan">
-          <p class="cat-thumb-poem">两颗灵魂共一颗心跳</p>
+        <div class="cat-thumb-glass active">
+          <div class="cat-thumb" data-hero="./imgs/03_Tuan.jpg" onclick="switchHero(this,'tuan')">
+            <img class="cat-thumb-img" src="./imgs/03_Tuan.jpg" alt="Tuan">
+            <p class="cat-thumb-poem">两颗灵魂共一颗心跳</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/05_Tuan.jpg" onclick="switchHero(this,'tuan')">
-          <img class="cat-thumb-img" src="./imgs/05_Tuan.jpg" alt="Tuan">
-          <p class="cat-thumb-poem">你的影子，你的影子</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/05_Tuan.jpg" onclick="switchHero(this,'tuan')">
+            <img class="cat-thumb-img" src="./imgs/05_Tuan.jpg" alt="Tuan">
+            <p class="cat-thumb-poem">你的影子，你的影子</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/15_Tuan.jpg" onclick="switchHero(this,'tuan')">
-          <img class="cat-thumb-img" src="./imgs/15_Tuan.jpg" alt="Tuan">
-          <p class="cat-thumb-poem">脚步跟随心跳</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/15_Tuan.jpg" onclick="switchHero(this,'tuan')">
+            <img class="cat-thumb-img" src="./imgs/15_Tuan.jpg" alt="Tuan">
+            <p class="cat-thumb-poem">脚步跟随心跳</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/16_Tuan.jpg" onclick="switchHero(this,'tuan')">
-          <img class="cat-thumb-img" src="./imgs/16_Tuan.jpg" alt="Tuan">
-          <p class="cat-thumb-poem">在你的光芒里沉沉睡去</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/16_Tuan.jpg" onclick="switchHero(this,'tuan')">
+            <img class="cat-thumb-img" src="./imgs/16_Tuan.jpg" alt="Tuan">
+            <p class="cat-thumb-poem">在你的光芒里沉沉睡去</p>
+          </div>
         </div>
       </div>
     </section>
@@ -291,13 +338,17 @@
         <img class="cat-hero-img" id="hero-img-xiao7" src="./imgs/09_小7.jpg" alt="小7">
       </div>
       <div class="cat-strip" id="strip-xiao7">
-        <div class="cat-thumb active" data-hero="./imgs/09_小7.jpg" onclick="switchHero(this,'xiao7')">
-          <img class="cat-thumb-img" src="./imgs/09_小7.jpg" alt="小7">
-          <p class="cat-thumb-poem">记忆深处一个清晨</p>
+        <div class="cat-thumb-glass active">
+          <div class="cat-thumb" data-hero="./imgs/09_小7.jpg" onclick="switchHero(this,'xiao7')">
+            <img class="cat-thumb-img" src="./imgs/09_小7.jpg" alt="小7">
+            <p class="cat-thumb-poem">记忆深处一个清晨</p>
+          </div>
         </div>
-        <div class="cat-thumb" data-hero="./imgs/17_小7.jpg" onclick="switchHero(this,'xiao7')">
-          <img class="cat-thumb-img" src="./imgs/17_小7.jpg" alt="小7">
-          <p class="cat-thumb-poem">在旧时光里静静等待</p>
+        <div class="cat-thumb-glass">
+          <div class="cat-thumb" data-hero="./imgs/17_小7.jpg" onclick="switchHero(this,'xiao7')">
+            <img class="cat-thumb-img" src="./imgs/17_小7.jpg" alt="小7">
+            <p class="cat-thumb-poem">在旧时光里静静等待</p>
+          </div>
         </div>
       </div>
     </section>
@@ -311,7 +362,7 @@
   </div>
 
   <script>
-    // Switch hero image on thumb click
+    // Switch hero image + active state on thumb click
     function switchHero(thumb, cat) {
       const heroImg = document.getElementById('hero-img-' + cat);
       const newSrc = thumb.dataset.hero;
@@ -322,9 +373,9 @@
           heroImg.style.opacity = '1';
         }, 180);
       }
-      // Update active state
-      document.querySelectorAll('#strip-' + cat + ' .cat-thumb').forEach(t => t.classList.remove('active'));
-      thumb.classList.add('active');
+      // Update active state on the glass wrapper
+      document.querySelectorAll('#strip-' + cat + ' .cat-thumb-glass').forEach(w => w.classList.remove('active'));
+      thumb.closest('.cat-thumb-glass').classList.add('active');
     }
 
     // Scroll reveal for hero images
