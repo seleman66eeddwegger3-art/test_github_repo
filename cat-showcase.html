@@ -143,13 +143,15 @@
     }
     /* top glow line — now outside cat-thumb, escapes backdrop-filter clipping */
     .cat-thumb-glass::before {
-      content:'';position:absolute;top:-1px;left:10%;right:10%;
-      height:2px;
-      background:linear-gradient(90deg,transparent,rgba(0,113,227,0.8),transparent);
-      border-radius:0 0 2px 2px;
+      content:'';position:absolute;top:-1px;left:0;right:0;bottom:-1px;
+      border-radius:18px;
       opacity:0;transition:opacity .3s;
       z-index:10;
       pointer-events:none;
+      box-shadow:0 -2px 0 0 rgba(0,113,227,0.9) inset,
+                 0 2px 0 0 rgba(0,113,227,0.5) inset,
+                 2px 0 0 0 rgba(0,113,227,0.7) inset,
+                 -2px 0 0 0 rgba(0,113,227,0.7) inset;
     }
     .cat-thumb-glass.active::before { opacity:1; }
 
