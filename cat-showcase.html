@@ -137,7 +137,12 @@
         0 12px 40px rgba(255,255,255,0.09),
         inset 0 1px 0 rgba(255,255,255,0.28);
     }
-    .cat-thumb-img { width:120px;height:120px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.1); }
+    .cat-thumb-img {
+      width:120px;height:120px;border-radius:50%;
+      object-fit:cover;object-position:center top;
+      border:1px solid rgba(255,255,255,.1);display:block;
+      transition:opacity .25s ease;
+    }
     .cat-thumb-poem { font-size:12px;font-weight:300;color:var(--text-secondary);text-align:center;line-height:1.5;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%; }
     .cat-thumb-poem::before{content:'「'}.cat-thumb-poem::after{content:'」'}
 
