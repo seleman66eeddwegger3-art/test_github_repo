@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resources & Commands</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F5F5F7;
+      --surface: #FFFFFF;
+      --border: rgba(0,0,0,0.07);
+      --text: #1d1d1f;
+      --text-muted: #86868b;
+      --accent: #0a84ff;
+      --code-bg: #1d1d1f;
+      --code-text: #f5f5f7;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 60px 20px;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section { margin-bottom: 48px; }
+    .link-item {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .link-item:hover {
+      border-color: rgba(10,132,255,0.3);
+      box-shadow: 0 0 0 3px rgba(10,132,255,0.08);
+    }
+    .link-item .label {
+      font-size: 15px;
+      font-weight: 500;
+      white-space: nowrap;
+      min-width: 160px;
+    }
+    .link-item .url {
+      font-size: 14px;
+      color: var(--accent);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .link-item .arrow {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-left: auto;
+    }
+    .cmd-item {
+      background: var(--surface);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .cmd-label {
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: rgba(0,0,0,0.02);
+      border-bottom: 1px solid var(--border);
+    }
+    pre {
+      font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      padding: 16px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      overflow-x: auto;
+      white-space: pre;
+      line-height: 1.7;
+    }
+    pre::-webkit-scrollbar { height: 4px; }
+    pre::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+    @media (max-width: 600px) {
+      .link-item { flex-direction: column; gap: 4px; }
+      .link-item .label { min-width: unset; }
+      pre { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <h1>本期视频所需资源链接 &amp; 终端指令代码</h1>
+
+    <!-- Demo Sites -->
+    <div class="section">
+      <h2>演示网站</h2>
+      <a class="link-item" href="https://test-github-repo.vercel.app/cat-showcase.html" target="_blank">
+        <span class="label">猫咪照片网页</span>
+        <span class="url">test-github-repo.vercel.app/cat-showcase.html</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-item" href="https://test-github-repo.vercel.app/growing_tree.html" target="_blank">
+        <span class="label">树生长的动态网页</span>
+        <span class="url">test-github-repo.vercel.app/growing_tree.html</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-item" href="https://test-github-repo.vercel.app/firework.html" target="_blank">
+        <span class="label">夜晚烟花动态网页</span>
+        <span class="url">test-github-repo.vercel.app/firework.html</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-item" href="https://wow-site-steel.vercel.app/" target="_blank">
+        <span class="label">YouTube 近期视频自动更新主页</span>
+        <span class="url">wow-site-steel.vercel.app</span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <!-- Tool Links -->
+    <div class="section">
+      <h2>必备工具官方链接</h2>
+      <a class="link-item" href="https://github.com/anthropics/claude-code" target="_blank">
+        <span class="label">Claude-code 官方 GitHub</span>
+        <span class="url">github.com/anthropics/claude-code</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-item" href="https://github.com/Alishahryar1/free-claude-code" target="_blank">
+        <span class="label">Free-claude-code GitHub</span>
+        <span class="url">github.com/Alishahryar1/free-claude-code</span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-item" href="https://build.nvidia.com/" target="_blank">
+        <span class="label">NVIDIA 免费 API 申请</span>
+        <span class="url">build.nvidia.com</span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <!-- Commands -->
+    <div class="section">
+      <h2>终端指令代码</h2>
+
+      <div class="cmd-item">
+        <div class="cmd-label">安装 Claude Code（需要先安装 Homebrew）</div>
+        <pre>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install --cask claude-code</pre>
+      </div>
+
+      <div class="cmd-item">
+        <div class="cmd-label">安装 uv 工具链 &amp; Python 3.14</div>
+        <pre>curl -LsSf https://astral.sh/uv/install.sh | sh
+uv self update
+uv python install 3.14</pre>
+      </div>
+
+      <div class="cmd-item">
+        <div class="cmd-label">克隆并配置 free-claude-code</div>
+        <pre>git clone https://github.com/Alishahryar1/free-claude-code.git
+cd free-claude-code
+cp .env.example .env
+sudo nano .env</pre>
+      </div>
+
+      <div class="cmd-item">
+        <div class="cmd-label">启动本地代理服务（在终端 A 中运行）</div>
+        <pre>cd /Users/eight/free-claude-code
+uv run uvicorn server:app --host 0.0.0.0 --port 8082</pre>
+      </div>
+
+      <div class="cmd-item">
+        <div class="cmd-label">启动免配置版 Claude Code（在终端 B 中运行）</div>
+        <pre>ANTHROPIC_AUTH_TOKEN="freecc" ANTHROPIC_BASE_URL="http://localhost:8082" claude</pre>
+      </div>
+
+    </div>
+
+  </div>
+</body>
+</html>
