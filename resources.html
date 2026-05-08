@@ -173,9 +173,15 @@
       <h2>终端指令代码</h2>
 
       <div class="cmd-item">
-        <div class="cmd-label">安装 Claude Code（需要先安装 Homebrew）</div>
+        <div class="cmd-label">安装 Homebrew（首次安装完成后需运行提示的两条命令）</div>
         <pre>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install --cask claude-code</pre>
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"</pre>
+      </div>
+
+      <div class="cmd-item">
+        <div class="cmd-label">安装 Claude Code</div>
+        <pre>brew install --cask claude-code</pre>
       </div>
 
       <div class="cmd-item">
