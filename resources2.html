@@ -415,6 +415,43 @@
 export ANTHROPIC_BASE_URL="http://localhost:8082"</code></pre>
 
   <div class="tip"><strong>自动校验：</strong>每次新 Session 启动时，Hermes 会自动检查这两个变量是否存在、是否指向 localhost:8082。若发现丢失，优先自动修复后再继续执行任务。</div>
+
+  <h3>5.3 Claude Code 自动校验规则（Session 启动检查清单）</h3>
+  <p>每次新 Session 启动时，Claude Code 子进程必须自动完成以下检查，无需用户干预：</p>
+
+  <h4>① Hermes YAML 配置校验</h4>
+  <pre><code># 确保以下配置存在于 ~/.hermes/config.yaml
+terminal:
+  env_passthrough:
+    - ANTHROPIC_AUTH_TOKEN
+    - ANTHROPIC_BASE_URL
+  shell_init_files:
+    - ~/.zshrc</code></pre>
+
+  <h4>② ~/.zshrc 环境变量校验</h4>
+  <pre><code>export ANTHROPIC_AUTH_TOKEN="freecc"
+export ANTHROPIC_BASE_URL="http://localhost:8082"</code></pre>
+
+  <h4>③ 子进程环境变量继承</h4>
+  <p>当你调用 Claude Code、OpenCode 或任何 Node.js 子进程 Agent 时，必须确保继承这两个环境变量。否则子进程会绕过本地网关，直接连接官方 Anthropic API，导致算力劫持失效。</p>
+
+  <h4>④ 默认工作原则</h4>
+  <div class="tip"><strong>Claude Code 并不直接连接官方 API，而是优先走本地 free-claude-code 网关。</strong>若发现变量丢失，优先自动修复，而不是继续执行任务。</div>
+
+  <h4>⑤ 启动检查流程（每次 Session）</h4>
+  <pre><code># 1. 检查 env_passthrough 是否存在
+grep -q "ANTHROPIC_AUTH_TOKEN" ~/.hermes/config.yaml || echo "MISSING"
+
+# 2. 检查 .zshrc 是否正确 export
+grep -q 'export ANTHROPIC_AUTH_TOKEN="freecc"' ~/.zshrc || echo "MISSING"
+grep -q 'export ANTHROPIC_BASE_URL="http://localhost:8082"' ~/.zshrc || echo "MISSING"
+
+# 3. 确认 Claude Code 请求目标是否为 localhost:8082
+echo $ANTHROPIC_BASE_URL  # 应输出 http://localhost:8082
+
+# 4. 若发现丢失，自动修复
+hermes config set terminal.env_passthrough '["ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL"]'
+hermes config set terminal.shell_init_files '["~/.zshrc"]'</code></pre>
 </section>
 
 <!-- ── s6 ── -->
