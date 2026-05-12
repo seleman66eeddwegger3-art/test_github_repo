@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Omni-Hunter 系统全链路架构</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0a0f; color: #FFD700; font-family: 'Courier New', monospace; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 24px; }
+    .intro { text-align: center; margin-bottom: 40px; max-width: 800px; }
+    .intro h1 { font-size: 28px; font-weight: bold; letter-spacing: 2px; margin-bottom: 12px; color: #FFD700; }
+    .intro p { color: #DAA520; font-size: 14px; line-height: 1.6; }
+    .diagram-wrapper { width: 100%; max-width: 960px; }
+    pre { color: #FFD700; font-size: 13px; line-height: 1.5; background: transparent; overflow-x: auto; }
+    .footer { margin-top: 40px; color: #8B7500; font-size: 12px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="intro">
+    <h1>⚡ Omni-Hunter 系统全链路架构 ⚡</h1>
+    <p>Mac mini M4 本地化 Agent 部署 · GitOps 工作流 · 算力劫持网关</p>
+  </div>
+
+  <div class="diagram-wrapper">
+<pre>
++==================================================================================+
+||                          USER INTERACTION LAYER                                  ||
+||            Telegram Message / CLI Command --> Hermes Agent (Mac mini M4)         ||
++==========================================+=======================================+
+|                                         |
+|                                         v
++==================================================================================+
+||                            MAC MINI M4 LOCAL SERVER                              ||
+|                                                                                  |
+|  +--------------------+    +-----------------------+    +--------------------+   |
+|  | Hermes Agent       |--> | Claude Code Sub-Agent |    | free-claude-code   |   |
+|  | (Main Controller)  |    | (Execute Code Tasks)  |    | gateway Port 8082  |   |
+|  +--------------------+    +-----------+-----------+    +---------+----------+   |
+|                                       |                          |               |
+|                                       |                          v               |
+|                                       |               +--------------------+     |
+|                                       |               | External LLM APIs   |    |
+|                                       |               | NVIDIA NIM/GLM-4.7/ |    |
+|                                       |               | DeepSeek V4/MiniMax |    |
+|                                       |               +--------------------+     |
+|                                       v                                          |
+|                         +--------------------------+                             |
+|                         | GitHub Repository        |                             |
+|                         |       (git push)         |                             |
+|                         +------------+-------------+                             |
+|                                      |                                           |
+|                                      v                                           |
+|                         +--------------------------+    +--------------------+   |
+|                         | Vercel                   |--> | Live Website       |   |
+|                         |      (Auto-Deploy)       |    | Deployed           |   |
+|                         +--------------------------+    +--------------------+   |
++==================================================================================+
+</pre>
+  </div>
+
+  <div class="footer">
+    Mac mini × Hermes Agent · Omni-Hunter · 全链路自动化部署
+  </div>
+</body>
+</html>
