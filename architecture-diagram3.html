@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Omni-Hunter 系统全链路架构</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0f;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    h1 {
+      color: #7CFC00;
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+
+    .subtitle {
+      color: #484f58;
+      font-size: 11px;
+      text-align: center;
+      margin-bottom: 32px;
+      letter-spacing: 0.03em;
+    }
+
+    .diagram-wrapper {
+      background: #0a0a0f;
+      border: 1px solid #21262d;
+      border-radius: 12px;
+      padding: 28px 24px;
+      overflow-x: auto;
+    }
+
+    pre {
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #8b949e;
+      white-space: pre;
+      tab-size: 4;
+      margin: 0;
+    }
+
+    .green { color: #7CFC00; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Omni-Hunter 系统全链路架构</h1>
+    <div class="subtitle">Hermes Agent --> free-claude-code gateway --> External LLMs --> Vercel --> Live Website</div>
+
+    <div class="diagram-wrapper">
+<pre>
++==================================================================================+
+|                          USER INTERACTION LAYER                                  |
+|            Telegram Message / CLI Command --&gt; <span class="green">Hermes Agent</span> (Mac mini M4)         |
++==========================================+=======================================+
+                                         |
+                                         v
++==================================================================================+
+|                            MAC MINI M4 LOCAL SERVER                              |
+|                                                                                  |
+|  +--------------------+    +-----------------------+    +--------------------+   |
+|  | <span class="green">Hermes Agent</span>       |--&gt; | Claude Code Sub-Agent |    | free-claude-code   |   |
+|  | (Main Controller)  |    | (Execute Code Tasks)  |    | gateway Port 8082  |   |
+|  +--------------------+    +-----------+-----------+    +---------+----------+   |
+|                                       |                          |               |
+|                                       |                          v               |
+|                                       |               +--------------------+     |
+|                                       |               | External LLM APIs   |    |
+|                                       |               | NVIDIA NIM/GLM-4.7/ |    |
+|                                       |               | DeepSeek V4/MiniMax |    |
+|                                       |               +--------------------+     |
+|                                       v                                          |
+|                         +--------------------------+                             |
+|                         | <span class="green">GitHub Repository</span>        |                             |
+|                         |       (git push)         |                             |
+|                         +------------+-------------+                             |
+|                                      |                                           |
+|                                      v                                           |
+|                         +--------------------------+    +--------------------+   |
+|                         |         <span class="green">Vercel</span>           |--&gt; | <span class="green">Live Website</span>       |   |
+|                         |      (Auto-Deploy)       |    | Deployed           |   |
+|                         +--------------------------+    +--------------------+   |
++==================================================================================+
+</pre>
+    </div>
+  </div>
+</body>
+</html>
