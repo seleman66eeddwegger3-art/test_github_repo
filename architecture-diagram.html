@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermes Agent Architecture</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #010409;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    h1 {
+      color: #f0c040;
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 32px;
+      letter-spacing: 0.05em;
+    }
+
+    .diagram-wrapper {
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 12px;
+      padding: 32px 24px;
+      overflow-x: auto;
+    }
+
+    pre {
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #8b949e;
+      white-space: pre;
+      tab-size: 4;
+    }
+
+    .yellow { color: #f0c040; }
+    .cyan { color: #58a6ff; }
+    .green { color: #3fb950; }
+    .orange { color: #d29922; }
+    .purple { color: #a371f7; }
+    .dim { color: #484f58; }
+
+    .legend {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot-yellow { background: #f0c040; }
+    .dot-cyan { background: #58a6ff; }
+    .dot-green { background: #3fb950; }
+    .dot-orange { background: #d29922; }
+    .dot-purple { background: #a371f7; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>HERMES AGENT SYSTEM ARCHITECTURE</h1>
+
+    <div class="diagram-wrapper">
+      <pre>
++==================================================================================+
+|                          USER INTERACTION LAYER                                  |
+|            Telegram Message / CLI Command --> <span class="yellow">Hermes Agent</span> (Mac mini M4)         |
++=========================================+========================================+
+                                         |                                          
+                                         v                                          
++==================================================================================+
+|                            MAC MINI M4 LOCAL SERVER                              |
+|                                                                                  |
+|  +--------------------+    +-----------------------+    +--------------------+   |
+|  | <span class="yellow">Hermes Agent</span>       |--->| Claude Code Sub-Agent |    | free-claude-code   |   |
+|  | (Main Controller)  |    | (Execute Code Tasks)  |    | gateway Port 8082  |   |
+|  +--------------------+    +-----------+-----------+    +---------+----------+   |
+|                                       |                          |               |
+|                                       |                          v               |
+|                                       |               +--------------------+     |
+|                                       |               | External LLM APIs   |    |
+|                                       |               | NVIDIA NIM/GLM-4.7/ |    |
+|                                       |               | DeepSeek V4/MiniMax |    |
+|                                       |               +--------------------+     |
+|                                       v                                          |
+|                         +--------------------------+                             |
+|                         | <span class="yellow">GitHub Repository</span>     |                             |
+|                         |       (git push)         |                             |
+|                         +------------+-------------+                             |
+|                                      |                                           |
+|                                      v                                           |
+|                         +--------------------------+    +--------------------+   |
+|                         | <span class="yellow">Vercel</span>           |--->| <span class="yellow">Live Website</span>       |   |
+|                         |      (Auto-Deploy)       |    | Deployed           |   |
+|                         +--------------------------+    +--------------------+   |
++==================================================================================+
+      </pre>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="dot dot-yellow"></span><span style="color:#8b949e">Key Components</span></div>
+      <div class="legend-item"><span class="dot dot-cyan"></span><span style="color:#8b949e">Data Flow</span></div>
+      <div class="legend-item"><span class="dot dot-green"></span><span style="color:#8b949e">External Services</span></div>
+    </div>
+  </div>
+</body>
+</html>
