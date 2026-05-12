@@ -67,7 +67,8 @@
     <div class="subtitle">deepseek v4 pro + GitHub 项目自动管理 + Vercel 自动部署</div>
 
     <div class="diagram-wrapper">
-      <pre>+==================================================================================+
+<pre>
++==================================================================================+
 |                          USER INTERACTION LAYER                                  |
 |            Telegram Message / CLI Command --&gt; <span class="yellow">Hermes Agent</span> (Mac mini M4)         |
 +==========================================+========================================+
@@ -77,7 +78,7 @@
 |                            MAC MINI M4 LOCAL SERVER                              |
 |                                                                                  |
 |  +--------------------+    +-----------------------+    +--------------------+   |
-|  | <span class="yellow">Hermes Agent</span>       |--&gt;| Claude Code Sub-Agent |    | free-claude-code   |   |
+|  | <span class="yellow">Hermes Agent</span>       |--&gt; | Claude Code Sub-Agent |    | free-claude-code   |   |
 |  | (Main Controller)  |    | (Execute Code Tasks)  |    | gateway Port 8082  |   |
 |  +--------------------+    +-----------+-----------+    +---------+----------+   |
 |                                       |                          |               |
@@ -89,16 +90,17 @@
 |                                       |               +--------------------+     |
 |                                       v                                          |
 |                         +--------------------------+                             |
-|                         | <span class="yellow">GitHub Repository</span> |                             |
+|                         | <span class="yellow">GitHub Repository</span>        |                             |
 |                         |       (git push)         |                             |
 |                         +------------+-------------+                             |
 |                                      |                                           |
 |                                      v                                           |
 |                         +--------------------------+    +--------------------+   |
-|                         | <span class="yellow">Vercel</span>           |--&gt;| <span class="yellow">Live Website</span>       |   |
+|                         | <span class="yellow">Vercel</span>           |--&gt;        | <span class="yellow">Live Website</span>       |   |
 |                         |      (Auto-Deploy)       |    | Deployed           |   |
 |                         +--------------------------+    +--------------------+   |
-+==================================================================================+</pre>
++==================================================================================+
+</pre>
     </div>
   </div>
 </body>
