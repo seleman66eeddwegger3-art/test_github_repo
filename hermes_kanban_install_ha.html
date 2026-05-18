@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Assistant 部署全记录 — Kanban 多角色协作</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f7;
+      --card: #ffffff;
+      --text: #1d1d1f;
+      --text-secondary: #86868b;
+      --border: #d2d2d7;
+      --code-bg: #f0f0f5;
+      --accent: #0071e3;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 15px;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin: 40px 0 16px;
+      padding-top: 8px;
+    }
+
+    h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 28px 0 12px;
+      color: #333;
+    }
+
+    h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 20px 0 10px;
+      color: #555;
+    }
+
+    p { margin-bottom: 14px; }
+
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 12px 16px;
+      background: rgba(0, 113, 227, 0.05);
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      color: #333;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 16px 20px;
+      overflow-x: auto;
+      font-size: 13.5px;
+      line-height: 1.6;
+      margin: 16px 0;
+      border: 1px solid var(--border);
+    }
+
+    code {
+      font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+      font-size: 0.9em;
+    }
+
+    pre code { background: none; padding: 0; font-size: 13px; }
+
+    :not(pre) > code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #c0392b;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f0f0f5;
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--border);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    ul, ol { padding-left: 24px; margin-bottom: 14px; }
+    li { margin-bottom: 6px; }
+
+    .task-section {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+
+    .task-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .task-tag {
+      background: var(--accent);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .task-tag.user { background: #34c759; }
+    .task-tag.ai { background: #5856d6; }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+    .back-link {
+      display: inline-block;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="javascript:history.back()">← 返回</a>
+
+    <h1>Home Assistant 部署全记录</h1>
+    <p class="subtitle">Kanban 多角色协作 · 从零到一搭建 Home Assistant</p>
+
+    <h2>目录</h2>
+    <ul>
+      <li><a href="#section1">环境准备</a></li>
+      <li><a href="#section2">创建多角色分工</a></li>
+      <li><a href="#section3">T1+T2：部署 HA 容器</a></li>
+      <li><a href="#section4">安装 HACS 社区商店</a></li>
+      <li><a href="#section5">配置 packages 目录结构</a></li>
+      <li><a href="#section6">最终成果</a></li>
+      <li><a href="#section7">附录：架构师底座配置</a></li>
+    </ul>
+
+    <hr>
+
+    <h2 id="section1">1. 环境准备</h2>
+
+    <h3>1.1 修复 Dashboard 启动</h3>
+    <div class="task-section">
+      <div class="task-header">
+        <span class="task-tag user">你问</span>
+        <span>`Hermes dashboard --host 0.0.0.0 --insecure` 为什么报错？</span>
+      </div>
+      <div class="task-header">
+        <span class="task-tag ai">我</span>
+        <span>Linux 命令大小写敏感，应该用小写。</span>
+      </div>
+    </div>
+
+    <pre><code># 正确的命令
+hermes dashboard --host 0.0.0.0 --insecure</code></pre>
+
+    <div class="task-section">
+      <div class="task-header">
+        <span class="task-tag user">你说</span>
+        <span>成功了，想让它开机后台静默运行。</span>
+      </div>
+      <p>我建议：创建 systemd 用户服务。</p>
+      <p><strong>操作结果：</strong>创建了 <code>~/.config/systemd/user/hermes-dashboard.service</code>，systemctl 已 enable + start，状态 running。</p>
+    </div>
+
+    <h3>1.2 你问 Kanban 是否有新角色</h3>
+    <div class="task-section">
+      <div class="task-header">
+        <span class="task-tag user">你问</span>
+        <span>Kanban 功能是不是有一些新的角色？</span>
+      </div>
+      <div class="task-header">
+        <span class="task-tag ai">我</span>
+        <span>读取 kanban-orchestrator skill 内容后说明：角色体系是用户配置驱动的，没有预设 roster，当前只有 <code>◆default</code> 一个 profile。文档里的 <code>docker-worker</code>、<code>cron-worker</code> 等都是示例占位符。</span>
+      </div>
+    </div>
+
+    <div class="task-section">
+      <div class="task-header">
+        <span class="task-tag user">你说</span>
+        <span>那我要装 Home Assistant，建议创建哪些角色？</span>
+      </div>
+      <p>我建议：按 HA 工作负载分6个角色：</p>
+    </div>
+
+    <table>
+      <thead><tr><th>角色</th><th>职责</th></tr></thead>
+      <tbody>
+        <tr><td>ha-admin</td><td>集成安装、设备配置、系统升级</td></tr>
+        <tr><td>ha-automer</td><td>自动化/脚本编写，YAML 编辑</td></tr>
+        <tr><td>ha-debugger</td><td>日志分析、故障排查</td></tr>
+        <tr><td>ha-monitor</td><td>长期监控、健康检查</td></tr>
+        <tr><td>researcher</td><td>调研 HA 插件、查文档</td></tr>
+        <tr><td>devops</td><td>服务器运维、Docker 管理</td></tr>
+      </tbody>
+    </table>
+
+    <div class="task-section">
+      <div class="task-header">
+        <span class="task-tag user">你决定</span>
+        <span>全部创建。</span>
+      </div>
+    </div>
+
+    <pre><code># 你让我执行
+hermes profile create ha-admin
+hermes profile create ha-automer
+hermes profile create ha-debugger
+hermes profile create ha-monitor
+hermes profile create researcher
+hermes profile create devops</code></pre>
+
+    <h2 id="section2">2. 创建多角色分工</h2>
+
+    <h3>2.1 实际角色列表（创建后）</h3>
+    <pre><code>◆default     MiniMax-M2.7   running
+ devops       —              stopped
+ ha-admin     —              stopped
+ ha-automer   —              stopped
+ ha-debugger  —              stopped
+ ha-monitor   —              stopped
+ researcher   —              stopped</code></pre>
+
+    <h2 id="section3">3. T1+T2：部署 HA 容器</h2>
+
+    <h3>3.1 任务创建</h3>
+    <div class="task-section">
+      <div class="task-header">
+        <span class="task-tag user">你说</span>
+        <span>部署 HA 容器：先 T1 让 devops 创建目录和 Docker 权限，然后 T2 让 ha-admin 写 docker-compose.yml 并用 <code>docker compose up -d</code> 启动。</span>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th>任务</th><th>执行者</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>T1: 准备 HA 部署目录</td><td>devops</td><td>创建 /home/ubuntu/hass {config,backup,share}，确保 Docker 可用</td></tr>
+        <tr><td>T2: 部署 HA 容器</td><td>ha-admin</td><td>编写 docker-compose.yml，docker compose up -d</td></tr>
+      </tbody>
+    </table>
+
+    <p>T2 依赖 T1（<code>--parent t_43ca55e0</code>）。</p>
+
+    <h3>3.2 T1 执行</h3>
+    <p>我调度 devops 执行 T1。devops 完成后：</p>
+    <ul>
+      <li>创建了 <code>/home/ubuntu/hass/</code> 目录及子目录</li>
+      <li>编写了 <code>docker-compose.yml</code>（host 网络，挂载 /config 和 /etc/localtime）</li>
+      <li>写了 README.md</li>
+    </ul>
+
+    <div class="task-section">
+      <p><strong>devops 汇报：</strong>目录已建好，但 <strong>Docker 未安装</strong>。</p>
+    </div>
+
+    <h3>3.3 Docker 安装决策</h3>
+    <p><strong>ha-admin</strong> 调度后报告 Docker 未安装并被拒绝安装。</p>
+
+    <div class="task-section">
+      <div class="task-header">
+        <span class="task-tag user">你说</span>
+        <span>底层 Docker 已经就绪，权限已下放。</span>
+      </div>
+    </div>
+
+    <p><strong>我发现：</strong><code>docker --version</code> 显示已安装，但 <code>docker ps</code> 报 permission denied。<code>groups ubuntu</code> 显示在 docker 组，但子进程未继承。用 <code>sg docker -c "docker ps"</code> 验证 Docker 可用。</p>
+
+    <div class="task-section">
+      <div class="task-header">
+        <span class="task-tag ai">我</span>
+        <span>Unblock T2 后调度 ha-admin。</span>
+      </div>
+      <p><strong>ha-admin</strong> 重新运行后仍然 blocked，因为之前的 workers 进程缓存中没有 docker 组权限。</p>
+      <p><strong>我决定：</strong>不继续调度 worker，直接替我完成最终步骤。</p>
+    </div>
+
+    <pre><code># 我直接执行的 Docker compose 部署
+mkdir -p /home/ubuntu/hass/config /home/ubuntu/hass/backup /home/ubuntu/hass/share
+cp /home/ubuntu/.hermes/kanban/workspaces/t_c0f7e6c1/docker-compose.yml /home/ubuntu/hass/
+cd /home/ubuntu/hass && sg docker -c "docker compose up -d"</code></pre>
+
+    <div class="task-section">
+      <p><strong>结果：</strong></p>
+      <pre><code>Container homeassistant Created
+Container homeassistant Starting
+Container homeassistant Started</code></pre>
+    </div>
+
+    <h3>3.4 完成 T2</h3>
+    <pre><code>hermes kanban complete t_c0f7e6c1 --summary "Home Assistant 容器已成功部署..."</code></pre>
+
+    <p>此时 Kanban：</p>
+    <pre><code>✓ t_43ca55e0  done   devops    T1: 准备 Home Assistant 部署目录
+✓ t_c0f7e6c1  done   ha-admin  T2: 部署 Home Assistant 容器</code></pre>
+
+    <h2 id="section4">4. 安装 HACS 社区商店</h2>
+
+    <h3>4.1 任务创建</h3>
+    <div class="task-section">
+      <div class="task-header">
+        <span class="task-tag user">你说</span>
+        <span>创建两个任务——先 T3 ha-admin 安装 HACS，再 T4 ha-automer 配置 packages 目录。</span>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th>任务</th><th>执行者</th><th>内容</th><th>依赖</th></tr></thead>
+      <tbody>
+        <tr><td>T3: 安装 HACS</td><td>ha-admin</td><td>docker exec 运行 hacs 安装脚本，重启容器</td><td>—</td></tr>
+        <tr><td>T4: 配置 packages</td><td>ha-automer</td><td>修改 configuration.yaml，创建 packages 目录</td><td>T3</td></tr>
+      </tbody>
+    </table>
+
+    <pre><code>hermes kanban create "T3: 安装 HACS 社区商店" --assignee ha-admin
+hermes kanban create "T4: 配置 packages 目录结构" --assignee ha-automer --parent t_4a28d162</code></pre>
+
+    <h3>4.2 T3 执行</h3>
+    <p><strong>ha-admin</strong> 调度后 blocked：Docker exec 权限不足。</p>
+
+    <div class="task-section">
+      <div class="task-header">
+        <span class="task-tag ai">我建议</span>
+        <span>让你手动执行。</span>
+      </div>
+    </div>
+
+    <pre><code># 我建议你执行（但你否决了这个方案）
+sg docker -c "docker exec homeassistant wget -O - https://get.hacs.xyz | bash"</code></pre>
+
+    <div class="task-section">
+      <div class="task-header">
+        <span class="task-tag user">你说</span>
+        <span>HACS 核心脚本已由人类强制注入完毕。权限拦截已解除。</span>
+      </div>
+      <p><strong>我：</strong>重启容器完成 T3。</p>
+      <pre><code>sg docker -c "docker restart homeassistant"
+hermes kanban complete t_4a28d162 --summary "HACS 已注入，容器已重启"</code></pre>
+    </div>
+
+    <h3>4.3 T4 执行</h3>
+    <p><strong>ha-automer</strong> 调度后做了：</p>
+    <ul>
+      <li>创建 <code>/home/ubuntu/hass/config/packages/</code> 目录</li>
+      <li>创建 <code>.gitkeep</code> 占位文件</li>
+    </ul>
+
+    <div class="task-section">
+      <p><strong>ha-automer 被 blocked：</strong><code>configuration.yaml</code> 是 root 所有（mode 0644），ubuntu 用户无写权限。</p>
+      <p><strong>我建议：</strong>两种方案二选一。</p>
+      <div class="task-header">
+        <span class="task-tag user">你决定</span>
+        <span>不使用 docker exec 方案。作为系统管理员，执行了 <code>chown</code> 将配置目录所有权交给 ubuntu。</span>
+      </div>
+    </div>
+
+    <pre><code># 你在服务器上执行的（大致）
+sudo chown -R ubuntu:ubuntu /home/ubuntu/hass/config</code></pre>
+
+    <p><strong>我：</strong>用 <code>patch</code> 工具直接编辑 configuration.yaml，追加：</p>
+
+    <pre><code># Enable packages directory for modular configuration
+packages: !include_dir_merge_named packages</code></pre>
+
+    <p>然后 unblock 让 ha-automer 确认并完成。</p>
+
+    <pre><code>hermes kanban unblock t_ab4fdf64
+hermes kanban dispatch</code></pre>
+
+    <p><strong>ha-automer</strong> 确认完成。</p>
+
+    <h2 id="section5">5. 配置 packages 目录结构</h2>
+
+    <h3>5.1 最终配置</h3>
+    <p><strong>configuration.yaml</strong>（位于 <code>/home/ubuntu/hass/config/configuration.yaml</code>）:</p>
+
+    <pre><code># Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# Enable packages directory for modular configuration
+packages: !include_dir_merge_named packages</code></pre>
+
+    <p><strong>packages 目录</strong>（位于 <code>/home/ubuntu/hass/config/packages/</code>）：</p>
+    <ul>
+      <li>已创建，含 <code>.gitkeep</code></li>
+      <li>未来只需在此目录放 <code>.yaml</code> 文件，HA 自动加载</li>
+    </ul>
+
+    <h3>5.2 关于分包的建议：HA packages 机制说明</h3>
+    <blockquote>这是我在 T4 中给 ha-automer 的指令，在此记录便于你理解：</blockquote>
+    <p>HA 的 <strong>packages</strong> 机制允许将自动化、脚本、场景等拆成多个独立 YAML 文件放在 <code>packages/</code> 目录下。建议按功能分包：</p>
+
+    <pre><code>packages/
+├── lighting.yaml          # 灯光自动化
+├── climate.yaml           # 温控相关
+├── security.yaml          # 安防自动化
+├── presence.yaml          # 人体感应/离家回家
+├── notifications.yaml     # 通知推送
+├── media.yaml             # 影音系统
+└── sensors.yaml           # 传感器处理</code></pre>
+
+    <p>每个 <code>.yaml</code> 文件独立写 <code>automation:</code> / <code>script:</code> / <code>binary_sensor:</code> 等内容，HA 启动时会自动 merge。配置变更无需重启 HA，只需调用"重新加载 YAML"即可（<code>http://ha:8123/config/server_control</code>）。</p>
+
+    <h2 id="section6">6. 最终成果</h2>
+
+    <h3>6.1 Kanban 任务板</h3>
+    <pre><code>✓ t_43ca55e0  done   devops     T1: 准备 Home Assistant 部署目录
+✓ t_c0f7e6c1  done   ha-admin   T2: 部署 Home Assistant 容器
+✓ t_4a28d162  done   ha-admin   T3: 安装 HACS 社区商店
+✓ t_ab4fdf64  done   ha-automer T4: 配置 packages 目录结构</code></pre>
+
+    <h3>6.2 服务状态</h3>
+    <pre><code>$ sg docker -c "docker ps --filter name=homeassistant"
+CONTAINER ID   IMAGE                                 COMMAND   STATUS        PORTS   NAMES
+7babc9bb0bfc   homeassistant/home-assistant:stable   "/init"   Up 2 hours            homeassistant</code></pre>
+
+    <h3>6.3 目录结构</h3>
+    <pre><code>/home/ubuntu/hass/
+├── docker-compose.yml
+├── config/
+│   ├── configuration.yaml    ← 已含 packages 指令
+│   ├── packages/             ← 模块化 YAML 存放处
+│   ├── custom_components/    ← HACS 安装的组件
+│   ├── automations.yaml
+│   ├── scripts.yaml
+│   ├── scenes.yaml
+│   ├── secrets.yaml
+│   └── ...
+├── backup/
+└── share/</code></pre>
+
+    <h3>6.4 已配置的角色（Kanban 可用）</h3>
+    <table>
+      <thead><tr><th>角色</th><th>用途</th><th>Alias</th></tr></thead>
+      <tbody>
+        <tr><td>devops</td><td>Docker/系统运维</td><td><code>devops</code></td></tr>
+        <tr><td>ha-admin</td><td>HA 集成/配置/系统管理</td><td><code>ha-admin</code></td></tr>
+        <tr><td>ha-automer</td><td>自动化脚本编写</td><td><code>ha-automer</code></td></tr>
+        <tr><td>ha-debugger</td><td>故障排查</td><td><code>ha-debugger</code></td></tr>
+        <tr><td>ha-monitor</td><td>状态监控</td><td><code>ha-monitor</code></td></tr>
+        <tr><td>researcher</td><td>调研/查文档</td><td><code>researcher</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>6.5 环境变量（.env 中已配置）</h3>
+    <pre><code>HASS_TOKEN=eyJhbG...lig
+HASS_URL=http://homeassistant.local:8123</code></pre>
+
+    <h2 id="section7">7. 附录：架构师底座配置与核心指令补充</h2>
+
+    <blockquote>此部分记录了在唤醒 AI 特工之前，由Gemini指导在 Ubuntu 宿主机底层执行的"环境铸造"和"神权配置"操作。这是整个 AI 运维系统能够稳定运转的物理与权限基石。</blockquote>
+
+    <h3>7.1 硬件与系统内核级优化 (X230i 专属)</h3>
+
+    <p>为了将 ThinkPad X230i 彻底改造为无光污染、永不休眠且保护固态硬盘寿命的"黑盒服务器"，我们执行了以下内核级重构：</p>
+
+    <h4>① 闭屏不休眠阻断 (<code>systemd-logind</code>)</h4>
+    <p>修改 <code>/etc/systemd/logind.conf</code>，彻底无视合盖动作：</p>
+
+    <pre><code>HandleLidSwitch=ignore
+HandleLidSwitchExternalPower=ignore
+HandleLidSwitchDocked=ignore
+LidSwitchIgnoreInhibited=no
+</code></pre>
+    <pre><code>sudo systemctl restart systemd-logind</code></pre>
+
+    <h4>② 硬件级彻底熄屏 (<code>GRUB</code> 控制)</h4>
+    <p>修改 <code>/etc/default/grub</code>，注入 60 秒无操作切断视频信号的内核参数：</p>
+
+    <pre><code>GRUB_CMDLINE_LINUX_DEFAULT="consoleblank=60"
+</code></pre>
+    <p><em>（执行 <code>sudo update-grub</code> 及重启后生效）</em></p>
+
+    <h4>③ 固态硬盘寿命保护 (压制 Swappiness)</h4>
+    <p>在拥有 16GB (8GBx2) 三星 DDR3L 满血双通道内存的前提下，修改 <code>/etc/sysctl.conf</code>，将交换倾向压至极限，防止无意义擦写 500G HP 固态硬盘：</p>
+
+    <pre><code>vm.swappiness=1
+</code></pre>
+    <p><em>（执行 <code>sudo sysctl -p</code> 立即生效）</em></p>
+
+    <h3>7.2 旁路由与全局网络穿透配置</h3>
+
+    <p>摒弃传统的 DHCP，使用 Netplan 强制劫持全局流量至 Mac mini M4 所在的 sing-box 旁路由，实现极速拉取 Docker 镜像与大模型 API 通信。</p>
+
+    <p>修改 <code>/etc/netplan/00-installer-config.yaml</code>（以实际网卡名为准）：</p>
+
+    <pre><code>network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0s25:
+      dhcp4: false
+      addresses:
+        - 192.168.2.100/24  # 宿主机静态 IP
+      routes:
+        - to: default
+          via: 192.168.2.226  # 全局旁路由网关
+      nameservers:
+        addresses:
+          - 223.5.5.5
+          - 1.1.1.1
+</code></pre>
+
+    <p><em>（执行 <code>sudo netplan apply</code> 瞬间生效）</em></p>
+
+    <h3>7.3 "零污染" AI 双引擎独立部署</h3>
+
+    <p>拒绝系统级全局安装 Node.js，采用最极客的 Standalone 沙盒方案，保持 Ubuntu Server 绝对纯净：</p>
+
+    <pre><code># 1. 沙盒化安装 Hermes Agent 母体
+curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+
+# 2. 沙盒化安装 Claude Code 底层打工人
+curl -fsSL https://claude.ai/install.sh | bash
+</code></pre>
+
+    <h3>7.4 脑机接口：算力劫持网关配置</h3>
+
+    <p>将 X230i 上的 AI 推理请求，无缝劫持回同局域网内 Mac mini M4 部署的 <code>free-claude-code</code> 免费算力枢纽：</p>
+
+    <p>修改 X230i 上的 <code>~/.hermes/config.yaml</code> 或直接注入终端环境变量：</p>
+
+    <pre><code>export ANTHROPIC_AUTH_TOKEN="freecc"
+export ANTHROPIC_BASE_URL="http://192.168.2.xxx:8082" # 指向 Mac mini
+</code></pre>
+
+    <h3>7.5 架构师权限哲学：拒绝 Sudo，精准赋权</h3>
+
+    <p>在 T2 和 T4 任务中，我们坚决抵制了向 AI 特工暴露系统 <code>sudo</code> 明文密码的安全隐患，采用了工业级的权限降维策略：</p>
+
+    <h4>① Docker 组级免密控制</h4>
+    <p>人类执行，将 <code>ubuntu</code> 加入 docker 用户组。特工后续操作容器再无权限阻碍：</p>
+
+    <pre><code>sudo usermod -aG docker ubuntu
+</code></pre>
+
+    <h4>② 宿主机文件"主权夺回"</h4>
+    <p>拒绝 AI 使用 <code>docker exec tee</code> 的黑客式注入，人类直接在宿主机修改 Home Assistant 映射目录的所有者。此举赋予了 AI 后续直接使用 <code>patch</code> 或原生文本编辑器重构 YAML 的能力：</p>
+
+    <pre><code># 将由 Docker root 建立的目录及文件，全部移交给 ubuntu 用户
+sudo chown -R ubuntu:ubuntu /home/ubuntu/hass
+</code></pre>
+
+    <h3>7.6 关键命令速查</h3>
+    <pre><code># Docker
+sg docker -c "docker ps"
+sg docker -c "docker logs homeassistant"
+sg docker -c "docker compose -f /home/ubuntu/hass/docker-compose.yml up -d"
+sg docker -c "docker restart homeassistant"
+
+# Kanban
+hermes kanban ls
+hermes kanban show &lt;task_id&gt;
+hermes kanban create "标题" --assignee &lt;profile&gt; [--parent &lt;id&gt;]
+hermes kanban complete &lt;task_id&gt; --summary "..."
+hermes kanban block &lt;task_id&gt; "原因"
+hermes kanban unblock &lt;task_id&gt;
+hermes kanban dispatch
+
+# HA 配置重载
+curl -X POST http://ha:8123/api/services/homeassistant/reload_core_config \
+  -H "Authorization: Bearer *** \
+  -H "Content-Type: application/json"</code></pre>
+
+  </div>
+</body>
+</html>
