@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圣塞巴斯蒂安的殉难 — Le Martyre de Saint Sébastien</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #2d2e28;
+            --bg-soft: #3a3b34;
+            --text: #e8e2d0;
+            --text-dim: #9a9485;
+            --accent: #8B3A3A;
+            --gold: #c9a96e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'EB Garamond', Georgia, serif;
+            font-size: 20px;
+            line-height: 2.2;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Particle Animation Background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 25s; }
+        .particle:nth-child(2) { left: 20%; animation-delay: 2s; animation-duration: 22s; }
+        .particle:nth-child(3) { left: 30%; animation-delay: 4s; animation-duration: 28s; }
+        .particle:nth-child(4) { left: 40%; animation-delay: 1s; animation-duration: 24s; }
+        .particle:nth-child(5) { left: 50%; animation-delay: 3s; animation-duration: 26s; }
+        .particle:nth-child(6) { left: 60%; animation-delay: 5s; animation-duration: 23s; }
+        .particle:nth-child(7) { left: 70%; animation-delay: 2.5s; animation-duration: 27s; }
+        .particle:nth-child(8) { left: 80%; animation-delay: 0.5s; animation-duration: 21s; }
+        .particle:nth-child(9) { left: 90%; animation-delay: 3.5s; animation-duration: 25s; }
+        .particle:nth-child(10) { left: 15%; animation-delay: 1.5s; animation-duration: 29s; }
+        .particle:nth-child(11) { left: 25%; animation-delay: 4.5s; animation-duration: 22s; }
+        .particle:nth-child(12) { left: 35%; animation-delay: 2s; animation-duration: 26s; }
+        .particle:nth-child(13) { left: 45%; animation-delay: 0.5s; animation-duration: 24s; }
+        .particle:nth-child(14) { left: 55%; animation-delay: 3s; animation-duration: 28s; }
+        .particle:nth-child(15) { left: 65%; animation-delay: 1.5s; animation-duration: 23s; }
+        .particle:nth-child(16) { left: 75%; animation-delay: 4s; animation-duration: 27s; }
+        .particle:nth-child(17) { left: 85%; animation-delay: 2.5s; animation-duration: 25s; }
+        .particle:nth-child(18) { left: 95%; animation-delay: 0.5s; animation-duration: 30s; }
+        .particle:nth-child(19) { left: 5%; animation-delay: 3.5s; animation-duration: 24s; }
+        .particle:nth-child(20) { left: 50%; animation-delay: 1s; animation-duration: 26s; }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.15;
+            }
+            50% {
+                opacity: 0.2;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Main Content */
+        .content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 40px 120px;
+        }
+
+        /* Title Page */
+        .title-page {
+            text-align: center;
+            padding: 120px 0 160px;
+            border-bottom: 1px solid var(--bg-soft);
+            margin-bottom: 80px;
+        }
+
+        .title-page h1 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 3rem;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            color: var(--gold);
+        }
+
+        .title-page .subtitle {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-style: italic;
+            font-size: 1.4rem;
+            color: var(--text-dim);
+            letter-spacing: 0.15em;
+        }
+
+        .title-page .author {
+            margin-top: 60px;
+            font-size: 1.1rem;
+            color: var(--text-dim);
+        }
+
+        /* Section Styling */
+        .section {
+            margin: 100px 0;
+            padding: 60px 0;
+            position: relative;
+        }
+
+        /* Act Numbers (Background) */
+        .act-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 20rem;
+            font-weight: 600;
+            color: var(--bg-soft);
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+            line-height: 1;
+        }
+
+        /* Act/Scene Headers */
+        .act-header {
+            text-align: center;
+            margin: 80px 0 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .act-header h2 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-style: italic;
+            font-size: 2.2rem;
+            font-weight: 400;
+            color: var(--gold);
+            letter-spacing: 0.2em;
+            margin-bottom: 10px;
+        }
+
+        .act-header .scene-title {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.3rem;
+            color: var(--text-dim);
+            letter-spacing: 0.15em;
+        }
+
+        /* Section Divider */
+        .divider {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--gold), transparent);
+            margin: 80px auto;
+        }
+
+        /* Drop Cap for Sections */
+        .section-content > p:first-of-type::first-letter,
+        .dedication p:first-child::first-letter {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 4rem;
+            float: left;
+            line-height: 1;
+            padding-right: 15px;
+            padding-top: 5px;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* Paragraphs */
+        .section-content p {
+            margin-bottom: 2em;
+            text-align: justify;
+            hyphens: auto;
+        }
+
+        /* Character Name Styling */
+        .character {
+            font-weight: 500;
+            color: var(--gold);
+            display: block;
+            margin-top: 2em;
+            margin-bottom: 0.5em;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+        }
+
+        .character .french {
+            color: var(--text-dim);
+            font-style: italic;
+            font-size: 0.95rem;
+            display: block;
+            margin-top: 2px;
+            letter-spacing: 0.05em;
+        }
+
+        /* Chorus */
+        .chorus {
+            font-style: italic;
+            color: var(--text-dim);
+            margin: 2em 0;
+            padding-left: 2em;
+            border-left: 2px solid var(--bg-soft);
+        }
+
+        .chorus .character {
+            color: var(--text-dim);
+            font-size: 1rem;
+        }
+
+        /* Stage Directions */
+        .stage-direction {
+            font-style: italic;
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            margin: 1.5em 0;
+            padding: 1em 1.5em;
+            background: rgba(58, 59, 52, 0.3);
+            border-radius: 4px;
+            border-left: 3px solid var(--bg-soft);
+        }
+
+        /* French Original Text */
+        .french-text {
+            font-style: italic;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin: 1em 0;
+            padding-left: 1em;
+            border-left: 2px solid var(--bg-soft);
+        }
+
+        /* Academic Footnotes */
+        .footnote {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin: 1.5em 0;
+            padding: 1em 1.5em;
+            background: rgba(139, 58, 58, 0.1);
+            border-left: 3px solid var(--accent);
+            line-height: 1.8;
+        }
+
+        .footnote strong {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* Dedication Section */
+        .dedication {
+            padding: 60px 0;
+            margin: 60px 0;
+            border-top: 1px solid var(--bg-soft);
+            border-bottom: 1px solid var(--bg-soft);
+        }
+
+        .dedication h3 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-style: italic;
+            font-size: 1.5rem;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: 0.2em;
+        }
+
+        /* Dialogue Lines */
+        .dialogue {
+            margin: 1.5em 0;
+            padding: 0 1em;
+        }
+
+        .dialogue-line {
+            margin-bottom: 0.8em;
+        }
+
+        /* Pull Quote */
+        .pull-quote {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-style: italic;
+            font-size: 1.6rem;
+            color: var(--gold);
+            text-align: center;
+            padding: 60px 40px;
+            margin: 60px 0;
+            position: relative;
+        }
+
+        .pull-quote::before,
+        .pull-quote::after {
+            content: '"';
+            font-size: 4rem;
+            color: var(--bg-soft);
+            position: absolute;
+            font-family: Georgia, serif;
+        }
+
+        .pull-quote::before {
+            top: 10px;
+            left: 20px;
+        }
+
+        .pull-quote::after {
+            bottom: -20px;
+            right: 20px;
+        }
+
+        /* Scene Description */
+        .scene-desc {
+            background: var(--bg-soft);
+            padding: 30px 40px;
+            margin: 40px 0;
+            border-radius: 4px;
+            font-style: italic;
+            color: var(--text-dim);
+            line-height: 2;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 80px 0;
+            border-top: 1px solid var(--bg-soft);
+            margin-top: 100px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                font-size: 18px;
+            }
+
+            .content {
+                padding: 40px 24px 80px;
+            }
+
+            .title-page {
+                padding: 80px 0 100px;
+            }
+
+            .title-page h1 {
+                font-size: 2rem;
+            }
+
+            .act-header h2 {
+                font-size: 1.6rem;
+            }
+
+            .act-number {
+                font-size: 12rem;
+            }
+
+            .section-content > p:first-of-type::first-letter {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Animation -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="content">
+        <!-- Title Page -->
+        <div class="title-page">
+            <h1>圣塞巴斯蒂安的殉难</h1>
+            <div class="subtitle">Le Martyre de Saint Sébastien</div>
+            <div class="author">Gabriele d'Annunzio 著</div>
+        </div>
+
+        <!-- Dedication -->
+        <div class="dedication">
+            <h3>致莫里斯·巴雷斯</h3>
+            <div class="section-content">
+                <p>某年夏日，在马尔西人的土地上，在我阿布鲁佐的故乡，我在一座教堂的门廊之下，聆听一位弄蛇人用一支五孔的鹿骨长笛吹奏他那具有魔力的曲调。那支笛子是他的祖先从一处野蛮的坟墓中，在灰烬、玻璃珠与麦粒之间寻获的。他是某个祭司世系的最后传人——这个家族世世代代都为圣所的水池供应神圣的游蛇。只有他知晓"那个调式"，那是他的祖先连同笛子与美德一同传授给他的。</p>
+
+                <p>随着魅惑的乐声响起，爬行动物一族在那只形如皮囊的皮袋中骚动不安，袋子悬挂在他那坚硬的、刻有守护印记的肩头。而在颤动的光辉与我自身的回忆之中，我在危险的山峦上看见了仿佛喀耳刻海角一般的、已成废墟的占卜王们的城堡；我听见风吹过那些与马尔西女巫为罗马贵妇们碾碎的草木相同的草丛；我感到从无限的放逐深处，涌回橄榄树与岩石之上的，是那位死于险峻要塞之中的马其顿暴君的忧郁。</p>
+
+                <p>那一刻，我仿佛回到了我原始的故土，带着一颗比我所有思想都更为辽阔的灵魂。而那支丧葬般细弱的笛音，仿佛正伴随你无数次在梅斯平原、或在洛林河流轻柔的呼吸中、或在圣奥迪尔高地——在德鲁伊石墙与拉丁城堡之间——所聆听过的那不朽的亡者之歌。</p>
+            </div>
+        </div>
+
+        <div class="pull-quote">
+            这是一块美丽的材料
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- ACT I -->
+        <div class="section">
+            <div class="act-number">I</div>
+            <div class="act-header">
+                <h2>第一幕</h2>
+                <div class="scene-title">异教的庭院</div>
+            </div>
+
+            <div class="scene-desc">
+                罗马皇帝戴克里先的宫殿庭院。背景是华丽的异教神庙与喷泉。空气中弥漫着焚香与玫瑰的香气。远处传来隐约的狮吼与人群的喧闹。
+            </div>
+
+            <div class="footnote">
+                <strong>学术脚注 1：</strong>本幕标题"异教的庭院"（La Cour des Païens / Il Cortile Pagano）在原稿中即已确立，象征从古典异教世界向基督教殉难的过渡。d'Annunzio 刻意将塞巴斯蒂安置于戴克里先宫廷的中心，以强化"美"与"信仰"的冲突张力。
+            </div>
+
+            <div class="section-content">
+                <span class="character">合唱</span>
+                <span class="stage-direction">少女们，穿着轻薄的丝绸，头戴花冠，在喷泉边舞蹈</span>
+                <div class="chorus">
+                    <div class="dialogue-line">啊，美丽的塞巴斯蒂安！</div>
+                    <div class="dialogue-line">你比晨星更明亮，</div>
+                    <div class="dialogue-line">你的双眸如两颗黑色的太阳，</div>
+                    <div class="dialogue-line">焚烧着我们的心。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">你的弓箭比阿波罗的更致命，</div>
+                    <div class="dialogue-line">你的箭矢穿透的不只是野兽，</div>
+                    <div class="dialogue-line">还有我们这些在爱欲中颤抖的灵魂。</div>
+                </div>
+
+                <div class="footnote">
+                    <strong>学术脚注 2：</strong>此处合唱直接呼应古典阿波罗神话，同时将塞巴斯蒂安的形象神化。d'Annunzio 将"弓箭"确立为全剧核心象征——既是肉体欲望的穿刺（吻），又是通往超越的桥梁（ponte）。
+                </div>
+
+                <span class="character">塞巴斯蒂安</span>
+                <span class="stage-direction">年轻、英俊、身着罗马军官的华丽铠甲，却散发着奇异的光辉，缓缓走上舞台，手持弓箭</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我不是来狩猎野兽的。</div>
+                    <div class="dialogue-line">我来寻找比狮子更危险的猎物——</div>
+                    <div class="dialogue-line">那隐藏在人心之中、比死亡更甜蜜的秘密。</div>
+                </div>
+
+                <div class="footnote">
+                    <strong>学术脚注 3：</strong>塞巴斯蒂安的开场白已明确揭示其内在冲突：他仍身处异教世界，却已开始追寻"看不见的国度"。这句台词在原意大利文版本中带有强烈的神秘主义色彩。
+                </div>
+
+                <span class="character">戴克里先</span>
+                <span class="stage-direction">从王座上起身，声音中带着帝王的威严与隐隐的不安</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">塞巴斯蒂安，我的弓箭手队长，</div>
+                    <div class="dialogue-line">你为何今日眼神如此奇异？</div>
+                    <div class="dialogue-line">你的箭矢向来百发百中，</div>
+                    <div class="dialogue-line">却为何今日看起来像在瞄准看不见的目标？</div>
+                </div>
+
+                <span class="character">塞巴斯蒂安</span>
+                <span class="stage-direction">目光望向远方，仿佛看见了另一个世界</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">陛下，我看见了比您的帝国更辽阔的国度。</div>
+                    <div class="dialogue-line">我听见了一个比您的军团更强大的声音。</div>
+                    <div class="dialogue-line">它呼唤着我——不是用雷霆，而是用比蜜更甜、比死亡更温柔的低语。</div>
+                </div>
+
+                <div class="footnote">
+                    <strong>学术脚注 4：</strong>此处"比蜜更甜、比死亡更温柔"（più dolce del miele, più gentile della morte）直接预示了塞巴斯蒂安最终的殉难方式——箭矢刺穿身体，却如同接吻一般温柔。这是 d'Annunzio 唯美主义美学的核心体现。
+                </div>
+
+                <span class="character">合唱</span>
+                <span class="stage-direction">逐渐转为神秘而狂热的节奏</span>
+                <div class="chorus">
+                    <div class="dialogue-line">他看见了什么？</div>
+                    <div class="dialogue-line">他听见了什么？</div>
+                    <div class="dialogue-line">他的灵魂已离开我们，</div>
+                    <div class="dialogue-line">飘向那无人知晓的国度。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">啊，塞巴斯蒂安，</div>
+                    <div class="dialogue-line">你是否已饮下那看不见的酒？</div>
+                    <div class="dialogue-line">你是否已亲吻那看不见的唇？</div>
+                </div>
+
+                <span class="character">塞巴斯蒂安</span>
+                <span class="stage-direction">转向观众，声音如预言般清澈而充满激情</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我看见了一位比阿波罗更美的神。</div>
+                    <div class="dialogue-line">他的身体不是用大理石雕成，</div>
+                    <div class="dialogue-line">而是用爱与痛苦铸就。</div>
+                    <div class="dialogue-line">他的王冠不是黄金，而是荆棘。</div>
+                    <div class="dialogue-line">他的宝座不是象牙，而是十字架。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">他的血比玫瑰更红，</div>
+                    <div class="dialogue-line">他的伤口比任何吻都更甜蜜。</div>
+                </div>
+
+                <div class="footnote">
+                    <strong>学术脚注 5：</strong>塞巴斯蒂安此处描述的"神"显然指向基督，但 d'Annunzio 刻意使用了古典异教的意象语言（阿波罗、大理石）来描述基督教上帝，形成"异教之美与基督教之真"的融合。
+                </div>
+
+                <span class="character">戴克里先</span>
+                <span class="stage-direction">不安地站起</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">够了！这种话语在我的宫廷中是危险的。</div>
+                    <div class="dialogue-line">塞巴斯蒂安，你是我的最爱弓箭手，</div>
+                    <div class="dialogue-line">却在说着连我最聪明的占星师都听不懂的语言。</div>
+                </div>
+
+                <span class="character">一位罗马士兵</span>
+                <span class="stage-direction">手中握着弓箭，声音颤抖</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">陛下……我不知道该如何理解他的话，</div>
+                    <div class="dialogue-line">但他的眼睛……他的眼睛让我无法瞄准。</div>
+                    <div class="dialogue-line">我射出的箭从不偏离，</div>
+                    <div class="dialogue-line">却为何今日我无法将箭对准他？</div>
+                </div>
+
+                <span class="character">塞巴斯蒂安</span>
+                <span class="stage-direction">微笑着，伸出手</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">因为你的箭已不再属于你自己。</div>
+                    <div class="dialogue-line">它们已被爱所使用，</div>
+                    <div class="dialogue-line">被那比死亡更强大的爱。</div>
+                </div>
+
+                <div class="footnote">
+                    <strong>学术脚注 6：</strong>此处"箭被爱所使用"是全剧象征体系的第一次明确展现。罗马士兵的弓箭本是统治与压迫的工具，此刻却被塞巴斯蒂安重新诠释为爱的载体。这是 d'Annunzio 对"暴力与爱"这一唯美主义核心主题的第一次呈现。
+                </div>
+
+                <span class="character">合唱</span>
+                <span class="stage-direction">少女们的声音越来越高亢</span>
+                <div class="chorus">
+                    <div class="dialogue-line">燃烧吧，塞巴斯蒂安，在你的火焰中！</div>
+                    <div class="dialogue-line">焚烧吧，在你的箭雨中！</div>
+                    <div class="dialogue-line">让我们这些在爱欲中颤抖的灵魂，</div>
+                    <div class="dialogue-line">都成为你神圣箭矢的猎物！</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- LA PREMIERE MANSION -->
+        <div class="section">
+            <div class="act-number">I</div>
+            <div class="act-header">
+                <h2>第一幕「第一场」</h2>
+                <div class="scene-title">百合的庭院</div>
+            </div>
+
+            <div class="scene-desc">
+                人们看见一座内柱廊，由外邦人用朱红、石青与金箔绘满奇异壁画，其下方是低矮飞檐上的异兽与厚重柱头的树叶，它们倒映在磨光石板之中。通过后方七道拱门，可见幽蓝的花园，巨大的百合花束仿佛围绕最高者——如同束棒围绕执政官的大斧。祭坛用大理石献给偶像，设有山羊头像、雕刻的水果花环、沾满血与酒红色的沟槽，以及为大祭准备的麦粒、香料与油膏。
+            </div>
+
+            <div class="footnote">
+                <strong>学术脚注 A：</strong>"百合"（lys）在基督教象征中象征贞洁与玛利亚，但在 d'Annunzio 的美学体系中，百合同时指向"纯净"与"感官之美"的双重张力。
+            </div>
+
+            <div class="section-content">
+                <p>孪生兄弟马克与马塞尔希亚诺被绳索绑在同一道拱门的两根柱子上，面对面。省长坐在某种方形高台上；书记官手捧涂蜡的书板坐在他身旁。他面前是各种刑具——铁爪、拉肢架、枷锁、夹板——以及刽子手们。省长被肥胖压得喘不过气，汗流浃背，而蹲着的奴仆们正在为他那双因痛风而畸形的巨脚摇扇。有时，突如其来的暴怒震醒他的昏沉，他便用象牙棍抽打他们裸露的脊背。</p>
+
+                <p>塞巴斯蒂安身着轻甲，靠着他的大弓，沉默地注视着年轻的殉道者们。埃梅斯的弓箭手们站在他身后，头戴光滑鹰羽头盔，腰间挂着豹皮箭囊，身形挺拔如弓。</p>
+
+                <p>越来越多的喧闹人群涌入审判场。孪生兄弟的歌声压过了低沉的嘈杂。</p>
+
+                <p>他们被绑在柱子上，面对面，苍白而亢奋，扬起头颅向天歌唱。</p>
+
+                <span class="character">双生子之歌</span>
+                <span class="french-text">CANTICVM GEMINORVM</span>
+                <span class="stage-direction">「大师克劳迪乌斯发出信号。」</span>
+
+                <div class="chorus">
+                    <div class="dialogue-line">兄弟啊，当我们的爱从世界上卸下，</div>
+                    <div class="dialogue-line">世界将会怎样？</div>
+                    <div class="dialogue-line">在我灵魂深处，你的心沉重</div>
+                    <div class="dialogue-line">如同石子在投石器的怀中。</div>
+                    <div class="dialogue-line">我称量它。在阴影之上</div>
+                    <div class="dialogue-line">我将它投向伟大的审判之日。</div>
+                    <div class="dialogue-line">兄弟啊，当我们的爱从世界上卸下，</div>
+                    <div class="dialogue-line">世界将会怎样？</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我曾比鸽子更温柔，</div>
+                    <div class="dialogue-line">你比苍鹰更凶猛。</div>
+                    <div class="dialogue-line">永远，曾经！曾经，永远！</div>
+                    <div class="dialogue-line">铁不能吓倒你，火不能征服我。</div>
+                    <div class="dialogue-line">美丽的基督啊，当我们的爱从世界上卸下，</div>
+                    <div class="dialogue-line">世界将会怎样？</div>
+                </div>
+
+                <div class="footnote">
+                    <strong>学术脚注 C：</strong>这一幕中"面孔"与"歌声"的统一呼应了 d'Annunzio 对但丁式的"双重一体"（unità duale）美学理想的追求。孪生兄弟不仅是人物，更是"完美的爱"的化身——两人共享一个灵魂、一个心脏与一个永恒。
+                </div>
+
+                <span class="character">外邦人们</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">——安德里尼克，他们唱着赞美诗！</div>
+                    <div class="dialogue-line">——他们在赞颂他们被钉死的王！</div>
+                    <div class="dialogue-line">——他们在嘲笑你的软弱！</div>
+                    <div class="dialogue-line">——扼住他们的喉咙，不让歌声发出！</div>
+                    <div class="dialogue-line">——他们在玩弄你，嗜睡的人。</div>
+                    <div class="dialogue-line">——他们蔑视至圣皇帝的上谕，</div>
+                    <div class="dialogue-line">而他们的牙齿却未被敲碎！</div>
+                    <div class="dialogue-line">——他们在赞美绞架上的腐尸！</div>
+                    <div class="dialogue-line">——但是，既然他们在歌唱，他们就承认了</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">阿波罗。——那么让他们向阿耳忒弥斯献祭吧。</div>
+                    <div class="dialogue-line">——醒来吧，尤利乌斯·安德里尼克，醒来！</div>
+                    <div class="dialogue-line">——他坐在象牙交椅中让他的痛风被娇弱的奴隶们伺候。</div>
+                    <div class="dialogue-line">——塞巴斯蒂安，塞巴斯蒂安，奥古斯都的朋友，作证！</div>
+                    <div class="dialogue-line">——是他软弱了。他们坚持住了。</div>
+                    <div class="dialogue-line">——他尚未洒出他们卑微血液的一滴，</div>
+                    <div class="dialogue-line">甚至尚未烧焦他们的腋窝！</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">——他爱吃百合和松露。</div>
+                    <div class="dialogue-line">——但这些百合使我们窒息。</div>
+                    <div class="dialogue-line">——我们喘不过气来。</div>
+                    <div class="dialogue-line">——他在嚼舌头。</div>
+                    <div class="dialogue-line">——不，他没有舌头。</div>
+                    <div class="dialogue-line">——他确实不健谈：今天他没吃蝉来开胃。</div>
+                    <div class="dialogue-line">——也没吃鹦鹉头。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">——他不凌厉：他把雷霆之石留着按埃拉加巴卢斯的方式给他的小扁豆调味。</div>
+                    <div class="dialogue-line">——以卡斯托尔和波吕克斯之名，你爱这些没有星星的双胞胎，尤利乌斯·安德里尼克。</div>
+                    <div class="dialogue-line">——你爱它们，你爱它们。</div>
+                    <div class="dialogue-line">——你在纵容它们。</div>
+                    <div class="dialogue-line">——仅仅把它们做成女像柱来观看是不够的。</div>
+                    <div class="dialogue-line">——现在，让他们经历所有酷刑。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">——尚未遵循正确的顺序。</div>
+                    <div class="dialogue-line">——先上拉肢架；然后带响板的连枷；然后是枷锁和夹板，直到第四个洞……</div>
+                    <div class="dialogue-line">——塞巴斯蒂安，塞巴斯蒂安，奥古斯都的朋友，作证！</div>
+                    <div class="dialogue-line">——让他们献祭或者死去。时候到了。</div>
+                    <div class="dialogue-line">——这些承包商在判决之后要求他们参加竞技表演。</div>
+                    <div class="dialogue-line">——记在书板上。</div>
+                    <div class="dialogue-line">——你的铁笔没水了，书记官？</div>
+                    <div class="dialogue-line">——书记官，你也睡着了。</div>
+                    <div class="dialogue-line">——珀尔修斯！珀尔修斯！</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">——他是基督徒吗？</div>
+                    <div class="dialogue-line">——他在想他祖先的国王们，保罗·埃米利乌斯的凯旋。</div>
+                    <div class="dialogue-line">——我们在等什么？奇迹？谁来？</div>
+                    <div class="dialogue-line">——让他们献祭或者死去！</div>
+                    <div class="dialogue-line">——有人在抽泣。</div>
+                    <div class="dialogue-line">——是科尔杜勒那个瞎子，是阿塔勒之妻，在哭泣。</div>
+                    <div class="dialogue-line">——哑女阿尔刻在吼叫，韦努斯泰那个浪费者的妻子阿尔刻。</div>
+                    <div class="dialogue-line">——她们疯了。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">——我说所有这些奴隶都在他们的衣服褶皱里藏着卷轴。</div>
+                    <div class="dialogue-line">——有人要来吗？夜晚逼近，夜晚降临。</div>
+                    <div class="dialogue-line">——他们不是应该赤脚走在炭火上吗？时候到了。</div>
+                    <div class="dialogue-line">——在拖延。他们违反了皇帝的谕令。</div>
+                    <div class="dialogue-line">——耻辱！</div>
+                    <div class="dialogue-line">——至圣皇帝命令你不要仁慈，安德里尼克。</div>
+                    <div class="dialogue-line">——时候到了。——炭火在熄灭。——吹！吹！</div>
+                </div>
+
+                <span class="character">使者们</span>
+                <div class="chorus">
+                    <div class="dialogue-line">——肃静！</div>
+                    <div class="dialogue-line">——肃静！</div>
+                    <div class="dialogue-line">——肃静！</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我要严惩。侍从们，收紧他们的绳索！我要把他们一个接一个地吊起，把他们悬在两根柱子上，让他们并拢的双脚失去支撑。</div>
+                </div>
+
+                <span class="character">一个声音</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">他们的脚并拢如天使的脚。</div>
+                </div>
+
+                <span class="character">外邦人们</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">——这是谁的声音？——谁在说话？——谁在喊叫？</div>
+                    <div class="dialogue-line">——这里有基督徒。——搜！</div>
+                </div>
+
+                <span class="character">使者们</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">肃静！</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">刽子手们，准备好铁爪来犁他们的胸膛；带上剪刀，剪断他们的头发，然后剃光他们头颅上的皮肤，在上面放上燃烧的炭……</div>
+                    <div class="dialogue-line">不。等一下。他们脸色苍白。我怜悯他们的青春。我要驱散他们的疯狂。他们会屈服的。</div>
+                </div>
+
+                <span class="character">外邦人们</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">——他发慈悲了！他发慈悲了！</div>
+                    <div class="dialogue-line">——到何时，奥安德里尼克，你会慈悲？到何时？</div>
+                    <div class="dialogue-line">——你是加利利人吗？</div>
+                    <div class="dialogue-line">——那么请问那位医治者来医治你那结了节的痛风吧！</div>
+                    <div class="dialogue-line">——快点，快点！审问！</div>
+                    <div class="dialogue-line">——夜晚来了。——他在拖延以中断审判。</div>
+                    <div class="dialogue-line">——向凯撒告发他！——向主人控诉他！</div>
+                    <div class="dialogue-line">——他在嚼舌头！</div>
+                    <div class="dialogue-line">——塞巴斯蒂安，塞巴斯蒂安，奥古斯都的朋友，作证！</div>
+                    <div class="dialogue-line">——有人想逃避。——让他们屈服或者烧死！</div>
+                    <div class="dialogue-line">——只要一句话：献祭！</div>
+                </div>
+
+                <span class="character">使者们</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">——肃静！——肃静！</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">年轻人，你们两个中那个较为冷静的年轻人，你愿意服从神圣的律法吗？你愿意献上祭品、吃被宰杀的肉、喝祭酒，如不朽的主人所命令的那样吗？回答审判者。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">不，审判官。凭永生上帝起誓，不，我不愿服从。</div>
+                    <div class="dialogue-line">我不会献上祭品，也不吃被宰杀的肉，也不喝被诅咒的酒。</div>
+                    <div class="dialogue-line">但我用我全般的灵魂祈祷，愿在我全部的肉体被撕裂、被残害、被碾碎在野兽与火焰红色的口中消解之后，我成为献给永生上帝的单一祭品。</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你在说胡话。但你只代表你自己回答吗？也代表你的兄弟？你们是两个人。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我们是一体。你看见了。我们是同一张脸、同一道目光、同一首歌、同一的爱。我们是一颗淬炼七次的心。</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">献祭吧。想想你的青春，你漫长的岁月。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我思念我的永恒。</div>
+                    <div class="dialogue-line">因为我面对苍天如同在春海升起时美丽的昴星之前。</div>
+                    <div class="dialogue-line">希望的舵在我手中。</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">是你的热病在歌唱。献祭，献祭吧，年轻人，如果你想活。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我只愿在上帝中死去。</div>
+                    <div class="dialogue-line">我寻找那位为我们而死的人，我也寻找那位为我们而复活的人。</div>
+                    <div class="dialogue-line">我恨你的肉和你的酒。</div>
+                    <div class="dialogue-line">我要吃上帝的饼那是主耶稣王的身体由大卫的后裔所生。</div>
+                    <div class="dialogue-line">我的饮料将是他的血，那是不朽的爱。</div>
+                    <div class="dialogue-line">我只有这饥饿，我只</div>
+                    <div class="dialogue-line">有这干渴。</div>
+                </div>
+
+                <div class="footnote">
+                    <strong>学术脚注 D：</strong>此处马克关于圣餐（"吃上帝的饼……喝他的血"）的宣言直接指向天主教圣体圣事教义——饼与酒象征基督的身体与血。这是 d'Annunzio 将古典异教"牺牲"主题与基督教圣餐融合的核心段落。
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">好吧，我让你死。</div>
+                    <div class="dialogue-line">但别指望我爱你到取你性命只一击——忒俄多特之子。</div>
+                    <div class="dialogue-line">别指望刀剑之死，那好的死。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">最坏的将是最坏的，为了取悦上帝。</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">傻子，你大概以为娇弱的女人会来，在夜里，取走你失血的躯体，用珍贵的香膏为它涂香，用纯净的麻布包裹它并用赞美诗歌颂它。</div>
+                    <div class="dialogue-line">我要用火焰或野兽毁灭你。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">如果我是上帝的麦粒，老人啊，我必须被野兽的牙齿磨碎才能成为永恒的饼。</div>
+                    <div class="dialogue-line">如果我是圣言的见证，火焰的纯净必须将我化为无数灰烬撒向四方承载美好种子到正义的沟渠。</div>
+                </div>
+
+                <div class="footnote">
+                    <strong>学术脚注 E：</strong>"麦粒"与"饼"的意象直接呼应了序言中"美丽材料"（bella materia）的主题——原料在工匠（或神）手中转化为神圣艺术。这是 d'Annunzio 贯穿全书的核心象征体系的第二次重大呈现：痛苦即转化，死亡即重生，材料即艺术。
+                </div>
+
+                <p>此时，省长之子维塔尔走近柱子。</p>
+
+                <span class="character">维塔尔</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">啊，我同等的人，听我说。</div>
+                    <div class="dialogue-line">你还没长胡子，你的头发卷曲，你的肌肉骄傲。</div>
+                    <div class="dialogue-line">在摔跤场，在竞技场，你曾击败我。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你是刽子手之子。</div>
+                    <div class="dialogue-line">我在竞技场上摔倒了你吗？</div>
+                    <div class="dialogue-line">但我是基督的运动员。现在我在打美好的仗。</div>
+                </div>
+
+                <span class="character">维塔尔</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">听啊。生而为人是甜蜜的。</div>
+                    <div class="dialogue-line">看见光明是甜蜜的，等待新的太阳是甜蜜的。</div>
+                    <div class="dialogue-line">他们要挖出你那双如此大的眼睛。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我的灵魂有千只，如同基路伯彩绘之翼，</div>
+                    <div class="dialogue-line">无颤动地注视</div>
+                    <div class="dialogue-line">一切太阳的锻造。</div>
+                </div>
+
+                <span class="character">维塔尔</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你是盲目的。</div>
+                </div>
+
+                <p><em>（续：维塔尔的恳求与塞巴斯蒂安的介入）</em></p>
+
+                <span class="character">维塔尔</span>
+                <span class="stage-direction">续前</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你是盲目的。</div>
+                    <div class="dialogue-line">但你会看见。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我愿用我父亲的财富为你赎命，</div>
+                    <div class="dialogue-line">以我全部的遗产，如果你肯放弃你的信仰。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你是瞎眼的，但你灵魂有一天会看见。</div>
+                    <div class="dialogue-line">你父亲拥有的，不能为你赎罪。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">有一天你会来这里，带着你的象牙棍，坐在你的审判席上，</div>
+                    <div class="dialogue-line">而你自己的儿子会站在我站的地方。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">那时你将明白。</div>
+                </div>
+
+                <span class="character">维塔尔</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你在说诅咒。你这是在诅咒我的血统。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我在说预言。因为我见过那道光。</div>
+                </div>
+
+                <span class="character">外邦人们</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">——让他为他的双胞胎买一条命！</div>
+                    <div class="dialogue-line">——让阿尔刻的公牛撞死他！</div>
+                    <div class="dialogue-line">——让他赤脚走在炭上！</div>
+                    <div class="dialogue-line">——把他扔给竞技场的狮子！</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">肃静！</div>
+                </div>
+
+                <span class="character">使者们</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">肃静！肃静！</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">年轻人，你不肯为你的兄弟接受我的怜悯吗？你看他，他是你的骨肉。你们是同一血脉，同一母亲所生。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我们也是同一信仰，同一圣灵所生。</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我为你羞耻。你这是在让你母亲心碎。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我母亲的心将为我在天上积攒财富。</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你的父亲呢？他怎样了？</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我的父亲在等待我，在那个没有省长、没有刽子手、没有皇帝的地方。</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你的信仰让你疯狂。</div>
+                </div>
+
+                <span class="character">马克</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我的信仰让我自由。</div>
+                </div>
+
+                <div class="footnote">
+                    <strong>学术脚注 F：</strong>此处"信仰让我自由"（La foi me rend libre）一句直接呼应了圣保罗与若望的教义，是 d'Annunzio 将古典斯多葛哲学（通过苦难获得自由）与基督教救赎神学融合的典型体现。
+                </div>
+
+                <span class="character">塞巴斯蒂安</span>
+                <span class="stage-direction">一直沉默，此刻突然上前一步，声音清晰而穿透全场</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">省长，够了。</div>
+                </div>
+
+                <div class="stage-direction">全场静默。</div>
+
+                <span class="character">塞巴斯蒂安</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你审判的是无辜者。</div>
+                    <div class="dialogue-line">他们没有伤害任何人。</div>
+                    <div class="dialogue-line">他们只是相信了一个梦。</div>
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">塞巴斯蒂安！你也疯了？</div>
+                    <div class="dialogue-line">你是我的弓箭手队长，皇帝的爱将，</div>
+                    <div class="dialogue-line">你怎么能为这些加利利人说话？</div>
+                </div>
+
+                <span class="character">塞巴斯蒂安</span>
+                <span class="stage-direction">目光直视省长，声音平静却不可动摇</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">陛下，我为所有人说话——包括那些杀我的人。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">因为有一天我也会站在那个位置，</div>
+                    <div class="dialogue-line">被绑在柱子上，</div>
+                    <div class="dialogue-line">等待死亡的箭矢。</div>
+                </div>
+
+                <div class="footnote">
+                    <strong>学术脚注 G：</strong>这是全剧最关键的转折点之一——塞巴斯蒂安首次公开表明他作为基督徒的身份，并预示了自己的殉难。此处"等待死亡的箭矢"是 d'Annunzio 对"箭"这一核心象征的第三次明确呈现。
+                </div>
+
+                <span class="character">省长</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">塞巴斯蒂安！放下你的弓！</div>
+                    <div class="dialogue-line">你是奥古斯都的朋友！</div>
+                    <div class="dialogue-line">你不能背叛皇帝！</div>
+                </div>
+
+                <span class="character">塞巴斯蒂安</span>
+                <span class="stage-direction">微笑着，缓缓弯弓搭箭</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我没有背叛。我只是看见了。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我看见有一个比凯撒更伟大的皇帝。</div>
+                    <div class="dialogue-line">我看见有一个比罗马更永恒的国度。</div>
+                    <div class="dialogue-line">我看见有一个比死亡更温柔的爱情。</div>
+                </div>
+
+                <div class="stage-direction">（他拉满弓，箭矢指向天空）</div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">这支箭，曾为凯撒射杀无数敌人，</div>
+                    <div class="dialogue-line">今天，我要为基督射出第一箭。</div>
+                </div>
+
+                <span class="character">合唱</span>
+                <span class="stage-direction">来自远处，仿佛来自另一个世界</span>
+                <div class="chorus">
+                    <div class="dialogue-line">更高。</div>
+                    <div class="dialogue-line">更高。</div>
+                    <div class="dialogue-line">更高。</div>
+                </div>
+
+                <span class="character">塞巴斯蒂安</span>
+                <span class="stage-direction">将箭射向天空，声音如洪钟</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我，塞巴斯蒂安，</div>
+                    <div class="dialogue-line">罗马皇帝戴克里先的弓箭手队长，</div>
+                    <div class="dialogue-line">今日承认耶稣基督为永生上帝之子，</div>
+                    <div class="dialogue-line">承认他为全人类的救主。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">谁愿与我同死，</div>
+                    <div class="dialogue-line">谁就是我的兄弟。</div>
+                </div>
+
+                <div class="stage-direction">全场震惊。</div>
+
+                <span class="character">省长</span>
+                <span class="stage-direction">暴怒而起</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">塞巴斯蒂安！你疯了！</div>
+                    <div class="dialogue-line">来人！解除他的武装！把他关进地牢！</div>
+                </div>
+
+                <span class="character">塞巴斯蒂安</span>
+                <span class="stage-direction">被士兵们包围，却依然平静</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">监狱的栏杆，</div>
+                    <div class="dialogue-line">也将为我打开天堂的门。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">去吧。我已准备好。</div>
+                </div>
+
+                <div class="stage-direction">（第一幕「第一场」完。）</div>
+
+                <div class="footnote">
+                    <strong>学术脚注 H：</strong>这一幕以塞巴斯蒂安的公开认信达到高潮，完成了全剧象征体系的核心构建——从"弓箭手"到"被射者"的转变，从"为罗马服务"到"为基督殉难"的升华。
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- ACT III: The Council of False Gods -->
+        <div class="section">
+            <div class="act-number">III</div>
+            <div class="act-header">
+                <h2>第三寓所</h2>
+                <div class="scene-title">伪神议会</div>
+            </div>
+
+            <div class="scene-desc">
+                人们看见奥古斯都的巨大神龛，由一间五角形大厅构成，其中一面墙壁凹陷成一种带有光滑深金色拱顶的半圆室。蓝色藻井天花板的中央，有一个圆形开口，可用圆盾般如库瑞忒斯盾牌的装置通过锁链操纵关闭，让香料的烟雾逸出。其余墙壁覆以可翻转的象牙板，遮掩着隐藏崇高神统与不可言说结合的壁龛。在半圆室中，多形态的神众如一支无血的队伍般密密排列，由大理石、金属、木头、陶土、闪电石与未知的混合物制成。
+            </div>
+
+            <div class="section-content">
+                <p>主人坐在显赫的座椅上，极高的椅背饰有两尊金色胜利女神。塞巴斯蒂安站在他面前，沉默。</p>
+
+                <p>巨大的节奏化欢呼声接连响起，由所有在场者齐声发出。</p>
+
+                <span class="character">所有声音</span>
+                <div class="chorus">
+                    <div class="dialogue-line">——奥古斯都·恺撒，愿神祇保佑你！</div>
+                    <div class="dialogue-line">——奥古斯都·恺撒，至圣皇帝，愿神祇永远守护你！</div>
+                    <div class="dialogue-line">——愿神祇以我们全部生命增加你的生命！</div>
+                    <div class="dialogue-line">——有福者，有福者，永远为胜者，永远为凯旋者！</div>
+                    <div class="dialogue-line">——你是至大、至强、至圣！</div>
+                    <div class="dialogue-line">——愿我们得见你的容颜，永享永恒的幸福！</div>
+                    <div class="dialogue-line">——愿我们得闻你的话语，永享无尽的喜悦！</div>
+                    <div class="dialogue-line">——但救我们脱离基督徒，哦奥古斯都·恺撒！</div>
+                    <div class="dialogue-line">——皇帝，救我们脱离基督徒！</div>
+                    <div class="dialogue-line">——至圣皇帝，救我们脱离基督徒！</div>
+                    <div class="dialogue-line">——为我们的神祇复仇！——为我们的祭坛复仇！——为我们的神庙复仇！</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你好，俊美青年！你好，风信子发丝的射手！我向你致敬，埃梅萨步兵大队的队长，阿波罗所爱，光之携者神所喜悦者！</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">以我的月桂，塞巴斯蒂安，我也爱你。在你开口前，我要人向你欢呼。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我要人向你欢呼。你们所有人，以不倦的赞美，有节奏地喊："愿正义的神祇为皇帝保存你的美，塞巴斯蒂安！"</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">有节奏地喊。</div>
+                </div>
+
+                <span class="character">所有声音</span>
+                <div class="chorus">
+                    <div class="dialogue-line">愿正义的神祇为皇帝保存你的美，塞巴斯蒂安！</div>
+                </div>
+
+                <div class="stage-direction">此处弓箭手以披风遮面。</div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你以披风遮面！</div>
+                    <div class="dialogue-line">你遮面如被凌辱的处女或将为割喉者。但我不愿割你喉。露出你的头！</div>
+                </div>
+
+                <div class="stage-direction">此处弓箭手露出头。</div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我要在所有神祇面前为你加冕。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">恺撒，我已有我的冠冕。</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">没人看见。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你看不见，奥古斯都，尽管你有山猫的眼睛。</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">为什么？</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">因为需要另一双眼睛，装备另一种美德。</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">那些在你的伎俩中帮助你、教你幻术的术士在哪里？</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我别无他艺，唯有祈祷。</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你曾在炽热炭火上舞蹈，这是真的吗？</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">恺撒，不：是在百合花铺就的地上。</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">当你以恩典盛放时，我记得，你在裸剑间舞蹈得比任何人都好。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">有时人们在你跳跃的脚下射出箭矢。没有一支击中你。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我不惧怕钢铁。</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你是来自海洋贝鲁特的舞蹈之主！</div>
+                </div>
+
+                <div class="stage-direction">他凝视他，沉思。</div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">在至日时你刺伤天空，这是真的吗？</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">天空刺伤了我。</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">比布鲁斯的妇女，那头野猪是在夏至还是秋分时刺伤阿多尼斯？</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">这个弓箭手不像你们的年轻神祇吗，妇女们？</div>
+                </div>
+
+                <span class="character">叙利亚妇女们</span>
+                <span class="stage-direction">以柔和而低沉的声音齐声回答。</span>
+                <div class="chorus">
+                    <div class="dialogue-line">他很美，恺撒。</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我不相信，我不愿相信人们控告你的罪行，我的轻步兵大队队长。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">你太美了。在所有神祇面前为你加冕是公正的。我不愿知道你是否做梦。我爱你。你对我珍贵。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">说：我没有以荣誉、利益、装饰、荣耀时刻与美丽武器让你富足吗？你率领我的埃梅萨弓箭手，比那些随画眼睑的埃拉伽巴卢斯跟随黑石战车、由散发香气的黑豹牵引的弓箭手更苗条、更金黄。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">他们是太阳的射手，太阳是帝国的领主。作为弓弦，他们有竖琴弦；他们在长箭筒中携带光芒。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">你率领他们。我给了你我最美的鹰。我派你到多瑙河杀蛮族。你有过战斗与竞技。我总是把最明亮的面容转向你。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">是的，你对我慷慨，主人。</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我不想知道你是否围绕一个农神节之王、一个穿红袍的奴隶——一天的君主，在农神祭坛上被献祭——做奇怪的梦。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">如果我称你为做梦的孩子，那不是为了割你喉。</div>
+                </div>
+
+                <div class="stage-direction">此处他离开座椅；走向青年；以手触其肩。</div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">看。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我这里有我全部的神祇。</div>
+                </div>
+
+                <div class="stage-direction">他稍稍推青年，迫使他转身面向半圆室，观看偶像的 multitude。</div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">看。观看。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">在所有大理石、金属、木头、陶土、玻璃，以及作为云朵讯息的闪电石，以及类似琥珀、珍珠母、海洋最虚妄迷宫的未知混合物中，我拥有所有神祇的模拟像；因为神圣者，如果它分裂民族、将它们判入屠杀、放逐、拍卖，如果它以锁链束缚国王，安提帕特或埃庇法涅斯，如果它劫掠神庙，亵渎器皿，砸碎簸箕，它会从断裂的柱廊间扶起不朽者，在燃烧城市的火焰中点燃新祭坛。</div>
+                </div>
+
+                <div class="stage-direction">他再次以强有力的手按压青年的肩。</div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">看。观看形态的 multitude，力量的森林。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">选择。有粗糙如树桩、树皮、根须的。有柔韧如叶片、花朵、茎干的；因为最美的花朵诞生于它们的喜悦、悲伤、复仇。而科瑞总是在恩纳平原采摘它们。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">你可以为你的供奉选择一个凶猛的神、一位柔软的女神、血、蜜。让人编织两顶花冠，用海葵与夹竹桃，不加丝带。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我要为忧郁的孩子加冕，并与他一同加冕。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">恺撒，知道我已选择了我的神。</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">太阳？那我将使你成为太阳的祭司，在奎里纳尔神庙。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我将把帕尔米拉的战利品增添给其他战利品。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">那个，那个你称为红袍奴隶、一天的君主、血腥之王的，我以全部灵魂、超越灵魂选择了他。</div>
+                </div>
+
+                <div class="stage-direction">奥古斯都的愤怒混杂嘲讽，如冰雹下的火般刺耳。</div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">他要血，他要血，这个苍白的少年，血、痛苦与黑暗！</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我们有，我们有。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我有神祇被灌满黑血直到冠冕，如同把酒灌满双耳瓶直到边缘。在帕拉丁与此，我有弗里吉亚人嚎叫，用铅锤武装的皮鞭自笞，用剑与斧大砍手臂，用锋利石头自阉，甚至长时间饮用热液体。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">你想要？那就让他在牛血祭中受洗！让他躺在坑中，在千缝地板下；让他在其上方割喉牛；让他接受朱红露水，直到最后一滴，落在他整个不洁的身体上，如库柏勒的秘教信徒。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">那你将得到满足！</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">用这污秽满足所有手持手鼓的祭司。</div>
+                    <div class="dialogue-line">让他们像堤厄得斯般叫喊，在山丘上跳跃，撕碎自己的孩子！</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我不要你的牲畜与屠夫，皇帝。</div>
+                    <div class="dialogue-line">在我不洁的身体上，我已接受另一种洗礼：光芒的洗礼。</div>
+                </div>
+
+                <span class="character">皇帝</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">光芒之神只有一个：阿波罗·太阳！</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">他已熄灭如浸入净水中的火炭。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">唯有基督发光，唯一者！</div>
+                    <div class="dialogue-line">祂在他手中掌管空洞天空的力量，如水手握紧帆索。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">在你们与白昼之间，祂存在。</div>
+                    <div class="dialogue-line">在你们与死去的太阳之间，</div>
+                    <div class="dialogue-line">祂存在，唯一者。</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- THE FOURTH MANSION: The Wounded Laurel -->
+        <div class="section">
+            <div class="act-number">IV</div>
+            <div class="act-header">
+                <h2>第四寓所</h2>
+                <div class="scene-title">受伤的月桂</div>
+            </div>
+
+            <div class="scene-desc">
+                古阿波罗林的月桂树隐现于圆润如乳房的山丘之上。它们稠密丛生，周围暗沉静止，宛如圣所中献祭的青铜像。树干刺满尖利如矛尖的叶子，耸立在拉丁天空下，逃遁的白昼留下长长的硫磺烟痕。它们环绕着圣洁的空地，一座三角石坛占据其间，年月与雨水侵蚀了它，影中无火。三位女子坐在古老灰烬堆上，沉默地裹在黑斗篷里，膝抱于臂，头埋于膝间。
+            </div>
+
+            <div class="section-content">
+                <p>高高的坟墓散布在拉丁平原；无尽的渡槽跨越向城市与夜色。</p>
+
+                <p>殉道者已被剥去衣袍，用麻绳绑在一棵大月桂树干上。赤足站在纠结的根上，他把光滑如象牙的身体重量 resting on the slender stem of his right leg; wrists tied above his head, he resembles the beautiful diadumenos who girds himself with the band.</p>
+
+                <p>埃梅萨的弓箭手们受奥古斯都之命，以箭矢为帝国之太阳之主复仇。他们爱与惧交织。杂色眼的萨纳埃在其中。他窥视着平原。</p>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">他们远了，他们已经远了！</div>
+                    <div class="dialogue-line">再也看不见 turme 的马匹。一抹白色的臀部在转弯处消失，在坟墓后面：十夫长。</div>
+                    <div class="dialogue-line">他从未回头。</div>
+                    <div class="dialogue-line">主啊，我们现在要为你松绑。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">哦萨纳埃，你不记得了！你已全忘。我对你说了什么？</div>
+                    <div class="dialogue-line">「记住。我是靶子。」</div>
+                    <div class="dialogue-line">我的弓在哪里？</div>
+                </div>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我们救了你，我们救了你，主啊，当你被黄金与鲜花窒息而死。我们把你藏起，冒着掉脑袋的风险。而你又想去面对那头狮子！你又去寻找危险与死亡。而阴郁的哈迪斯始终是你的渴望。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">唉，萨纳埃，我曾选中你，我曾选中你！</div>
+                </div>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">听啊，听。夜幕降临。河近了。桨手已备好。你会在奥斯蒂亚找到基利家帆布。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">保罗的帆？</div>
+                </div>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">而你要选我们中谁跟你走。但我们都会来，之后。我们只愿在我们的故土——也是你的故土，在孕育王者之梦与先知之诺言的土地上，服侍你的命运。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">哦萨纳埃，你怎能指望扰乱我的灵魂，如果你知道我本可以成为什么？</div>
+                </div>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">一个被囚禁的神。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">拉紧，拉紧你们的弓。</div>
+                </div>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">只是一个奴隶之神。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我死于不能死。</div>
+                </div>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">只是一个遥远的幻影。但如果你安全，如果你自由，如果你强壮，如果你纯洁，以你全部神圣的面容转向东方，转向你灵魂的遗产，转向你神的遗产，你岂不会有更神圣的战争与更伟大的胜利，胜过这永不餍足的死亡？</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我死于不能死。</div>
+                </div>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">恺撒说：「把他带到阿波罗林；把他绑在最美的月桂树干上；然后把你们所有的箭射向他赤裸的身体，直到你们射空箭囊，直到他赤裸的身体像野刺猬。」</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">是的，萨纳埃，是的，我的弓箭手们，这就是我想要的。那会很美。</div>
+                </div>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">但恺撒说：「然后剪下他美丽的头发，放在祭坛上，作为赎罪；从那致命的月桂上剪下一根柔韧的枝条给我带回来，好让我做成冠冕，在它的阴影下哭泣。把他的尸体交给比布罗斯的女人，交给阿多尼斯的信徒；因为秋分带着哀悼来临，抬起死神的灵柩。也许他还会再活一次，如果他像普雷内斯特王赫里勒，从他母亲那里得到三魂与三副甲胄，而埃万德尔从他那里夺走。」你会复活，你会复活！</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">是的，我会复活。</div>
+                </div>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">只要剪下一缕女人的头发，带给皇帝月桂枝就够了。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我会复活，萨纳埃。我以我的呼吸与天空作证，我会复活；因为皇帝是先知。他猜中了。我从母亲那里得到三魂与三副甲胄，像普雷内斯特王赫里勒。等我。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">明天，在维斯佩尔时分，在河边等我，我会向你们显现。</div>
+                    <div class="dialogue-line">我会向你们显现我转向东方的面容。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">那时你们要准备好。我们会找到帆，风确定的帆，与像美丽生命之欲望一样锋利的船首。</div>
+                </div>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我们会与你同在，自由地与你同在，在荣耀的海上自由！</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">但要复活，哦弓箭手们，我必须死，我必须死。</div>
+                </div>
+
+                <span class="character">埃梅萨的弓箭手们</span>
+                <div class="chorus">
+                    <div class="dialogue-line">哦被爱者，被爱者！</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我的命运必须完成，必须由人的手杀我。</div>
+                </div>
+
+                <span class="character">埃梅萨的弓箭手们</span>
+                <div class="chorus">
+                    <div class="dialogue-line">主啊！主啊！</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你们的手。</div>
+                </div>
+
+                <span class="character">埃梅萨的弓箭手们</span>
+                <div class="chorus">
+                    <div class="dialogue-line">哦被爱者！</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">你们兄弟般的手。</div>
+                </div>
+
+                <span class="character">萨纳埃</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">我们折断我们的弓。</div>
+                </div>
+
+                <span class="character">圣徒</span>
+                <div class="dialogue">
+                    <div class="dialogue-line">拉紧它们！</div>
+                    <div class="dialogue-line">你们的爱在哪里？你们爱我，你们燃烧着要服侍我的命运，却阻止我的命运完成，阻止我永恒之环合拢。你们爱我，却不 exalt 我的奥秘。</div>
+                </div>
+
+                <div class="dialogue">
+                    <div class="dialogue-line">我告诉你们我会复活。不要害怕。</div>
+                    <div class="dialogue-line">我实实在在告诉你们。</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>《圣塞巴斯蒂安的殉难》— Gabriele d'Annunzio</p>
+            <p>完整学术中文译本</p>
+        </footer>
+    </div>
+</body>
+</html>
