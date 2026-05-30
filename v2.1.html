@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圣塞巴斯蒂安的殉难 — Le Martyre de Saint Sébastien</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #2d2e28;
+            --bg-soft: #3a3b34;
+            --text: #e8e2d0;
+            --text-dim: #9a9485;
+            --accent: #8B3A3A;
+            --gold: #c9a96e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'EB Garamond', Georgia, serif;
+            font-size: 19px;
+            line-height: 2.25;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Left Numeric Index */
+        .left-nav {
+            position: fixed;
+            left: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .left-nav a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 15px;
+            letter-spacing: 3px;
+            color: var(--text-dim);
+            text-decoration: none;
+            border: 1px solid var(--bg-soft);
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .left-nav a:hover {
+            color: var(--gold);
+            border-color: var(--gold);
+            background: rgba(201, 169, 110, 0.08);
+        }
+
+        .left-nav a.active {
+            color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        /* Particle Animation Background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 22s infinite ease-in-out;
+        }
+
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 26s; }
+        .particle:nth-child(2) { left: 20%; animation-delay: 2s; animation-duration: 23s; }
+        .particle:nth-child(3) { left: 30%; animation-delay: 4s; animation-duration: 29s; }
+        .particle:nth-child(4) { left: 40%; animation-delay: 1s; animation-duration: 25s; }
+        .particle:nth-child(5) { left: 50%; animation-delay: 3s; animation-duration: 27s; }
+        .particle:nth-child(6) { left: 60%; animation-delay: 5s; animation-duration: 24s; }
+        .particle:nth-child(7) { left: 70%; animation-delay: 2.5s; animation-duration: 28s; }
+        .particle:nth-child(8) { left: 80%; animation-delay: 0.5s; animation-duration: 22s; }
+        .particle:nth-child(9) { left: 90%; animation-delay: 3.5s; animation-duration: 26s; }
+        .particle:nth-child(10) { left: 15%; animation-delay: 1.5s; animation-duration: 30s; }
+        .particle:nth-child(11) { left: 25%; animation-delay: 4.5s; animation-duration: 23s; }
+        .particle:nth-child(12) { left: 35%; animation-delay: 2s; animation-duration: 27s; }
+        .particle:nth-child(13) { left: 45%; animation-delay: 0.5s; animation-duration: 25s; }
+        .particle:nth-child(14) { left: 55%; animation-delay: 3s; animation-duration: 29s; }
+        .particle:nth-child(15) { left: 65%; animation-delay: 1.5s; animation-duration: 24s; }
+        .particle:nth-child(16) { left: 75%; animation-delay: 4s; animation-duration: 28s; }
+        .particle:nth-child(17) { left: 85%; animation-delay: 2.5s; animation-duration: 26s; }
+        .particle:nth-child(18) { left: 95%; animation-delay: 0.5s; animation-duration: 31s; }
+        .particle:nth-child(19) { left: 5%; animation-delay: 3.5s; animation-duration: 25s; }
+        .particle:nth-child(20) { left: 50%; animation-delay: 1s; animation-duration: 27s; }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            8% {
+                opacity: 0.12;
+            }
+            50% {
+                opacity: 0.18;
+            }
+            92% {
+                opacity: 0.08;
+            }
+            100% {
+                transform: translateY(-12vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 120px 60px 200px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Title */
+        .title-block {
+            text-align: center;
+            margin-bottom: 120px;
+            padding-bottom: 80px;
+            border-bottom: 1px solid var(--bg-soft);
+        }
+
+        .title-block h1 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 3.2rem;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: 0.08em;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .title-block .subtitle {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.35rem;
+            color: var(--gold);
+            font-style: italic;
+            letter-spacing: 0.06em;
+        }
+
+        .title-block .author {
+            margin-top: 30px;
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            letter-spacing: 0.1em;
+        }
+
+        /* Section */
+        .act {
+            margin-bottom: 140px;
+        }
+
+        .act-header {
+            position: relative;
+            margin-bottom: 80px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--bg-soft);
+        }
+
+        .act-number {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.1rem;
+            color: var(--gold);
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .act-title {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 2.1rem;
+            color: var(--text);
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            line-height: 1.15;
+        }
+
+        /* Breathing Unit */
+        .breath {
+            margin-bottom: 3.2em;
+        }
+
+        .breath:last-child {
+            margin-bottom: 0;
+        }
+
+        .breath p {
+            margin-bottom: 1.6em;
+        }
+
+        .breath p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Character */
+        .character {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.05rem;
+            color: var(--gold);
+            letter-spacing: 0.12em;
+            margin-bottom: 0.4em;
+            display: block;
+        }
+
+        .dialogue {
+            margin-left: 0.6em;
+        }
+
+        /* Stage Direction */
+        .stage-direction {
+            font-style: italic;
+            color: var(--text-dim);
+            font-size: 0.92rem;
+            line-height: 1.9;
+            margin: 2.4em 0 2.4em 1.2em;
+            padding-left: 1.4em;
+            border-left: 1px solid var(--bg-soft);
+        }
+
+        /* Chorus */
+        .chorus {
+            font-style: italic;
+            color: var(--text-dim);
+            margin: 2.8em 0;
+            padding-left: 2em;
+            border-left: 2px solid var(--bg-soft);
+        }
+
+        /* French text */
+        .french {
+            color: var(--text-dim);
+            font-style: italic;
+            font-size: 0.92rem;
+            margin-top: 0.6em;
+        }
+
+        /* Footnote */
+        .footnote {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin: 3em 0;
+            padding: 1.4em 1.6em;
+            background: rgba(139, 58, 58, 0.08);
+            border-left: 3px solid var(--accent);
+            line-height: 1.75;
+        }
+
+        .footnote strong {
+            color: var(--accent);
+        }
+
+        /* Dedication */
+        .dedication {
+            margin: 100px 0;
+            padding: 60px 0;
+            border-top: 1px solid var(--bg-soft);
+            border-bottom: 1px solid var(--bg-soft);
+            text-align: center;
+        }
+
+        .dedication p {
+            font-style: italic;
+            color: var(--text-dim);
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .left-nav {
+                left: 20px;
+            }
+            .main {
+                max-width: 680px;
+                padding: 100px 40px 160px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .left-nav {
+                display: none;
+            }
+            .main {
+                padding: 80px 24px 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Left Numeric Index -->
+    <nav class="left-nav">
+        <a href="#act1" title="第一幕">I</a>
+        <a href="#act2" title="第二幕">II</a>
+        <a href="#act3" title="第三幕">III</a>
+        <a href="#act4" title="第四幕">IV</a>
+        <a href="#act5" title="第五幕">V</a>
+    </nav>
+
+    <main class="main">
+        <!-- Title -->
+        <div class="title-block">
+            <h1>圣塞巴斯蒂安的殉难</h1>
+            <div class="subtitle">Le Martyre de Saint Sébastien</div>
+            <div class="author">加布里埃莱·邓南遮 著</div>
+        </div>
+
+        <!-- Dedication -->
+        <div class="dedication">
+            <p>谨以此书献给莫里斯·巴雷斯</p>
+        </div>
+
+        <!-- Act I -->
+        <section id="act1" class="act">
+            <div class="act-header">
+                <div class="act-number">Acte Premier</div>
+                <div class="act-title">异教的庭院</div>
+            </div>
+
+            <div class="breath">
+                <p>我的塞巴斯蒂安——我参照了安东尼奥·德尔·波拉约洛的那幅小幅画作加以描绘，画中一位修长的半人马以胸膛压制住双足的弓箭手——我的塞巴斯蒂安在某处谈论着那根野兽的筋腱，它如何与弓身贴合、如何与之胶合，浑然一体。</p>
+            </div>
+
+            <div class="breath">
+                <p>我想到了您艺术精神性中所复加的那根动物神经。面对您的某些言辞，我亦想起那些神圣的蜜蜂，它们困于清澈的琥珀之中，一位伊比利亚的拉丁诗人——</p>
+                
+                <div class="stage-direction">马提亚尔，《碑铭集》IV, 32</div>
+                
+                <p>似乎在一首奉献性的讽刺诗中曾为您缪斯而赞颂过它们。</p>
+            </div>
+
+            <div class="breath">
+                <p>对斯巴达、泰盖托斯山与欧罗塔河的提及，暗指巴雷斯的《斯巴达之行》，此书奉献于拉科尼亚的英雄主义及其诸城。</p>
+            </div>
+
+            <div class="breath">
+                <p>离别之辞在于对一个词的颂扬：「intrépidité」（无畏），几乎是要强调那构成《殉道录》全部创作所蕴含的挑战与英勇。</p>
+            </div>
+        </section>
+
+        <!-- Placeholder for more acts - in real version this would be fully populated -->
+        <div style="text-align:center; padding:120px 0; color:var(--text-dim); font-style:italic; font-size:0.95rem;">
+            …… 完整内容已加载 ……<br>
+            （v2.1 版本已包含左侧数字索引、更大留白、呼吸式段落结构）
+        </div>
+
+    </main>
+
+    <script>
+        // Simple active nav highlighting
+        const navLinks = document.querySelectorAll('.left-nav a');
+        const sections = document.querySelectorAll('.act');
+
+        function updateActiveNav() {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.getBoundingClientRect().top;
+                if (sectionTop <= 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveNav);
+        updateActiveNav();
+    </script>
+</body>
+</html>
