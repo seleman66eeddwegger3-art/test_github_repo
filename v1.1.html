@@ -1,243 +1,146 @@
-/* v1.1 - Way of Code 风格版本，保留 v1 不被覆盖 */
-
-html, body {
-  font-family: 'EB Garamond', Georgia, serif;
-  background: #2d2e28;
-  color: #e8e2d0;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background-color: #2d2e28;
-  color: #e8e2d0;
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 19px;
-  line-height: 2.25;
-  min-height: 100vh;
-}
-
-/* v1.1 版本保持原 v1 的羊皮纸风格，但加入更多 thewayofcode.com 风格的留白和呼吸感 */
-.container {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 120px 60px 200px;
-}
-
-/* 左侧导航索引 */
-.left-nav {
-  position: fixed;
-  left: 40px;
-  top: 50%;
-  transform: translate(0, -50%);
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.left-nav a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 15px;
-  letter-spacing: 3px;
-  color: #9a9485;
-  text-decoration: none;
-  border: 1px solid #3a3b34;
-  border-radius: 50%;
-}
-
-/* 粒子动画 */
-.particles {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.particle {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: #c9a96e;
-  border-radius: 50%;
-  opacity: 0;
-  animation: float 22s infinite ease-in-out;
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(100vh) scale(0);
-    opacity: 0;
-  }
-  8% {
-    opacity: 0.12;
-  }
-  50% {
-    opacity: 0.18;
-  }
-  92% {
-    opacity: 0.08;
-  }
-  100% {
-    transform: translateY(-12vh) scale(1);
-    opacity: 0;
-  }
-}
-
-/* 主内容区 */
-.main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 120px 60px 200px;
-  position: relative;
-  z-index: 1;
-}
-
-/* 标题块 */
-.title-block {
-  text-align: center;
-  margin-bottom: 120px;
-  padding-bottom: 80px;
-  border-bottom: 1px solid #3a3b34;
-}
-
-.title-block h1 {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 3.2rem;
-  font-weight: 600;
-  color: #e8e2d0;
-  letter-spacing: 0.08em;
-  margin-bottom: 20px;
-  line-height: 1.1;
-}
-
-.title-block .subtitle {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.35rem;
-  color: #c9a96e;
-  font-style: italic;
-  letter-spacing: 0.06em;
-}
-
-.title-block .author {
-  margin-top: 30px;
-  color: #9a9485;
-  font-size: 1.05rem;
-  letter-spacing: 0.1em;
-}
-
-/* 幕次 */
-.act {
-  margin-bottom: 140px;
-}
-
-/* 呼吸单元 */
-.breath {
-  margin-bottom: 3.2em;
-}
-
-.breath p {
-  margin-bottom: 1.6em;
-}
-
-.breath p:last-child {
-  margin-bottom: 0;
-}
-
-/* 角色名 */
-.character {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.05rem;
-  color: #c9a96e;
-  letter-spacing: 0.12em;
-  margin-bottom: 0.4em;
-  display: block;
-}
-
-/* 舞台指示 */
-.stage-direction {
-  font-style: italic;
-  color: #9a9485;
-  font-size: 0.92rem;
-  line-height: 1.9;
-  margin: 2.4em 0 2.4em 1.2em;
-  padding-left: 1.4em;
-  border-left: 1px solid #3a3b34;
-}
-
-/* 合唱 */
-.chorus {
-  font-style: italic;
-  color: #9a9485;
-  margin: 2.8em 0;
-  padding-left: 2em;
-  border-left: 2px solid #3a3b34;
-}
-
-/* 法文原文 */
-.french {
-  color: #9a9485;
-  font-style: italic;
-  font-size: 0.92rem;
-  margin-top: 0.6em;
-}
-
-/* 学术脚注 */
-.footnote {
-  font-size: 0.85rem;
-  color: #9a9485;
-  margin: 3em 0;
-  padding: 1.4em 1.6em;
-  background: rgba(139, 58, 58, 0.08);
-  border-left: 3px solid #8B3A3A;
-  line-height: 1.75;
-}
-
-.footnote strong {
-  color: #8B3A3A;
-}
-
-/* 奉献 */
-.dedication {
-  margin: 100px 0;
-  padding: 60px 0;
-  border-top: 1px solid #3a3b34;
-  border-bottom: 1px solid #3a3b34;
-  text-align: center;
-}
-
-.dedication p {
-  font-style: italic;
-  color: #9a9485;
-  max-width: 520px;
-  margin: 0 auto;
-}
-
-/* 响应式 */
-@media (max-width: 1100px) {
-  .left-nav {
-    left: 20px;
-  }
-  .main {
-    max-width: 680px;
-    padding: 100px 40px 160px;
-  }
-}
-
-@media (max-width: 768px) {
-  .left-nav {
-    display: none;
-  }
-  .main {
-    padding: 80px 24px 120px;
-  }
-}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>《圣塞巴斯蒂安的殉难》v1.1</title>
+    <style>
+        /* v1.1 样式 */
+        body {
+            font-family: 'EB Garamond', serif;
+            background: #2d2e28;
+            color: #e8e2d0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 120px 60px 200px;
+        }
+        .left-nav {
+            position: fixed;
+            left: 40px;
+            top: 50%;
+            transform: translate(0, -50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .left-nav a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 15px;
+            letter-spacing: 3px;
+            color: #9a9485;
+            text-decoration: none;
+            border: 1px solid #3a3b34;
+            border-radius: 50%;
+        }
+        .act {
+            margin-bottom: 140px;
+        }
+        .breath {
+            margin-bottom: 3.2em;
+        }
+        .character {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.05rem;
+            color: #c9a96e;
+            margin-bottom: 0.4em;
+            display: block;
+        }
+        .stage-direction {
+            font-style: italic;
+            color: #9a9485;
+            font-size: 0.92rem;
+            line-height: 1.9;
+            margin: 2.4em 0 2.4em 1.2em;
+            padding-left: 1.4em;
+            border-left: 1px solid #3a3b34;
+        }
+        .footnote {
+            font-size: 0.85rem;
+            color: #9a9485;
+            margin: 3em 0;
+            padding: 1.4em 1.6em;
+            background: rgba(139, 58, 58, 0.08);
+            border-left: 3px solid #8B3A3A;
+            line-height: 1.75;
+        }
+        .footnote strong {
+            color: #8B3A3A;
+        }
+        .dedication {
+            margin: 100px 0;
+            padding: 60px 0;
+            border-top: 1px solid #3a3b34;
+            border-bottom: 1px solid #3a3b34;
+            text-align: center;
+        }
+        .dedication p {
+            font-style: italic;
+            color: #9a9485;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+        @media (max-width: 1100px) {
+            .left-nav {
+                left: 20px;
+            }
+            .main {
+                max-width: 680px;
+                padding: 100px 40px 160px;
+            }
+        }
+        @media (max-width: 768px) {
+            .left-nav {
+                display: none;
+            }
+            .main {
+                padding: 80px 24px 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title-block">
+            <h1>《圣塞巴斯蒂安的殉难》v1.1</h1>
+        </div>
+        <div class="left-nav">
+            <a href="#act1" title="第一幕">I</a>
+            <a href="#act2" title="第二幕">II</a>
+            <a href="#act3" title="第三幕">III</a>
+            <a href="#act4" title="第四幕">IV</a>
+            <a href="#act5" title="第五幕">V</a>
+        </div>
+        <div class="main">
+            <div class="title-block">
+                <h1>《圣塞巴斯蒂安的殉难》</h1>
+            </div>
+            <div class="act">
+                <div class="act-header">
+                    <div class="act-number">Acte 1</div>
+                    <div class="act-title">异教的庭院</div>
+                </div>
+                <div class="breath">
+                    <p>我的塞巴斯蒂安——我参照了安东尼奥·德尔·波拉约洛的那幅小幅画作加以描绘，画中一位修长的半人马以胸膛压制住双足的弓箭手——我的塞巴斯蒂安在某处谈论着那根野兽的筋腱，它如何与弓身贴合、如何与之胶合，浑然一体。我想到了您艺术精神性中所复加的那根动物神经。面对您的某些言辞，我亦想起那些神圣的蜜蜂，它们困于清澈的琥珀之中，一位伊比利亚的拉丁诗人——</p>
+                </div>
+                <div class="breath">
+                    <p>似乎在一首奉献性的讽刺诗中曾为您缪斯而赞颂过它们。对斯巴达、泰盖托斯山与欧罗塔河的提及，暗指巴雷斯的《斯巴达之行》，此书奉献于拉科尼亚的英雄主义及其诸城。离别之辞在于对一个词的颂扬：「intrépidité」（无畏），几乎是要强调那构成《殉道录》全部创作所蕴含的挑战与英勇。巴雷斯将接受这份馈赠，尽管内心颇为挣扎，正如他的若干《笔记本》（Cahiers）段落所证实的那样（VIII, pp. 100-8）：「我不愿前往发烧之地。我热爱健康……您赐我一本被逐出教会的书。那是您故乡的果实，悲伤海岸的果实。有些人对我说：『什么，拒绝它吧。』我吗？一位如此伟大的艺术家！邓南遮将这艺术作品赠予我。他将其赠予艺术家……一位法国艺术家理应因热爱自己的语言而感到幸福——看到一位意大利大师向其思想兄弟「奉献」并展现出对其语言如此神奇的了解。」邓南遮曾向受题献者坚持道：「请看……所有这些我想为之歌颂的圣者肖像。正是从它们之中，我的幻象得以浮现；正如圣徒的民间传说——比起《黄金传说》这部圣人轶事生活的伟大基督教每日祈祷书——是逐步依照大画家们的作品而形成、演变的那样」；他澄清道「因此我遵循了民众灵魂的范式」（L. Handler，《在圣塞巴斯蒂安殉道之前——加布里埃莱·邓南遮谈他的法国作品》，《科莫edia》，1911年5月14日）。</p>
+                </div>
+                <div class="breath">
+                    <p>有一天，我对那位因热病而憔悴的少女说：「我要把你，我灼热的女儿，送到栋雷米，送到那棵名为'美丽五月'的山毛榉下，让你在'醋栗泉'中沐浴，热病患者在那里能获得痊愈。」但她总是回答：「我不想被治愈。」于是我听见了瓦伦丁那永不疲倦地爱着、受苦着、回忆着的声音：「更高」。</p>
+                </div>
+                <div class="breath">
+                    <p>我向你坦白，当作品完成之时，我曾发愿前往沙特尔朝圣，去重睹那些美丽的彩绘玻璃，并把这部未知的手稿，不是放在祭坛上祈求上帝的恩典——像从前沙特尔的可怜少女们对待她们不幸的孩子那样——而是放在教堂的西南角，那里雕刻着「拉小提琴的驴子」。春天的慰藉！我从未见过比这更辽阔、更宽容的天空，笼罩在更寂静的丰饶之上。整个青翠的博斯像一根单独的草叶般在温柔中颤抖；而在那开花的苹果树枝上，云朵仿佛被活泼的女人们用轻柔的拖裙卷起，准备跳一曲埃斯坦皮耶或雷韦迪。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
