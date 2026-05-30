@@ -1,0 +1,243 @@
+/* v1.1 - Way of Code 风格版本，保留 v1 不被覆盖 */
+
+html, body {
+  font-family: 'EB Garamond', Georgia, serif;
+  background: #2d2e28;
+  color: #e8e2d0;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #2d2e28;
+  color: #e8e2d0;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 19px;
+  line-height: 2.25;
+  min-height: 100vh;
+}
+
+/* v1.1 版本保持原 v1 的羊皮纸风格，但加入更多 thewayofcode.com 风格的留白和呼吸感 */
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 120px 60px 200px;
+}
+
+/* 左侧导航索引 */
+.left-nav {
+  position: fixed;
+  left: 40px;
+  top: 50%;
+  transform: translate(0, -50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.left-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 15px;
+  letter-spacing: 3px;
+  color: #9a9485;
+  text-decoration: none;
+  border: 1px solid #3a3b34;
+  border-radius: 50%;
+}
+
+/* 粒子动画 */
+.particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #c9a96e;
+  border-radius: 50%;
+  opacity: 0;
+  animation: float 22s infinite ease-in-out;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.12;
+  }
+  50% {
+    opacity: 0.18;
+  }
+  92% {
+    opacity: 0.08;
+  }
+  100% {
+    transform: translateY(-12vh) scale(1);
+    opacity: 0;
+  }
+}
+
+/* 主内容区 */
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 120px 60px 200px;
+  position: relative;
+  z-index: 1;
+}
+
+/* 标题块 */
+.title-block {
+  text-align: center;
+  margin-bottom: 120px;
+  padding-bottom: 80px;
+  border-bottom: 1px solid #3a3b34;
+}
+
+.title-block h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 3.2rem;
+  font-weight: 600;
+  color: #e8e2d0;
+  letter-spacing: 0.08em;
+  margin-bottom: 20px;
+  line-height: 1.1;
+}
+
+.title-block .subtitle {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  color: #c9a96e;
+  font-style: italic;
+  letter-spacing: 0.06em;
+}
+
+.title-block .author {
+  margin-top: 30px;
+  color: #9a9485;
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+}
+
+/* 幕次 */
+.act {
+  margin-bottom: 140px;
+}
+
+/* 呼吸单元 */
+.breath {
+  margin-bottom: 3.2em;
+}
+
+.breath p {
+  margin-bottom: 1.6em;
+}
+
+.breath p:last-child {
+  margin-bottom: 0;
+}
+
+/* 角色名 */
+.character {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.05rem;
+  color: #c9a96e;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.4em;
+  display: block;
+}
+
+/* 舞台指示 */
+.stage-direction {
+  font-style: italic;
+  color: #9a9485;
+  font-size: 0.92rem;
+  line-height: 1.9;
+  margin: 2.4em 0 2.4em 1.2em;
+  padding-left: 1.4em;
+  border-left: 1px solid #3a3b34;
+}
+
+/* 合唱 */
+.chorus {
+  font-style: italic;
+  color: #9a9485;
+  margin: 2.8em 0;
+  padding-left: 2em;
+  border-left: 2px solid #3a3b34;
+}
+
+/* 法文原文 */
+.french {
+  color: #9a9485;
+  font-style: italic;
+  font-size: 0.92rem;
+  margin-top: 0.6em;
+}
+
+/* 学术脚注 */
+.footnote {
+  font-size: 0.85rem;
+  color: #9a9485;
+  margin: 3em 0;
+  padding: 1.4em 1.6em;
+  background: rgba(139, 58, 58, 0.08);
+  border-left: 3px solid #8B3A3A;
+  line-height: 1.75;
+}
+
+.footnote strong {
+  color: #8B3A3A;
+}
+
+/* 奉献 */
+.dedication {
+  margin: 100px 0;
+  padding: 60px 0;
+  border-top: 1px solid #3a3b34;
+  border-bottom: 1px solid #3a3b34;
+  text-align: center;
+}
+
+.dedication p {
+  font-style: italic;
+  color: #9a9485;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* 响应式 */
+@media (max-width: 1100px) {
+  .left-nav {
+    left: 20px;
+  }
+  .main {
+    max-width: 680px;
+    padding: 100px 40px 160px;
+  }
+}
+
+@media (max-width: 768px) {
+  .left-nav {
+    display: none;
+  }
+  .main {
+    padding: 80px 24px 120px;
+  }
+}
