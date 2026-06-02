@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermes + M3 Telegram Vision Routing Debug Prompt</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0f;
+      min-height: 100vh;
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+      color: #c9d1d9;
+      padding: 40px 20px 80px;
+      line-height: 1.65;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      color: #7CFC00;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #484f58;
+      font-size: 11px;
+      letter-spacing: 0.03em;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      color: #6e7681;
+      font-size: 10.5px;
+      margin-top: 10px;
+      letter-spacing: 0.04em;
+    }
+
+    .meta .tag {
+      color: #7CFC00;
+    }
+
+    /* ===== Action bar ===== */
+    .action-bar {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 32px 0 28px;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: 1px solid #21262d;
+      background: #0d1117;
+      color: #c9d1d9;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      border-color: #7CFC00;
+      color: #7CFC00;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: #7CFC00;
+      color: #0a0a0f;
+      border-color: #7CFC00;
+    }
+
+    .btn-primary:hover {
+      background: #9eff3a;
+      border-color: #9eff3a;
+      color: #0a0a0f;
+    }
+
+    .btn-secondary {
+      background: transparent;
+    }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #7CFC00;
+      color: #0a0a0f;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 100;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ===== Prompt card ===== */
+    .prompt-card {
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 12px;
+      padding: 32px 28px;
+      position: relative;
+    }
+
+    .prompt-card::before {
+      content: '📋 DEBUG PROMPT';
+      position: absolute;
+      top: -10px;
+      left: 24px;
+      background: #0a0a0f;
+      padding: 0 10px;
+      font-size: 10.5px;
+      color: #7CFC00;
+      letter-spacing: 0.12em;
+    }
+
+    .prompt-body {
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+      font-size: 13px;
+      line-height: 1.75;
+      color: #c9d1d9;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* ===== Markdown styling for view mode ===== */
+    .view-mode h2 {
+      color: #7CFC00;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 28px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #21262d;
+      letter-spacing: 0.04em;
+    }
+
+    .view-mode h2:first-child {
+      margin-top: 0;
+    }
+
+    .view-mode ul, .view-mode ol {
+      margin: 8px 0 16px 22px;
+    }
+
+    .view-mode li {
+      margin: 6px 0;
+    }
+
+    .view-mode code {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 12px;
+      color: #ffa657;
+    }
+
+    .view-mode pre {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin: 12px 0 16px;
+      overflow-x: auto;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .view-mode pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: #c9d1d9;
+    }
+
+    .view-mode strong {
+      color: #7CFC00;
+      font-weight: 600;
+    }
+
+    .view-mode p {
+      margin: 8px 0;
+    }
+
+    .view-mode .check-ok { color: #7CFC00; }
+    .view-mode .check-bad { color: #ff7b72; }
+
+    /* ===== Footer ===== */
+    .footer {
+      text-align: center;
+      margin-top: 48px;
+      color: #484f58;
+      font-size: 10.5px;
+      letter-spacing: 0.04em;
+    }
+
+    .footer a {
+      color: #7CFC00;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>HERMES + M3 TELEGRAM VISION ROUTING DEBUG</h1>
+      <div class="subtitle">一键复制的调试提示词 · for forwarding to other Hermes instances</div>
+      <div class="meta">
+        <span><span class="tag">SCENARIO</span> Telegram 图片收不到 image tokens</span>
+        <span><span class="tag">SCOPE</span> Hermes gateway + 多模态模型</span>
+        <span><span class="tag">DURATION</span> 5 min read / 2 min fix</span>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-primary" id="copyBtn" onclick="copyPrompt()">
+        <span>📋</span>
+        <span>复制完整提示词</span>
+      </button>
+      <button class="btn btn-secondary" onclick="toggleMode()">
+        <span id="modeLabel">查看渲染版</span>
+      </button>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-body" id="rawMode">你正在调试一个 Hermes + 多模态模型（MiniMax-M3）通过 Telegram 收图时无法读图的问题。
+
+## 症状
+- Telegram 发图片，bot 回的是 vision_analyze 预生成的英文文本描述（消息里出现 "The user sent an image but I couldn't quite see it this time" 或 "Here's what I can see: ..." 这样的元描述包装）
+- 模型本身支持 vision（同一模型走 OpenClaw 或直接调 API 都能读图）
+- 之前在 Hermes 上用 Grok 等其它模型能正常读图
+- 用户体感：bot 在"装能看图"但实际是描述文本
+
+## 根因
+Hermes 的 image_routing 决策在 `agent/image_routing.py::decide_image_input_mode`：
+- config 写 `agent.image_input_mode: auto`（默认）时，查 `models.dev` 缓存判断模型 vision 能力
+- 缓存文件：`~/.hermes/models_dev_cache.json`
+- 缓存里漏了新模型 / 把纯文本模型标错 / 私有模型未收录 → 落到 "text" 模式 → 走 `vision_analyze` 工具预生成英文描述再塞进 user message
+- 真正的 image tokens（native multimodal）**根本没传给主模型**
+
+## 诊断三步
+
+**1. 看 gateway 走的是哪条路：**
+```bash
+tail -200 ~/.hermes/logs/gateway.log | grep "Image routing"
+```
+- `Image routing: native (model supports vision).` → ✅
+- `Image routing: text (mode=text). Pre-analyzing N image(s) via vision_analyze.` → ❌ 走错路
+
+**2. 看当前 config 的 model.default 和 provider override：**
+```bash
+python3 -c "
+import yaml
+cfg = yaml.safe_load(open('/Users/eight/.hermes/config.yaml'))
+print('model:', cfg.get('model'))
+print('providers:', cfg.get('providers'))
+"
+```
+
+**3. 看 models.dev 缓存里这个 provider 的 models 列表 + vision 标记：**
+```bash
+python3 -c "
+import json
+d = json.load(open('/Users/eight/.hermes/models_dev_cache.json'))
+prov = d.get('<provider_name>', {})  # e.g. 'minimax'
+for mid, m in (prov.get('models') or {}).items():
+    print(f'{mid}: attachment={m.get(\"attachment\")}, input={m.get(\"modalities\", {}).get(\"input\")}')
+"
+```
+预期：多模态模型应出现 `attachment=True, input=['text','image',...]`，纯文本模型应 `attachment=False`。缓存里没收录就解释了 bug。
+
+## 修法（三步，缺一不可）
+
+**第一步：显式 override 这个 provider+model 的 vision 能力**
+```bash
+hermes config set providers.<provider>.models.<model_name>.supports_vision true
+```
+（如：`hermes config set providers.minimax.models.MiniMax-M3.supports_vision true`）
+
+**第二步：把 model.default 同步成当前活跃模型**
+```bash
+hermes config set model.default <model_name>
+```
+（关键：Telegram UI 里 `/model` 切换是 runtime override，**不会写回 `model.default`**。gateway image_routing 在创建 AIAgent 之前调 `_read_main_model()` 读的是 config 里的 default。两边必须一致。）
+
+**第三步：重启 gateway 让 config 生效**
+```bash
+hermes gateway restart
+```
+（gateway 启动时把 config 读进内存，运行时改 config 文件不会自动重载。这是这次踩到的最隐蔽的坑。）
+
+## 验证
+
+重启后用 Telegram 发一张图，gateway 日志应当输出：
+```
+Image routing: native (model supports vision). 1 image(s) will be attached inline.
+```
+
+且 bot 的回复里**不应该再出现** "The user sent an image" 这种元描述包装——主模型现在直接收到 image tokens。
+
+## 重要提醒
+
+- **多模态白名单要按 provider+model 精细配置**，不要为所有模型都开 vision。纯文本模型收图时应当走 vision_analyze 工具路径（省钱 + 兼容），只有真正支持 vision 的模型才走 native。
+- gateway 启动时一次性加载 config，**改 config 必须重启 gateway**。
+- `/model` UI picker 不会持久化回 `config.yaml`，picker 状态和 config 文件可能错位——以 `model.default` 为准。
+- `decide_image_input_mode` 决策顺序：config 显式 override > models.dev 缓存 > fallback text。所以新模型 / 私有模型**必须**显式 override，否则必然走 text。
+- 同样的逻辑也适用于 `toolsets` `providers` `agent.image_input_mode` 等所有 config 维度。
+
+## 相关文件路径速查
+
+- 路由决策源码：`~/.hermes/hermes-agent/agent/image_routing.py`
+- 配置加载：`~/.hermes/hermes-agent/hermes_cli/config.py`
+- 主模型读取：`~/.hermes/hermes-agent/agent/auxiliary_client.py::_read_main_model`
+- models.dev 缓存：`~/.hermes/models_dev_cache.json`
+- gateway 日志：`~/.hermes/logs/gateway.log`
+- 用户配置：`~/.hermes/config.yaml`
+- 保护配置工具：`hermes config set <key.path> <value>`（不能直接 patch `config.yaml`，文件被保护）</div>
+
+      <div class="view-mode" id="viewMode" style="display: none;"></div>
+    </div>
+
+    <div class="footer">
+      <div>Generated by Hermes Agent · MiniMax-M3 · 2026-06-02</div>
+      <div style="margin-top: 6px;">
+        Forward the prompt to another Hermes instance via Telegram / any chat tool.
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">✓ 已复制到剪贴板</div>
+
+  <script>
+    const PROMPT_TEXT = `你正在调试一个 Hermes + 多模态模型（MiniMax-M3）通过 Telegram 收图时无法读图的问题。
+
+## 症状
+- Telegram 发图片，bot 回的是 vision_analyze 预生成的英文文本描述（消息里出现 "The user sent an image but I couldn't quite see it this time" 或 "Here's what I can see: ..." 这样的元描述包装）
+- 模型本身支持 vision（同一模型走 OpenClaw 或直接调 API 都能读图）
+- 之前在 Hermes 上用 Grok 等其它模型能正常读图
+- 用户体感：bot 在"装能看图"但实际是描述文本
+
+## 根因
+Hermes 的 image_routing 决策在 \`agent/image_routing.py::decide_image_input_mode\`：
+- config 写 \`agent.image_input_mode: auto\`（默认）时，查 models.dev 缓存判断模型 vision 能力
+- 缓存文件：\`~/.hermes/models_dev_cache.json\`
+- 缓存里漏了新模型 / 把纯文本模型标错 / 私有模型未收录 → 落到 "text" 模式 → 走 \`vision_analyze\` 工具预生成英文描述再塞进 user message
+- 真正的 image tokens（native multimodal）**根本没传给主模型**
+
+## 诊断三步
+
+**1. 看 gateway 走的是哪条路：**
+\`\`\`bash
+tail -200 ~/.hermes/logs/gateway.log | grep "Image routing"
+\`\`\`
+- \`Image routing: native (model supports vision).\` → ✅
+- \`Image routing: text (mode=text). Pre-analyzing N image(s) via vision_analyze.\` → ❌ 走错路
+
+**2. 看当前 config 的 model.default 和 provider override：**
+\`\`\`bash
+python3 -c "
+import yaml
+cfg = yaml.safe_load(open('/Users/eight/.hermes/config.yaml'))
+print('model:', cfg.get('model'))
+print('providers:', cfg.get('providers'))
+"
+\`\`\`
+
+**3. 看 models.dev 缓存里这个 provider 的 models 列表 + vision 标记：**
+\`\`\`bash
+python3 -c "
+import json
+d = json.load(open('/Users/eight/.hermes/models_dev_cache.json'))
+prov = d.get('<provider_name>', {})  # e.g. 'minimax'
+for mid, m in (prov.get('models') or {}).items():
+    print(f'{mid}: attachment={m.get(\\"attachment\\")}, input={m.get(\\"modalities\\", {}).get(\\"input\\")}')
+"
+\`\`\`
+预期：多模态模型应出现 \`attachment=True, input=['text','image',...]\`，纯文本模型应 \`attachment=False\`。缓存里没收录就解释了 bug。
+
+## 修法（三步，缺一不可）
+
+**第一步：显式 override 这个 provider+model 的 vision 能力**
+\`\`\`bash
+hermes config set providers.<provider>.models.<model_name>.supports_vision true
+\`\`\`
+（如：\`hermes config set providers.minimax.models.MiniMax-M3.supports_vision true\`）
+
+**第二步：把 model.default 同步成当前活跃模型**
+\`\`\`bash
+hermes config set model.default <model_name>
+\`\`\`
+（关键：Telegram UI 里 \`/model\` 切换是 runtime override，**不会写回 \`model.default\`**。gateway image_routing 在创建 AIAgent 之前调 \`_read_main_model()\` 读的是 config 里的 default。两边必须一致。）
+
+**第三步：重启 gateway 让 config 生效**
+\`\`\`bash
+hermes gateway restart
+\`\`\`
+（gateway 启动时把 config 读进内存，运行时改 config 文件不会自动重载。这是这次踩到的最隐蔽的坑。）
+
+## 验证
+
+重启后用 Telegram 发一张图，gateway 日志应当输出：
+\`\`\`
+Image routing: native (model supports vision). 1 image(s) will be attached inline.
+\`\`\`
+
+且 bot 的回复里**不应该再出现** "The user sent an image" 这种元描述包装——主模型现在直接收到 image tokens。
+
+## 重要提醒
+
+- **多模态白名单要按 provider+model 精细配置**，不要为所有模型都开 vision。纯文本模型收图时应当走 vision_analyze 工具路径（省钱 + 兼容），只有真正支持 vision 的模型才走 native。
+- gateway 启动时一次性加载 config，**改 config 必须重启 gateway**。
+- \`/model\` UI picker 不会持久化回 \`config.yaml\`，picker 状态和 config 文件可能错位——以 \`model.default\` 为准。
+- \`decide_image_input_mode\` 决策顺序：config 显式 override > models.dev 缓存 > fallback text。所以新模型 / 私有模型**必须**显式 override，否则必然走 text。
+- 同样的逻辑也适用于 \`toolsets\` \`providers\` \`agent.image_input_mode\` 等所有 config 维度。
+
+## 相关文件路径速查
+
+- 路由决策源码：\`~/.hermes/hermes-agent/agent/image_routing.py\`
+- 配置加载：\`~/.hermes/hermes-agent/hermes_cli/config.py\`
+- 主模型读取：\`~/.hermes/hermes-agent/agent/auxiliary_client.py::_read_main_model\`
+- models.dev 缓存：\`~/.hermes/models_dev_cache.json\`
+- gateway 日志：\`~/.hermes/logs/gateway.log\`
+- 用户配置：\`~/.hermes/config.yaml\`
+- 保护配置工具：\`hermes config set <key.path> <value>\`（不能直接 patch \`config.yaml\`，文件被保护）`;
+
+    function copyPrompt() {
+      const btn = document.getElementById('copyBtn');
+      const originalHTML = btn.innerHTML;
+
+      const fallbackCopy = (text) => {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+        } catch (e) {
+          console.error('Copy failed', e);
+        }
+        document.body.removeChild(ta);
+      };
+
+      const showToast = () => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 1800);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(PROMPT_TEXT).then(() => {
+          btn.innerHTML = '<span>✓</span><span>已复制</span>';
+          showToast();
+          setTimeout(() => { btn.innerHTML = originalHTML; }, 1500);
+        }).catch(() => {
+          fallbackCopy(PROMPT_TEXT);
+          btn.innerHTML = '<span>✓</span><span>已复制</span>';
+          showToast();
+          setTimeout(() => { btn.innerHTML = originalHTML; }, 1500);
+        });
+      } else {
+        fallbackCopy(PROMPT_TEXT);
+        btn.innerHTML = '<span>✓</span><span>已复制</span>';
+        showToast();
+        setTimeout(() => { btn.innerHTML = originalHTML; }, 1500);
+      }
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;');
+    }
+
+    function renderMarkdown(md) {
+      // Minimal markdown renderer for this specific prompt
+      const lines = md.split('\n');
+      let html = '';
+      let inCode = false;
+      let codeLang = '';
+      let codeBuf = [];
+      let inList = false;
+      let inOrdered = false;
+
+      const flushList = () => {
+        if (inList) { html += '</ul>'; inList = false; }
+        if (inOrdered) { html += '</ol>'; inOrdered = false; }
+      };
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
+
+        // Code block
+        if (trimmed.startsWith('```')) {
+          if (inCode) {
+            html += '<pre><code>' + escapeHtml(codeBuf.join('\n')) + '</code></pre>';
+            codeBuf = [];
+            inCode = false;
+          } else {
+            flushList();
+            inCode = true;
+            codeLang = trimmed.slice(3).trim();
+          }
+          continue;
+        }
+        if (inCode) {
+          codeBuf.push(line);
+          continue;
+        }
+
+        // Heading
+        if (trimmed.startsWith('## ')) {
+          flushList();
+          html += '<h2>' + escapeHtml(trimmed.slice(3)) + '</h2>';
+          continue;
+        }
+
+        // Bullet
+        if (trimmed.startsWith('- ')) {
+          if (!inList) { flushList(); html += '<ul>'; inList = true; }
+          let content = escapeHtml(trimmed.slice(2));
+          // Inline code
+          content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+          // Bold
+          content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+          // Checkmarks
+          content = content.replace(/→ ✅/g, '<span class="check-ok">→ ✅</span>');
+          content = content.replace(/→ ❌/g, '<span class="check-bad">→ ❌</span>');
+          html += '<li>' + content + '</li>';
+          continue;
+        }
+
+        // Numbered
+        const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+        if (numMatch) {
+          if (!inOrdered) { flushList(); html += '<ol>'; inOrdered = true; }
+          let content = escapeHtml(numMatch[2]);
+          content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+          content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+          html += '<li>' + content + '</li>';
+          continue;
+        }
+
+        // Empty line
+        if (trimmed === '') {
+          flushList();
+          continue;
+        }
+
+        // Paragraph
+        flushList();
+        let content = escapeHtml(line);
+        content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+        content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        content = content.replace(/→ ✅/g, '<span class="check-ok">→ ✅</span>');
+        content = content.replace(/→ ❌/g, '<span class="check-bad">→ ❌</span>');
+        html += '<p>' + content + '</p>';
+      }
+
+      flushList();
+      if (inCode) {
+        html += '<pre><code>' + escapeHtml(codeBuf.join('\n')) + '</code></pre>';
+      }
+      return html;
+    }
+
+    let viewMode = false;
+    function toggleMode() {
+      viewMode = !viewMode;
+      const raw = document.getElementById('rawMode');
+      const view = document.getElementById('viewMode');
+      const label = document.getElementById('modeLabel');
+      if (viewMode) {
+        view.innerHTML = renderMarkdown(PROMPT_TEXT);
+        raw.style.display = 'none';
+        view.style.display = 'block';
+        label.textContent = '查看原始 Markdown';
+      } else {
+        raw.style.display = 'block';
+        view.style.display = 'none';
+        label.textContent = '查看渲染版';
+      }
+    }
+  </script>
+</body>
+</html>
