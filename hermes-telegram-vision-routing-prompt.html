@@ -239,29 +239,8 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>HERMES + M3 TELEGRAM VISION ROUTING DEBUG</h1>
-      <div class="subtitle">一键复制的调试提示词 · for forwarding to other Hermes instances</div>
-      <div class="meta">
-        <span><span class="tag">SCENARIO</span> Telegram 图片收不到 image tokens</span>
-        <span><span class="tag">SCOPE</span> Hermes gateway + 多模态模型</span>
-        <span><span class="tag">DURATION</span> 5 min read / 2 min fix</span>
-      </div>
-    </div>
-
-    <div class="action-bar">
-      <button class="btn btn-primary" id="copyBtn" onclick="copyPrompt()">
-        <span>📋</span>
-        <span>复制完整提示词</span>
-      </button>
-      <button class="btn btn-secondary" onclick="toggleMode()">
-        <span id="modeLabel">查看渲染版</span>
-      </button>
-    </div>
-
-    <div class="prompt-card">
-      <div class="prompt-body" id="rawMode">你正在调试一个 Hermes + 多模态模型（MiniMax-M3）通过 Telegram 收图时无法读图的问题。
+  <!-- Raw markdown stored in a script tag so HTML parser doesn't touch <placeholders> -->
+  <script type="text/plain" id="rawPrompt">你正在调试一个 Hermes + 多模态模型（MiniMax-M3）通过 Telegram 收图时无法读图的问题。
 
 ## 症状
 - Telegram 发图片，bot 回的是 vision_analyze 预生成的英文文本描述（消息里出现 "The user sent an image but I couldn't quite see it this time" 或 "Here's what I can see: ..." 这样的元描述包装）
@@ -271,7 +250,7 @@
 
 ## 根因
 Hermes 的 image_routing 决策在 `agent/image_routing.py::decide_image_input_mode`：
-- config 写 `agent.image_input_mode: auto`（默认）时，查 `models.dev` 缓存判断模型 vision 能力
+- config 写 `agent.image_input_mode: auto`（默认）时，查 models.dev 缓存判断模型 vision 能力
 - 缓存文件：`~/.hermes/models_dev_cache.json`
 - 缓存里漏了新模型 / 把纯文本模型标错 / 私有模型未收录 → 落到 "text" 模式 → 走 `vision_analyze` 工具预生成英文描述再塞进 user message
 - 真正的 image tokens（native multimodal）**根本没传给主模型**
@@ -352,8 +331,31 @@ Image routing: native (model supports vision). 1 image(s) will be attached inlin
 - models.dev 缓存：`~/.hermes/models_dev_cache.json`
 - gateway 日志：`~/.hermes/logs/gateway.log`
 - 用户配置：`~/.hermes/config.yaml`
-- 保护配置工具：`hermes config set <key.path> <value>`（不能直接 patch `config.yaml`，文件被保护）</div>
+- 保护配置工具：`hermes config set <key.path> <value>`（不能直接 patch `config.yaml`，文件被保护）</script>
 
+  <div class="container">
+    <div class="header">
+      <h1>HERMES + M3 TELEGRAM VISION ROUTING DEBUG</h1>
+      <div class="subtitle">一键复制的调试提示词 · for forwarding to other Hermes instances</div>
+      <div class="meta">
+        <span><span class="tag">SCENARIO</span> Telegram 图片收不到 image tokens</span>
+        <span><span class="tag">SCOPE</span> Hermes gateway + 多模态模型</span>
+        <span><span class="tag">DURATION</span> 5 min read / 2 min fix</span>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-primary" id="copyBtn" onclick="copyPrompt()">
+        <span>📋</span>
+        <span>复制完整提示词</span>
+      </button>
+      <button class="btn btn-secondary" onclick="toggleMode()">
+        <span id="modeLabel">查看渲染版</span>
+      </button>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-body" id="rawMode"></div>
       <div class="view-mode" id="viewMode" style="display: none;"></div>
     </div>
 
@@ -368,98 +370,11 @@ Image routing: native (model supports vision). 1 image(s) will be attached inlin
   <div class="toast" id="toast">✓ 已复制到剪贴板</div>
 
   <script>
-    const PROMPT_TEXT = `你正在调试一个 Hermes + 多模态模型（MiniMax-M3）通过 Telegram 收图时无法读图的问题。
+    // Read the raw prompt from the script tag (bypasses HTML parsing)
+    const PROMPT_TEXT = document.getElementById('rawPrompt').textContent.trim();
 
-## 症状
-- Telegram 发图片，bot 回的是 vision_analyze 预生成的英文文本描述（消息里出现 "The user sent an image but I couldn't quite see it this time" 或 "Here's what I can see: ..." 这样的元描述包装）
-- 模型本身支持 vision（同一模型走 OpenClaw 或直接调 API 都能读图）
-- 之前在 Hermes 上用 Grok 等其它模型能正常读图
-- 用户体感：bot 在"装能看图"但实际是描述文本
-
-## 根因
-Hermes 的 image_routing 决策在 \`agent/image_routing.py::decide_image_input_mode\`：
-- config 写 \`agent.image_input_mode: auto\`（默认）时，查 models.dev 缓存判断模型 vision 能力
-- 缓存文件：\`~/.hermes/models_dev_cache.json\`
-- 缓存里漏了新模型 / 把纯文本模型标错 / 私有模型未收录 → 落到 "text" 模式 → 走 \`vision_analyze\` 工具预生成英文描述再塞进 user message
-- 真正的 image tokens（native multimodal）**根本没传给主模型**
-
-## 诊断三步
-
-**1. 看 gateway 走的是哪条路：**
-\`\`\`bash
-tail -200 ~/.hermes/logs/gateway.log | grep "Image routing"
-\`\`\`
-- \`Image routing: native (model supports vision).\` → ✅
-- \`Image routing: text (mode=text). Pre-analyzing N image(s) via vision_analyze.\` → ❌ 走错路
-
-**2. 看当前 config 的 model.default 和 provider override：**
-\`\`\`bash
-python3 -c "
-import yaml
-cfg = yaml.safe_load(open('/Users/eight/.hermes/config.yaml'))
-print('model:', cfg.get('model'))
-print('providers:', cfg.get('providers'))
-"
-\`\`\`
-
-**3. 看 models.dev 缓存里这个 provider 的 models 列表 + vision 标记：**
-\`\`\`bash
-python3 -c "
-import json
-d = json.load(open('/Users/eight/.hermes/models_dev_cache.json'))
-prov = d.get('<provider_name>', {})  # e.g. 'minimax'
-for mid, m in (prov.get('models') or {}).items():
-    print(f'{mid}: attachment={m.get(\\"attachment\\")}, input={m.get(\\"modalities\\", {}).get(\\"input\\")}')
-"
-\`\`\`
-预期：多模态模型应出现 \`attachment=True, input=['text','image',...]\`，纯文本模型应 \`attachment=False\`。缓存里没收录就解释了 bug。
-
-## 修法（三步，缺一不可）
-
-**第一步：显式 override 这个 provider+model 的 vision 能力**
-\`\`\`bash
-hermes config set providers.<provider>.models.<model_name>.supports_vision true
-\`\`\`
-（如：\`hermes config set providers.minimax.models.MiniMax-M3.supports_vision true\`）
-
-**第二步：把 model.default 同步成当前活跃模型**
-\`\`\`bash
-hermes config set model.default <model_name>
-\`\`\`
-（关键：Telegram UI 里 \`/model\` 切换是 runtime override，**不会写回 \`model.default\`**。gateway image_routing 在创建 AIAgent 之前调 \`_read_main_model()\` 读的是 config 里的 default。两边必须一致。）
-
-**第三步：重启 gateway 让 config 生效**
-\`\`\`bash
-hermes gateway restart
-\`\`\`
-（gateway 启动时把 config 读进内存，运行时改 config 文件不会自动重载。这是这次踩到的最隐蔽的坑。）
-
-## 验证
-
-重启后用 Telegram 发一张图，gateway 日志应当输出：
-\`\`\`
-Image routing: native (model supports vision). 1 image(s) will be attached inline.
-\`\`\`
-
-且 bot 的回复里**不应该再出现** "The user sent an image" 这种元描述包装——主模型现在直接收到 image tokens。
-
-## 重要提醒
-
-- **多模态白名单要按 provider+model 精细配置**，不要为所有模型都开 vision。纯文本模型收图时应当走 vision_analyze 工具路径（省钱 + 兼容），只有真正支持 vision 的模型才走 native。
-- gateway 启动时一次性加载 config，**改 config 必须重启 gateway**。
-- \`/model\` UI picker 不会持久化回 \`config.yaml\`，picker 状态和 config 文件可能错位——以 \`model.default\` 为准。
-- \`decide_image_input_mode\` 决策顺序：config 显式 override > models.dev 缓存 > fallback text。所以新模型 / 私有模型**必须**显式 override，否则必然走 text。
-- 同样的逻辑也适用于 \`toolsets\` \`providers\` \`agent.image_input_mode\` 等所有 config 维度。
-
-## 相关文件路径速查
-
-- 路由决策源码：\`~/.hermes/hermes-agent/agent/image_routing.py\`
-- 配置加载：\`~/.hermes/hermes-agent/hermes_cli/config.py\`
-- 主模型读取：\`~/.hermes/hermes-agent/agent/auxiliary_client.py::_read_main_model\`
-- models.dev 缓存：\`~/.hermes/models_dev_cache.json\`
-- gateway 日志：\`~/.hermes/logs/gateway.log\`
-- 用户配置：\`~/.hermes/config.yaml\`
-- 保护配置工具：\`hermes config set <key.path> <value>\`（不能直接 patch \`config.yaml\`，文件被保护）`;
+    // Inject raw text into the visible raw-mode div via textContent (no HTML parsing)
+    document.getElementById('rawMode').textContent = PROMPT_TEXT;
 
     function copyPrompt() {
       const btn = document.getElementById('copyBtn');
@@ -486,22 +401,20 @@ Image routing: native (model supports vision). 1 image(s) will be attached inlin
         setTimeout(() => toast.classList.remove('show'), 1800);
       };
 
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(PROMPT_TEXT).then(() => {
-          btn.innerHTML = '<span>✓</span><span>已复制</span>';
-          showToast();
-          setTimeout(() => { btn.innerHTML = originalHTML; }, 1500);
-        }).catch(() => {
-          fallbackCopy(PROMPT_TEXT);
-          btn.innerHTML = '<span>✓</span><span>已复制</span>';
-          showToast();
-          setTimeout(() => { btn.innerHTML = originalHTML; }, 1500);
-        });
-      } else {
-        fallbackCopy(PROMPT_TEXT);
+      const onSuccess = () => {
         btn.innerHTML = '<span>✓</span><span>已复制</span>';
         showToast();
         setTimeout(() => { btn.innerHTML = originalHTML; }, 1500);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(PROMPT_TEXT).then(onSuccess).catch(() => {
+          fallbackCopy(PROMPT_TEXT);
+          onSuccess();
+        });
+      } else {
+        fallbackCopy(PROMPT_TEXT);
+        onSuccess();
       }
     }
 
@@ -518,7 +431,6 @@ Image routing: native (model supports vision). 1 image(s) will be attached inlin
       const lines = md.split('\n');
       let html = '';
       let inCode = false;
-      let codeLang = '';
       let codeBuf = [];
       let inList = false;
       let inOrdered = false;
@@ -541,7 +453,6 @@ Image routing: native (model supports vision). 1 image(s) will be attached inlin
           } else {
             flushList();
             inCode = true;
-            codeLang = trimmed.slice(3).trim();
           }
           continue;
         }
@@ -561,11 +472,8 @@ Image routing: native (model supports vision). 1 image(s) will be attached inlin
         if (trimmed.startsWith('- ')) {
           if (!inList) { flushList(); html += '<ul>'; inList = true; }
           let content = escapeHtml(trimmed.slice(2));
-          // Inline code
           content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
-          // Bold
           content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-          // Checkmarks
           content = content.replace(/→ ✅/g, '<span class="check-ok">→ ✅</span>');
           content = content.replace(/→ ❌/g, '<span class="check-bad">→ ❌</span>');
           html += '<li>' + content + '</li>';
