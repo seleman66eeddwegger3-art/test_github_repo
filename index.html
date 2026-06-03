@@ -86,6 +86,8 @@
   }
   .nav-search .clear:hover { background: rgba(0, 0, 0, 0.05); color: var(--text); }
   .nav-search.has-value .clear { display: block; }
+  /* 默认桌面端：显示完整名 */
+  .nav-brand .brand-short { display: none; }
 
   /* ===== Hero 标题区 ===== */
   .hero {
@@ -281,13 +283,16 @@
     .timeline-item .title { font-size: 18px; }
     .timeline-item.focused .title { font-size: 26px; }
     .nav-search { width: 50vw; }
+    /* 移动端：切换为短名 */
+    .nav-brand .brand-full { display: none; }
+    .nav-brand .brand-short { display: inline; }
   }
 </style>
 </head>
 <body>
 
 <nav class="nav">
-  <div class="nav-brand"><span class="dot"></span> Hermes Agent 笔记</div>
+  <div class="nav-brand"><span class="dot"></span> <span class="brand-full">Hermes Agent 笔记</span><span class="brand-short">Hermes 笔记</span></div>
   <div class="nav-search" id="searchWrap">
     <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input type="text" id="searchInput" placeholder="搜索问题、标签、日期…" autocomplete="off" spellcheck="false" />
