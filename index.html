@@ -223,6 +223,11 @@
 
   /* 搜索过滤 */
   .timeline-item.hidden { display: none; }
+  /* 左右交替：奇数项右、偶数项左，节点永远在中央 */
+  .timeline-item:nth-child(even) .card {
+    grid-column: 1;
+    padding: 28px 36px 28px 0;
+  }
   .timeline-item.match .title mark,
   .timeline-item.match .summary mark {
     background: linear-gradient(180deg, transparent 60%, rgba(0, 113, 227, 0.25) 60%);
@@ -268,6 +273,11 @@
     }
     .timeline-item .node { grid-column: 1; }
     .timeline-item .card { grid-column: 2; padding: 16px 0 16px 16px; }
+    /* 移动端不交替：保持单列布局 */
+    .timeline-item:nth-child(even) .card {
+      grid-column: 2;
+      padding: 16px 0 16px 16px;
+    }
     .timeline-item .title { font-size: 18px; }
     .timeline-item.focused .title { font-size: 26px; }
     .nav-search { width: 50vw; }
