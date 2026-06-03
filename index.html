@@ -223,7 +223,8 @@
 
   /* 搜索过滤 */
   .timeline-item.hidden { display: none; }
-  .timeline-item.match .title mark {
+  .timeline-item.match .title mark,
+  .timeline-item.match .summary mark {
     background: linear-gradient(180deg, transparent 60%, rgba(0, 113, 227, 0.25) 60%);
     color: inherit;
     padding: 0 2px;
@@ -409,8 +410,9 @@ function applyFilter() {
     if (matched) {
       visible++;
       visibleIds.add(id);
-      // 重渲染 title 高亮
+      // 重渲染 title + summary 高亮
       item.querySelector('.title').innerHTML = highlight(post.title, q);
+      item.querySelector('.summary').innerHTML = highlight(post.summary, q);
     } else {
       visibleIds.delete(id);
     }
