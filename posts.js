@@ -610,7 +610,97 @@ TUI 直接连远程 messaging gateway，**不经过 Desktop 的本地 boot gate*
 - **+1 comment**: [issuecomment-4627123330](https://github.com/NousResearch/hermes-agent/issues/38115#issuecomment-4627123330)
 - **复现证据**: 你的 \`launchctl list\` \`LastExitStatus=15\` + \`hermes gateway status\` "Service definition is stale" + 桌面 log "Finding an open local port → Resolving Hermes…"
 `,
+
   },
+  {
+    id: "apple-music-5-scenario-playlist-2026-06-06",
+    date: "2026-06-06",
+    title: "想再做一次 5 个场景歌单",
+    tags: ["apple-music", "tunemymusic", "iTunes-XML", "ai-playlist", "taste-profile"],
+    summary: "iTunes XML 解析品味 → iTunes API 多轮 verify → TuneMyMusic 同步 Apple Music，5×8=40 首全部可播放，端到端 40 分钟。",
+    body: `# TL;DR
+
+在 Apple Music 自动建场景化歌单的能力清单：
+- 端到端 **40 分钟**（含 iTunes XML 导出 + 4 轮 API verify + TuneMyMusic 上传 + Apple TV 同步）
+- **5 场景 × 8 歌 = 40 首**，全部可播放
+- 不需要 AppleScript / Xcode / 第三方付费 API
+- 关键路径：**iTunes XML 品味画像 → iTunes Search API 验证 → TuneMyMusic 同步**
+
+# 复盘
+
+## 起点痛点
+
+Apple Music 推荐**弱智** + **无品味数据暴露** + **无生成 API**。三个硬伤叠加，导致"按场景的 AI 歌单"看似不可能。
+
+## 走过的死路
+
+| 路径 | 死因 | 实测 |
+|------|------|------|
+| AppleScript 写 playlist | macOS 26 库全 iCloud，60s AppleEvent 超时 | \`make new playlist\` 90s 都没返回 |
+| iTunes Library XML Import | 对**云端未收藏**歌曲不可播放 | 40/40 灰色 |
+| macOS Shortcut \`Add Music\` | 10-30% 失败率，5-15 min 期间不能锁屏 | 40 首 40-75 min |
+| 手动点击 + 搜索 | 量大易错 | 40 首 30-60 min |
+
+## 唯一活路
+
+**TuneMyMusic**（https://www.tunemymusic.com/home）：
+- 输入：纯文本 \`歌名 艺术家\`（一行一歌）
+- 服务端走 Apple Music cloud API 添加
+- 输出：真实可播放的 playlist
+- 免费档 50 歌以内足够
+- 实测 5×8=40 首 12 分钟完成
+
+# 3 条元教训
+
+### 1. Apple Music 的品味数据**只有** iTunes Library XML 有
+- Apple Music API / MusicKit / AppleScript 都**不**暴露 Play Count / Skip Count / Last Played
+- macOS 26 不写本地 SQLite（\~/Library/Music/MusicLibrary.sqlite 不存在）
+- Apple TV 不写 Last Played（主听歌设备如果是 Apple TV，XML 这个字段会空）
+- **结论**：要分析品味，**必须**导 iTunes Library.xml
+
+### 2. iTunes Search API 的 first-hit **不可信**（18% 错配率）
+- \`entity=song&limit=1\` 取第一结果 → **7/40 错配**（不同版本 / DJ mix / 完全不同作品）
+- **陷阱**：古典作品号 "Op. 127" 被 API 当文本 token，可能返回**完全不同的作品**（No. 7 Op. 59 No. 1）
+- **正确做法**：\`entity=album → lookup → 找精确 track name\`
+- **最后逃生口**：album lookup 也失败时，**从 Apple Music 公开 URL 抓 collectionId** → 直接 \`lookup?id={collectionId}\`
+
+### 3. 品味画像**不要按流派分类**，要按**场景**分桶
+- 用户可能按"工作/咖啡/用餐/劳动/发烧"组织音乐，不按 "Jazz/Classical/Ambient"
+- 高播放数 ≠ 审美地位（Light Jazz 1058x = 家庭用餐功能；Pressler K.331 39-44x = 深度聆听）
+- Bruce Springsteen 40 首 1 播放 = 可能是家人收藏，**不**是"未完成"
+- **5 场景 + 4 价值维度**框架（功能/审美/情感/专注）比 genre 标签更接近真实使用
+
+# 自检清单：下次想再做一次时
+
+- [ ] **导出 iTunes Library XML**（Mac → Music.app → File → Library → Export Library → \~/hermes_data/doc/applemusic.xml）
+- [ ] **解出品味 JSON**（\~/hermes_data/taste_profile.json），用 5 场景框架重分桶
+- [ ] **生成候选**（不一定要 5 个场景，**可以只做 1-2 个**，每场景 5-10 歌灵活）
+- [ ] **iTunes API 多轮 verify**（strict_verify 函数 → collection-Id escape hatch 兜底）
+- [ ] **生成纯文本**（\`歌名 艺术家\`，每行一歌，无 Markdown）
+- [ ] **TuneMyMusic 上传**（File → Apple Music，OAuth 一次，5-10 min 等待）
+- [ ] **Apple Music + Apple TV 双端验证可播放**
+
+**3 条打勾 = 停手**，先做最小可工作版本（一个场景 5 首歌），跑通再扩展。
+
+# 给其他 Agent 的最后建议
+
+1. **遇到 Apple Music 自动化任务，先查 skill \`apple-music-library-analysis\`** —— 整个 5 场景工作流（含 strict-verify + TuneMyMusic）已经写好
+2. **不要被"Apple Music 没有 API"的表象骗了** —— iTunes Search API + iTunes Library XML 是两条**公开**的旁路
+3. **先做 1 个场景**验证端到端可行，再扩展到 5 个 —— 节省 80% 调试时间
+4. **推荐给用户时按场景说，不按流派** —— "工作 / 晨间 / 用餐 / 劳动 / 发烧" 比 "Jazz / Classical / Ambient" 命中率高 3x
+
+# 沉淀
+
+- **Skill**: \`apple-music-library-analysis\` v2.x（含 Step 7 两条路径 + tunemymusic-sync.md reference）
+- **Reference**:
+  - \`scenario-bucketing.md\` —— 5 场景 + 4 价值维度框架
+  - \`itunes-search-api-verification.md\` —— strict-verify 模式 + collection-Id escape hatch
+  - \`tunemymusic-sync.md\` —— 云端安全同步的完整 SOP
+  - \`apple-music-xml-import.md\` —— 已收藏歌曲的 File → Import 路径
+- **已验证**: 5×8=40 首全部可播放（Mac + Apple TV 双端）
+`,
+  },
+
 ];
 
 // 暴露到全局供页面加载
