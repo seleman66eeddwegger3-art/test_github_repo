@@ -516,7 +516,7 @@ Apple 系统签名（\`com.apple.dt.xcode_select.tool-shim-public\`），TCC 祖
     date: "2026-06-05",
     time: "12:00",
     title: "Hermes Desktop 远程连不上：两层根因",
-    tags: ["hermes-desktop", "launchd", "websocket-1012", "remote-gateway", "issue-tracker"],
+    tags: ["hermes-desktop", "launchd", "websocket-1012", "remote-gateway", "issue-tracker", "v0.16-resolved"],
     summary: "Remote 模式 Test 通过≠session 真成立。Test 只验 REST 不验 WebSocket 持久化；Desktop 仍先本地 boot backend，launchd 反复 SIGTERM gateway，桌面卡在 'background gateway didn't come up'。",
     body: `# 问题
 
@@ -614,6 +614,19 @@ TUI 直接连远程 messaging gateway，**不经过 Desktop 的本地 boot gate*
 - **Issue**: [NousResearch/hermes-agent#38115](https://github.com/NousResearch/hermes-agent/issues/38115)
 - **+1 comment**: [issuecomment-4627123330](https://github.com/NousResearch/hermes-agent/issues/38115#issuecomment-4627123330)
 - **复现证据**: 你的 \`launchctl list\` \`LastExitStatus=15\` + \`hermes gateway status\` "Service definition is stale" + 桌面 log "Finding an open local port → Resolving Hermes…"
+## ✅ 已解决（v0.16，2026-06-05 发布）
+
+> **Update 2026-06-07**：用户在另一个 session 升级到 v0.16 后亲自验证，两层根因都被解决。
+
+v0.16.0 release 关键变更（与本 issue 直接相关）：
+
+1. **Hermes Desktop 重写**——全新 native Electron app（macOS/Linux/Windows），从根上解决"本地 boot gate 阻塞远程 session"的隐性架构
+2. **Remote Hermes Connection 重做**——从"Test 绿≠session 通"改为 **OAuth / username-password via WebSocket**，session 持久化是 first-class concern
+3. **#38115 已在 v0.16 关闭**（v0.16 release 一次性 closed 399 issues）
+
+**建议**：升级到 v0.16 → Desktop → Settings → Remote gateway → 配 URL+token → 看 session 是否能持久维持。
+
+v0.15 时代的 workaround（SSH tunnel / \`hermes --tui\`）**仍可用，但不再是唯一选项**。
 `,
 
   },
