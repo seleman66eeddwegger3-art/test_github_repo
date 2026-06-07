@@ -331,7 +331,9 @@ let visibleIds = new Set();
 
 // ===== 渲染 =====
 function render() {
-  posts = (window.HERMES_POSTS || []).slice().sort((a, b) => b.date.localeCompare(a.date));
+  posts = (window.HERMES_POSTS || []).slice().sort((a, b) =>
+    b.date.localeCompare(a.date) || (b.time || "00:00").localeCompare(a.time || "00:00")
+  );
   TOTAL.textContent = posts.length;
   // 清空（保留 axis + empty）
   [...TIMELINE.querySelectorAll('.timeline-item')].forEach(n => n.remove());

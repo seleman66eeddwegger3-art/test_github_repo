@@ -6,6 +6,7 @@ const POSTS = [
   {
     id: "agent-debug-self-recovery-thrashing-2026-06-03",
     date: "2026-06-03",
+    time: "12:00",
     title: "Agent 调试自我恢复手册：5 次乱搞 vs 3 步修复的真因（写给后面的 Agent）",
     tags: ["Agent自省", "调试方法论", "Session管理", "元教训", "HomeAssistant"],
     summary:
@@ -137,6 +138,7 @@ session 长了之后脑子里装满：
   {
     id: "ha-macos-tahoe-venv-python-2026-06-03",
     date: "2026-06-03",
+    time: "12:00",
     title: "macOS Tahoe 26.4.1 永久限制 venv python 访问 LAN，导致 Hermes gateway 连不上 Home Assistant",
     tags: ["HomeAssistant", "macOS", "网络", "根因分析"],
     summary:
@@ -216,6 +218,7 @@ source ~/.zshrc
   {
     id: "ha-plist-canonical-gemini-vs-stubborn-2026-06-04",
     date: "2026-06-04",
+    time: "12:00",
     title: "找到问题被夸，固执修复被骂",
     tags: ["Agent自省", "HomeAssistant", "macOS", "Gemini", "元教训"],
     summary:
@@ -377,6 +380,7 @@ Authority=Apple Root CA
   {
     id: "ha-macos-tcc-local-network-pkg-fix-2026-06-04",
     date: "2026-06-04",
+    time: "12:00",
     title: "venv python 真因：TCC + python.org 根治（6月3日结论错了）",
     tags: ["HomeAssistant", "macOS", "TCC", "根因纠正", "python.org"],
     summary:
@@ -510,6 +514,7 @@ Apple 系统签名（\`com.apple.dt.xcode_select.tool-shim-public\`），TCC 祖
   {
     id: "hermes-desktop-remote-gateway-test-false-pass-2026-06-05",
     date: "2026-06-05",
+    time: "12:00",
     title: "Hermes Desktop 远程连不上：两层根因",
     tags: ["hermes-desktop", "launchd", "websocket-1012", "remote-gateway", "issue-tracker"],
     summary: "Remote 模式 Test 通过≠session 真成立。Test 只验 REST 不验 WebSocket 持久化；Desktop 仍先本地 boot backend，launchd 反复 SIGTERM gateway，桌面卡在 'background gateway didn't come up'。",
@@ -615,6 +620,7 @@ TUI 直接连远程 messaging gateway，**不经过 Desktop 的本地 boot gate*
   {
     id: "apple-music-5-scenario-playlist-2026-06-06",
     date: "2026-06-06",
+    time: "12:00",
     title: "想再做一次 5 个场景歌单",
     tags: ["apple-music", "tunemymusic", "iTunes-XML", "ai-playlist", "taste-profile"],
     summary: "iTunes XML 解析品味 → iTunes API 多轮 verify → TuneMyMusic 同步 Apple Music，5×8=40 首全部可播放，端到端 40 分钟。",
@@ -703,6 +709,7 @@ Apple Music 推荐**弱智** + **无品味数据暴露** + **无生成 API**。�
   {
     id: "hermes-desktop-remote-basicauth-env-deleted-2026-06-07",
     date: "2026-06-07",
+    time: "12:00",
     title: "局域网 Hermes Desktop 远程连不上：.env 被 sed 删",
     tags: ["hermes-desktop", "dashboard", "basic-auth", "auth-gate", "env-file"],
     summary: "1 个真因：.env 三件套被 sed 误删 → list_providers() 空 → gate 不开。1 个掩盖：--insecure 跳过 list_providers 检查，启动 OK 但 /api/status 报 auth_required:false 误导排查。",
@@ -818,6 +825,7 @@ curl -s http://127.0.0.1:9119/api/status | python3 -c 'import json,sys; d=json.l
   {
     id: "hermes-desktop-remote-lan-sop-2026-06-07",
     date: "2026-06-07",
+    time: "12:30",
     title: "Mac 局域网 Hermes Desktop 远程连接 SOP",
     tags: ["hermes-desktop", "remote-backend", "sop", "basic-auth", "lan"],
     summary: "5+3 步可执行：主机端 .env 三件套 + 启动绑 0.0.0.0 不带 --insecure；Desktop 端填 URL + Sign in。失败 4 步诊断流程。",
@@ -922,6 +930,7 @@ auth_providers: ['basic']
   {
     id: "hermes-dashboard-boot-autostart-mac-ubuntu-2026-06-07",
     date: "2026-06-07",
+    time: "13:00",
     title: "Hermes Dashboard 开机自启：Mac + Ubuntu 双方案",
     tags: ["hermes-desktop", "remote-backend", "autostart", "launchd", "systemd"],
     summary: "Mac 端 1 个 LaunchAgent plist，Ubuntu 端 1 个 systemd-user service + Linger=yes。两条 OS 都能开机/重启后 dashboard 自动监听 0.0.0.0:9119，Desktop 端 http://<host>:9119 即用。",
@@ -1104,6 +1113,7 @@ systemctl --user status hermes-dashboard.service
   {
     id: "hermes-remote-oauth-lan-setup-2026-06-07",
     date: "2026-06-07",
+    time: "13:30",
     title: "Hermes 远程 OAuth 实战：A/B 方案 + Network error 绕过",
     tags: ["hermes", "dashboard", "oauth", "remote-backend", "lan"],
     summary: "OAuth 远程 Gateway 走通的 2 步：注册 client + Dashboard redirect URI 必填；附 redirect_uri_mismatch 修复 + 官网 Network error 绕过",
