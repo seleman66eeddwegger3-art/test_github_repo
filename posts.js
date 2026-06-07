@@ -1097,7 +1097,180 @@ systemctl --user status hermes-dashboard.service
 - 关键文件：
   - macOS: \`~/Library/LaunchAgents/ai.hermes.dashboard.plist\`（本次新增，2029 B，--insecure 0 次）
   - Ubuntu: \`/home/ubuntu/.config/systemd/user/hermes-dashboard.service\`（用户自写，PID 53409）
-- 验证证据：Mac plutil OK + 关键字段 grep（--insecure 0 次 / 0.0.0.0 1 次）；Ubuntu Linger=yes + PID 53409 + auth_required=True
+  - 验证证据：Mac plutil OK + 关键字段 grep（--insecure 0 次 / 0.0.0.0 1 次）；Ubuntu Linger=yes + PID 53409 + auth_required=True
+`,
+
+  },
+  {
+    id: "hermes-remote-oauth-lan-setup-2026-06-07",
+    date: "2026-06-07",
+    title: "Hermes 远程 OAuth 实战：A/B 方案 + Network error 绕过",
+    tags: ["hermes", "dashboard", "oauth", "remote-backend", "lan"],
+    summary: "OAuth 远程 Gateway 走通的 2 步：注册 client + Dashboard redirect URI 必填；附 redirect_uri_mismatch 修复 + 官网 Network error 绕过",
+    body: `# TL;DR
+
+OAuth（Nous Portal）**不需要**公网，**纯局域网能跑通**。\`Dashboard redirect URI\` 留空 = 官网只放行 localhost，从局域网 IP 访问 dashboard 会触发 \`redirect_uri_mismatch\`。两条修复路径：
+
+- **A. 官网 client 配置填局域网 IP**（推荐：操作最直接）
+- **B. SSH 隧道改成 localhost 访问**（推荐：长期稳定，零官网配置）
+
+中间遇到 \`Network error. Please try again.\`？99% 是官网前端问题，跟你的 OAuth 配置无关。
+
+# 复盘
+
+| 阶段 | 操作 | 期望 | 实际 |
+|---|---|---|---|
+| 1. 基础已通 | basic auth 用户名密码走通（上一会话） | \`auth_providers: ['basic']\` | ✅ |
+| 2. 注册 client | hermes 官网注册 OAuth client，拿到 client ID + Dashboard redirect URI 字段（可选） | 两个字段 | ✅ |
+| 3. 写 .env | \`echo HERMES_DASHBOARD_OAUTH_CLIENT_ID=*** >> ~/.hermes/.env\` | client ID 进环境 | ✅ |
+| 4. 重启 dashboard | \`hermes dashboard --stop\` → \`hermes dashboard --no-open --host 0.0.0.0 --port 9119\` | \`*:9119\` 监听 | ✅ |
+| 5. 验证 status | \`curl -s http://127.0.0.1:9119/api/status\` | \`auth_required: True\` + \`auth_providers\` 含 nous | ✅ \`['basic', 'nous']\` |
+| 6. 浏览器登录 | 局域网 IP 打开 → 点 "Sign in with Nous Research" | 跳官网 → 登录 → 回调成功 | ❌ \`redirect_uri_mismatch\` |
+| 7. 修复（方案 A） | 官网填 \`http://192.168.2.233:9119\` | Save 成功 | ⚠️ 官网报 "Network error" |
+| 8. 绕过 Network error | 强制刷新 + 隐身窗口 + 换浏览器 | Save 成功 | ✅ |
+| 9. 重新登录 | 浏览器再点 Sign in | 回调成功 + 进 dashboard | ✅ |
+
+# 方案 A — 官网 client 配置填局域网 IP
+
+## 步骤
+
+**1. 写 client ID 到 .env（如果还没写）**
+
+\`\`\`bash
+echo 'HERMES_DASHBOARD_OAUTH_CLIENT_ID=*** >> ~/.hermes/.env
+chmod 600 ~/.hermes/.env
+\`\`\`
+
+**2. 重启 dashboard（不要带 --insecure）**
+
+\`\`\`bash
+hermes dashboard --stop
+sleep 2
+hermes dashboard --no-open --host 0.0.0.0 --port 9119
+\`\`\`
+
+**3. 验证 provider 已注册**
+
+\`\`\`bash
+curl -s http://127.0.0.1:9119/api/status | python3 -c '
+import json,sys
+d=json.load(sys.stdin)
+print("auth_required:", d["auth_required"])
+print("auth_providers:", d["auth_providers"])
+'
+\`\`\`
+
+期望：
+
+\`\`\`
+auth_required: True
+auth_providers: ['basic', 'nous']
+\`\`\`
+
+**4. 官网填 Dashboard redirect URI**
+
+在 hermes 官网 OAuth client 配置页，\`Dashboard redirect URI\` 字段填：
+
+\`\`\`
+http://<你的局域网IP>:9119
+\`\`\`
+
+> 不要加 \`/auth/callback\`，官网会自动加。
+> 例子：\`http://192.168.2.233:9119\`
+
+## 遇到 "Network error. Please try again." 怎么绕
+
+按顺序试：
+
+1. **强制刷新页面**（\`Cmd+Shift+R\` / \`Ctrl+Shift+R\`）— 清 CSRF token + stale session
+2. **隐身窗口**重新登录官网 → 重填 IP → Save
+3. **换浏览器**（Chrome → Safari / Firefox）— 排除扩展拦截
+
+这 3 步能解决 90% 的"Network error"。
+
+# 方案 B — SSH 隧道改 localhost 访问
+
+## 思路
+
+不改任何配置，物理上让浏览器以 \`localhost\` 身份打开 dashboard → OAuth callback 走 \`http://localhost:9119/auth/callback\` → 官网默认放行。
+
+## 步骤
+
+**1. 在你常用电脑（不是 ha）开 SSH 隧道**
+
+\`\`\`bash
+ssh -L 9119:127.0.0.1:9119 ubuntu@ha
+\`\`\`
+
+**2. 浏览器开**
+
+\`\`\`
+http://localhost:9119
+\`\`\`
+
+**3. 点 "Sign in with Nous Research"**
+
+回调走 localhost → 官网放行 → 登录成功。
+
+## 优势
+
+- \`~/.hermes/.env\` 不动
+- 官网 client 配置不动
+- 物理上让 callback 回到 localhost，零配置依赖
+
+# A vs B 怎么选
+
+| 维度 | 方案 A（填 IP） | 方案 B（SSH 隧道） |
+|---|---|---|
+| 官网配置改动 | 必填一次 | 零 |
+| \`.env\` 改动 | 必填 client ID | 必填 client ID |
+| 多设备访问 | ✅ 任何同网段设备都能开 | ❌ 必须先 SSH 隧道 |
+| 公网访问 | ❌（仍是 LAN 限定） | ❌ |
+| 维护成本 | 低（填一次） | 中（每次开隧道） |
+| 推荐场景 | 长期、多设备 | 临时验证、单机调试 |
+
+**两个可以共存**—— 方案 A 解决多设备日常访问，方案 B 用于临时 debug。
+
+# 3 条元教训
+
+### 1. "Localhost is always allowed automatically" ≠ "LAN IP 也被允许"
+
+文档原话让你以为"Localhost allowed" = "本地都允许"，但实际只放行 \`127.0.0.1\`/\`localhost\`。局域网 IP（如 \`192.168.x.x\`）需要**显式填**到 client 配置里。
+
+### 2. OAuth callback 从 host header 推导
+
+dashboard 没有"我的对外地址"配置，OAuth 跳转时它从浏览器访问用的 \`Host\` 字段反推 callback URL。所以：
+
+- \`http://localhost:9119\` 打开 → callback 是 \`http://localhost:9119/auth/callback\`
+- \`http://192.168.x.x:9119\` 打开 → callback 是 \`http://192.168.x.x:9119/auth/callback\`
+
+→ 想稳定走 localhost，就让用户用 localhost 打开（方案 B 思路）。
+
+### 3. 官网"Network error" 99% 是前端
+
+OAuth 失败类错误如果发生在**配置页 Save 按钮**，几乎都不是网络问题。是：
+
+- CSRF token 过期
+- Session cookie 丢失
+- 浏览器扩展拦截 fetch
+- 官网临时服务抽风
+
+\`curl\` 后端 API 没用 — 这层是 SPA 在打。直接刷新/隐身/换浏览器，比排查"网络哪里不通"快 10 倍。
+
+# 自检清单（5 条全打勾 = 远程 OAuth 就绪）
+
+- [ ] \`curl /api/status\` 显示 \`auth_required: True\`
+- [ ] \`auth_providers\` 列表**包含** \`nous\`（不是只有 \`basic\`）
+- [ ] \`lsof -nP -iTCP:9119 -sTCP:LISTEN\` 显示 \`*:9119\`（不是 \`127.0.0.1:9119\`）
+- [ ] \`~/.hermes/.env\` 含 \`HERMES_DASHBOARD_OAUTH_CLIENT_ID=*** 且 \`chmod 600\`
+- [ ] dashboard 启动命令**无** \`--insecure\` 参数
+
+# 沉淀
+
+- 关联 skill: \`hermes-remote-backend-setup\` v1.0.0（auth-gate truth table / 三种 path 对比表）
+- **建议补**：skill 加 "OAuth on LAN" 章节，明确 redirect URI 留空的行为差异、A/B 方案对比
+- 关联笔记: \`hermes-desktop-remote-basicauth-env-deleted-2026-06-07\`（basic auth 失败诊断树）
+- 关键命令: \`hermes dashboard --host 0.0.0.0 --port 9119\`（无 \`--insecure\`，basic + OAuth 共用）
 `,
   },
 
