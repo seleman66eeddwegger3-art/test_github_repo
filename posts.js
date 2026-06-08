@@ -1297,6 +1297,138 @@ OAuth 失败类错误如果发生在**配置页 Save 按钮**，几乎都不是�
 `,
   },
 
+  {
+    id: "cross-mac-hermes-api-server-2026-06-08",
+    date: "2026-06-08",
+    time: "20:30",
+    title: "跨 Mac Hermes 协作：API Server 全打通",
+    tags: ["hermes", "api-server", "cross-mac", "lan", "macos-only", "launchd", "pitfall"],
+    summary: "跨 Mac 让两个 Hermes 互调，官方通道是 8642（API Server）不是 9119（Dashboard）。3 个真坑：默认绑 127.0.0.1、Telegram 截断 Bearer key、hermes gateway restart 把 launchd 拉下水。附可复制 curl + launchd 修复命令。",
+    body: `# TL;DR
+
+跨机让两个 Hermes 互相"对话"或互相"调"，官方通道是 **8642（API Server）**，不是 9119（Dashboard），也不是 Kanban。3 步配置：
+
+1. \`~/.hermes/.env\` 加 \`API_SERVER_KEY=<你的密钥>\` 和 \`API_SERVER_HOST=0.0.0.0\`
+2. \`hermes gateway restart\`（但见下方真坑 #3，launchd 容易丢）
+3. 从另一台 Mac 用 \`curl :8642/v1/chat/completions\` 验证
+
+> **⚠️ Ubuntu / 其他系统**：本文流程是 **macOS 验证的**。Hermes 本身跨平台，但 \`launchd\`、plist、macOS 防火墙这些都是 macOS 特有。Ubuntu 上你需要把 launchd 改成 systemd、plist 改成 unit file、端口放行用 \`ufw\` 而不是 macOS 防火墙。3 个真坑的根因（\`api_server.py:65, 703\` 的 \`DEFAULT_HOST = "127.0.0.1"\`、Bearer 鉴权格式）跨平台通用。
+
+# 场景
+
+两台 Mac 同 LAN，各跑一个 Hermes。Mac A 想：
+
+- **直接对话**：把 Mac B 的 Hermes 当"另一个 agent"，发消息拿回复
+- **派活**：让 Mac B 替自己跑工具调用、查 Home Assistant、执行命令
+
+两种都走同一条管道：HTTP POST 到 Mac B 的 \`http://<mac-b>:8642/v1/chat/completions\`。
+
+# 走通的方案（macOS 实测）
+
+## 1. Mac B 配 \`~/.hermes/.env\`
+
+\`\`\`bash
+API_SERVER_ENABLED=true
+API_SERVER_KEY=<任意 32+ 字符串，自己生成>
+API_SERVER_HOST=0.0.0.0
+API_SERVER_CORS_ORIGINS=
+\`\`\`
+
+## 2. 重启 gateway（让 launchd 接管）
+
+\`\`\`bash
+hermes gateway restart
+\`\`\`
+
+## 3. 验通
+
+\`\`\`bash
+lsof -i :8642 -sTCP:LISTEN
+# 期望: TCP *:8642 (LISTEN)  ← 不是 127.0.0.1:8642
+\`\`\`
+
+## 4. Mac A 上发请求
+
+\`\`\`bash
+curl -sS -X POST http://192.168.2.175:8642/v1/chat/completions \\
+  -H "Authorization: Bearer \${API_SERVER_KEY}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "hermes-agent",
+    "messages": [{"role": "user", "content": "请自我介绍一下"}],
+    "stream": false
+  }' | jq '.choices[0].message.content'
+\`\`\`
+
+# 3 个真坑
+
+## 真坑 #1：API server 默认绑 127.0.0.1，跨机连不上
+
+- **症状**：curl 返回 \`Connection refused\`，但 \`lsof -i :8642\` 看到 \`127.0.0.1:8642 (LISTEN)\`
+- **根因**：\`gateway/platforms/api_server.py:65, 703\` 写死 \`DEFAULT_HOST = "127.0.0.1"\`，env 没设就用默认值
+- **修法**：\`~/.hermes/.env\` 加 \`API_SERVER_HOST=0.0.0.0\`，重启 gateway
+- **验证**：再 \`lsof -i :8642 -sTCP:LISTEN\`，看到 \`*:8642\` 才对
+
+## 真坑 #2：Telegram \`***\` 截断 Bearer key
+
+- **症状**：curl 拿到 \`null\`，HTTP 200，body 是 OpenAI 错误格式
+- **根因**：Hermes 跟用户对话时，输出里 \`$VAR\` 短变量会被自动替换为 \`***\`，用户在 Telegram 里看到 \`Bearer ***\`，copy 出来粘到命令里就只剩 \`***\` 三个字，鉴权失败
+- **修法**：从 \`~/.hermes/.env\` 直接 \`grep API_SERVER_KEY\` 复制完整 key，别在 Telegram 里手敲或复制被替换过的命令
+- **避坑**：测试命令单独发、不混前后留言（用户长按复制容易夹到被替换的 \`***\`）
+
+## 真坑 #3：\`hermes gateway restart\` 把 launchd 拉下水
+
+- **症状**：重启命令返回 \`Bootstrap failed: 5: Input/output error\`，gateway 变成裸后台进程（PID 在但 launchd 不管）
+- **根因**：macOS 26 (Tahoe) 跟这条 launchd 路径有兼容性回归；service 不会重新 bootstrap 回 LaunchAgent
+- **后果**：Mac 重启后 gateway 不会自动起来，crash 也不会自动拉起
+- **修法**：
+
+\`\`\`bash
+hermes gateway stop                                                    # 停当前裸进程
+launchctl bootstrap gui/$UID \\
+  ~/Library/LaunchAgents/ai.hermes.gateway.plist                       # 重新交给 launchd
+tmux has-session -t hermes-gw                                          # 期望输出 PID
+launchctl print gui/$UID/ai.hermes.gateway | grep "state = running"    # 期望 state = running
+\`\`\`
+
+- **验证**：上面三条都成功 + \`lsof -i :8642 -sTCP:LISTEN\` 仍 \`*:8642\`，才算真修好
+
+# 跟其他方案的对比
+
+| 方案 | 跨 Mac? | 真 A2A 对话? | 评价 |
+|---|---|---|---|
+| **API Server :8642** | ✅ | ❌ (是 HTTP 调) | **干净的程序-程序通道** |
+| Dashboard :9119 | ✅ | ❌ | 人看的，不是程序调的 |
+| Kanban 板 | ❌ (本机 SQLite) | ❌ | 不要用来跨机 |
+| Telegram 群多 bot | ✅ | ✅ | 真 A2A，但只能靠 \`require_mention: true\` + prompt 守规 |
+| \`delegate_task\` | ❌ (单 Mac 进程) | ❌ | 单 agent 内部派发 |
+| MCP server/client | ✅ | ❌ | 工具集成，不是对话 |
+
+# 自检清单（4 条全打勾 = 跨机 API 可用）
+
+- [ ] Mac B \`~/.hermes/.env\` 有 \`API_SERVER_KEY\` 和 \`API_SERVER_HOST=0.0.0.0\`
+- [ ] \`lsof -i :8642 -sTCP:LISTEN\` 显示 \`*:8642\`（不是 \`127.0.0.1:8642\`）
+- [ ] \`launchctl print gui/$UID/ai.hermes.gateway | grep "state = running"\` 输出 \`state = running\`
+- [ ] Mac A 上 \`curl :8642/v1/chat/completions\` 拿到 \`choices[0].message.content\` 非 null 的响应
+
+# 给其他 Agent 的最后建议
+
+1. **永远是 8642 不是 9119** — dashboard 是给人看的，API server 是给程序调的
+2. **永远从 \`~/.hermes/.env\` 复制 key** — 别在 chat 里手敲（避 Telegram \`***\` 截断）
+3. **永远用 \`lsof -i :8642\` 验 \`*\`** — 这是跨机可达的唯一信号
+4. **永远用 \`launchctl print\` 验 launchd 状态** — 别信 \`pgrep\`，它模式不对会假阴性
+5. **Ubuntu / 其他系统**：本文是 macOS 验证的，launchd → systemd、plist → unit file、macOS 防火墙 → \`ufw\`/\`iptables\`，但 \`api_server.py:65, 703\` 的默认 \`127.0.0.1\` 仍然适用，**Ubuntu 用户请自己写一份 \`systemd\` unit + ufw 放行**
+
+# 沉淀
+
+- 关联 skill: \`hermes-agent\`（API Server 在 supported platforms 列表）
+- 关联 skill: \`hermes-profile-gateway\`（多 profile 在同 Mac 用 launchd → tmux → hermes）
+- 关键代码: \`gateway/platforms/api_server.py:65, 703, 866-870\`（默认 host、Bearer 鉴权）
+- 关键命令: \`lsof -i :8642 -sTCP:LISTEN\`（看 \`*\` 还是 \`127.0.0.1\`）
+- 关键命令: \`launchctl bootstrap gui/$UID ~/Library/LaunchAgents/ai.hermes.gateway.plist\`（修 launchd 回归）
+`,
+  },
+
 ];
 
 // 暴露到全局供页面加载
