@@ -1351,7 +1351,7 @@ lsof -i :8642 -sTCP:LISTEN
 
 \`\`\`bash
 curl -sS -X POST http://192.168.2.175:8642/v1/chat/completions \\
-  -H "Authorization: Bearer \${API_SERVER_KEY}" \\
+  -H "Authorization: Bearer \\$API_SERVER_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "model": "hermes-agent",
@@ -1359,6 +1359,38 @@ curl -sS -X POST http://192.168.2.175:8642/v1/chat/completions \\
     "stream": false
   }' | jq '.choices[0].message.content'
 \`\`\`
+
+> **前置**：下面的 $API_SERVER_KEY 假设你 shell 里 \\`export API_SERVER_KEY=xxx\\` 过。**首次配置**见下方「env var 标准约定」一节——一次性写到 \\`~/.zshrc\\`，之后所有脚本/curl/Python 都不再硬编码 key。
+
+
+# env var 标准约定（2026-06-09 更新）
+
+跨机脚本（curl / Python / 任何调用 `/v1/chat/completions` 的代码）**永远不要**硬编码 Bearer key、**永远不要**从 chat 里复制。**正确做法**：
+
+## 一次性：把 key export 到 shell
+
+加到 `$HOME/.zshrc`（一次性，之后所有 shell 自动有）：
+
+```bash
+echo 'export API_SERVER_KEY=$(grep "^API_SERVER_KEY=" $HOME/.hermes/.env | cut -d= -f2-)' >> $HOME/.zshrc
+source $HOME/.zshrc
+echo "API_SERVER_KEY length: ${#API_SERVER_KEY}"   # 期望 35, 验通即可关掉
+```
+
+## 之后所有脚本
+
+- **bash**：`$API_SERVER_KEY`（**长**变量名, 不会被 chat 渲染层吃成 `***`；短名 `$KEY` `$T` 等会被吃）
+- **Python**：`os.environ["API_SERVER_KEY"]`（**不要**带默认值, 强制 fail-fast 让你配 export, 而非静默用 hardcode 兜底）
+- **永远不**在脚本源码里出现 key 本体、**永远不** echo 整段命令
+
+## 根除旧方案的 2 个痛
+
+之前所有跨机脚本的「修法」是 `grep API_SERVER_KEY ~/.hermes/.env | cut -d= -f2-` 然后手工 copy paste。这有两个根问题：
+
+1. **每次**都要复制（不必要摩擦）
+2. **Telegram 渲染层会吃短变量名**（\\`$KEY\\` \\`***\\`），用户在 chat 里看到的 `Bearer ***` copy 出来是字面 3 个星，鉴权失败——见「真坑 #2」（已废）
+
+env var 约定**根除**这两个问题。
 
 # 3 个真坑
 
@@ -1369,12 +1401,13 @@ curl -sS -X POST http://192.168.2.175:8642/v1/chat/completions \\
 - **修法**：\`~/.hermes/.env\` 加 \`API_SERVER_HOST=0.0.0.0\`，重启 gateway
 - **验证**：再 \`lsof -i :8642 -sTCP:LISTEN\`，看到 \`*:8642\` 才对
 
-## 真坑 #2：Telegram \`***\` 截断 Bearer key
+## 真坑 #2：Telegram \\`\\*\\*\\*\\` 截断 Bearer key（已废，请用 env var）
 
-- **症状**：curl 拿到 \`null\`，HTTP 200，body 是 OpenAI 错误格式
-- **根因**：Hermes 跟用户对话时，输出里 \`$VAR\` 短变量会被自动替换为 \`***\`，用户在 Telegram 里看到 \`Bearer ***\`，copy 出来粘到命令里就只剩 \`***\` 三个字，鉴权失败
-- **修法**：从 \`~/.hermes/.env\` 直接 \`grep API_SERVER_KEY\` 复制完整 key，别在 Telegram 里手敲或复制被替换过的命令
-- **避坑**：测试命令单独发、不混前后留言（用户长按复制容易夹到被替换的 \`***\`）
+- **症状**：curl 拿到 \\`null\\`，HTTP 200，body 是 OpenAI 错误格式
+- **根因**：Hermes 跟用户对话时，输出里 \\`$VAR\\` 短变量会被自动替换为 \\`\\*\\*\\*\\`，用户在 Telegram 里看到 \\`Bearer \\*\\*\\*\\`，copy 出来粘到命令里就只剩 \\`\\*\\*\\*\\` 三个字，鉴权失败
+- **修法（已废）**：从 \\`~/.hermes/.env\\` 直接 \\`grep API_SERVER_KEY\\` 复制完整 key，别在 Telegram 里手敲或复制被替换过的命令
+- **避坑**：测试命令单独发、不混前后留言（用户长按复制容易夹到被替换的 \\`\\*\\*\\*\\`）
+- **✅ 2026-06-09 更新**：改用 **env var 标准约定**（见下节），根除此坑——脚本里**只**用 \\`$API_SERVER_KEY\\` 引用，**不**复制 key 本身
 
 ## 真坑 #3：\`hermes gateway restart\` 把 launchd 拉下水
 
@@ -1414,7 +1447,7 @@ launchctl print gui/$UID/ai.hermes.gateway | grep "state = running"    # 期望 
 # 给其他 Agent 的最后建议
 
 1. **永远是 8642 不是 9119** — dashboard 是给人看的，API server 是给程序调的
-2. **永远从 \`~/.hermes/.env\` 复制 key** — 别在 chat 里手敲（避 Telegram \`***\` 截断）
+2. **永远用 env var 引用 key**（见下一节「env var 标准约定」）— 别在 chat 里手敲、别从 \\`/复制 key\\`、别用短名 \\`$KEY\\`
 3. **永远用 \`lsof -i :8642\` 验 \`*\`** — 这是跨机可达的唯一信号
 4. **永远用 \`launchctl print\` 验 launchd 状态** — 别信 \`pgrep\`，它模式不对会假阴性
 5. **Ubuntu / 其他系统**：本文是 macOS 验证的，launchd → systemd、plist → unit file、macOS 防火墙 → \`ufw\`/\`iptables\`，但 \`api_server.py:65, 703\` 的默认 \`127.0.0.1\` 仍然适用，**Ubuntu 用户请自己写一份 \`systemd\` unit + ufw 放行**
