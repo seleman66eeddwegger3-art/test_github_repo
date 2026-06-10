@@ -325,7 +325,7 @@
 </section>
 
 <div class="meta-strip" id="metaStrip">
-  共 <span id="totalCount">0</span> 条 · 滚动浏览，<kbd>↑</kbd>/<kbd>↓</kbd> 翻页
+  <span id="totalCount">0</span> 条记录 · 当前显示 <span id="loadedCount">0</span> 条 · 滚到底加载更多 · <kbd>↑</kbd>/<kbd>↓</kbd> 翻页
 </div>
 
 <div class="timeline" id="timeline">
@@ -347,6 +347,7 @@ const CLEAR = document.getElementById('clearBtn');
 const WRAP = document.getElementById('searchWrap');
 const EMPTY = document.getElementById('empty');
 const TOTAL = document.getElementById('totalCount');
+const LOADED = document.getElementById('loadedCount');
 const LOAD_MORE = document.getElementById('loadMore');
 
 // ===== 数据源: manifest (无 body, 仅元数据) =====
@@ -427,6 +428,11 @@ function showLoading(show) {
   LOAD_MORE.style.display = show ? 'block' : 'none';
 }
 
+// ===== 实时更新 "当前显示 N / total 条" =====
+function updateLoadedCount() {
+  LOADED.textContent = renderedCount;
+}
+
 // ===== 初始化 =====
 function init() {
   TOTAL.textContent = posts.length;
@@ -434,6 +440,7 @@ function init() {
   // 跳过前 (startPage-1) 页, 渲染第 startPage 页
   renderedCount = (startPage - 1) * PAGE_SIZE;
   renderNextBatch();
+  updateLoadedCount();
   if (renderedCount < posts.length) {
     showLoading(true);
   }
@@ -480,6 +487,7 @@ window.addEventListener('scroll', () => {
     if (isNearBottom() && renderedCount < posts.length) {
       showLoading(false);
       renderNextBatch();
+      updateLoadedCount();
     }
     if (renderedCount >= posts.length) {
       showLoading(false);
@@ -549,6 +557,7 @@ document.addEventListener('keydown', e => {
   // 如果滚动到底附近, 先加载下一批
   if (isNearBottom() && renderedCount < posts.length) {
     renderNextBatch();
+    updateLoadedCount();
   }
   const idx = items.indexOf(lastFocus);
   let next = idx;
