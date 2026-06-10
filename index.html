@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Hermes Agent 笔记</title>
 <meta name="description" content="Hermes Agent 不断解决问题的真实记录，可一键复制发给其他智能体参考。" />
-<script src="posts.js"></script>
+<script src="posts-manifest.js"></script>
 <style>
   :root {
     --bg: #fbfbfd;
@@ -238,6 +238,25 @@
     border-radius: 2px;
   }
 
+  /* 加载更多 / 状态提示 */
+  .timeline-status {
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--text-3);
+    font-size: 14px;
+  }
+  .timeline-status .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--hairline);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   /* 计数 + 提示 */
   .meta-strip {
     text-align: center;
@@ -312,6 +331,9 @@
 <div class="timeline" id="timeline">
   <div class="timeline-axis"></div>
   <div class="timeline-empty" id="empty" style="display:none;">没有找到匹配的问题。</div>
+  <div class="timeline-status" id="loadMore" style="display:none;">
+    <span class="spinner"></span>加载中…
+  </div>
 </div>
 
 <footer>
@@ -325,66 +347,102 @@ const CLEAR = document.getElementById('clearBtn');
 const WRAP = document.getElementById('searchWrap');
 const EMPTY = document.getElementById('empty');
 const TOTAL = document.getElementById('totalCount');
+const LOAD_MORE = document.getElementById('loadMore');
 
-let posts = [];
+// ===== 数据源: manifest (无 body, 仅元数据) =====
+const M = window.HERMES_MANIFEST || { totalPosts: 0, pageSize: 9, totalPages: 0, posts: [] };
+let posts = M.posts.slice().sort((a, b) =>
+  b.date.localeCompare(a.date) || (b.time || "00:00").localeCompare(a.time || "00:00")
+);
+const PAGE_SIZE = M.pageSize || 9;
+let renderedCount = 0;     // 已渲染到 timeline 的条数
+let lastFocus = null;
 let visibleIds = new Set();
 
-// ===== 渲染 =====
-function render() {
-  posts = (window.HERMES_POSTS || []).slice().sort((a, b) =>
-    b.date.localeCompare(a.date) || (b.time || "00:00").localeCompare(a.time || "00:00")
-  );
-  TOTAL.textContent = posts.length;
-  // 清空（保留 axis + empty）
-  [...TIMELINE.querySelectorAll('.timeline-item')].forEach(n => n.remove());
-  posts.forEach(p => {
-    // 单条 entry 渲染错误隔离: 一条坏不拖垮整站
-    try {
-      const item = document.createElement('a');
-      item.className = 'timeline-item';
-      item.href = `detail.html?id=${encodeURIComponent(p.id)}`;
-      item.dataset.id = p.id;
-      item.dataset.text = (p.title + ' ' + p.tags.join(' ') + ' ' + p.date + ' ' + p.summary).toLowerCase();
-      item.innerHTML = `
-        <div class="node" aria-hidden="true"></div>
-        <div class="card">
-          <div class="card-meta">
-            <span class="date">${p.date}</span>
-          </div>
-          <h2 class="title">${escapeHtml(p.title)}</h2>
-          <p class="summary">${escapeHtml(p.summary)}</p>
-          <div class="tags">${p.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
-        </div>
-      `;
-      TIMELINE.appendChild(item);
-    } catch (e) {
-      // 降级: 显示一条不可点击的占位卡, 不影响其他 entry
-      const errItem = document.createElement('div');
-      errItem.className = 'timeline-item timeline-item-error';
-      errItem.dataset.id = p.id;
-      errItem.innerHTML = `
-        <div class="node" aria-hidden="true"></div>
-        <div class="card card-error">
-          <div class="card-meta"><span class="date">${p.date}</span></div>
-          <h2 class="title">⚠️ 渲染失败: ${escapeHtml(p.id)}</h2>
-          <p class="summary">${escapeHtml(String(e && e.message || e))}</p>
-        </div>
-      `;
-      TIMELINE.appendChild(errItem);
-      console.error('[timeline] 渲染失败', p.id, e);
-    }
-  });
-  visibleIds = new Set(posts.map(p => p.id));
-  // 初始 focus 第一条（但要等布局完）
-  requestAnimationFrame(() => updateFocus());
+// 初始 URL ?page=N
+function getInitialPage() {
+  const params = new URLSearchParams(window.location.search);
+  const p = parseInt(params.get('page') || '1', 10);
+  return Math.max(1, Math.min(M.totalPages || 1, p));
 }
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+// ===== 单条卡片渲染 (带 try/catch 隔离) =====
+function appendItem(p) {
+  try {
+    const item = document.createElement('a');
+    item.className = 'timeline-item';
+    item.href = `detail.html?id=${encodeURIComponent(p.id)}`;
+    item.dataset.id = p.id;
+    item.dataset.text = (p.title + ' ' + p.tags.join(' ') + ' ' + p.date + ' ' + p.summary).toLowerCase();
+    item.innerHTML = `
+      <div class="node" aria-hidden="true"></div>
+      <div class="card">
+        <div class="card-meta">
+          <span class="date">${p.date}</span>
+        </div>
+        <h2 class="title">${escapeHtml(p.title)}</h2>
+        <p class="summary">${escapeHtml(p.summary)}</p>
+        <div class="tags">${p.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+      </div>
+    `;
+    // 插在 axis/empty/loadMore 之前
+    TIMELINE.insertBefore(item, LOAD_MORE);
+    visibleIds.add(p.id);
+  } catch (e) {
+    // 降级: 占位卡, 不影响其他
+    const errItem = document.createElement('div');
+    errItem.className = 'timeline-item timeline-item-error';
+    errItem.dataset.id = p.id;
+    errItem.innerHTML = `
+      <div class="node" aria-hidden="true"></div>
+      <div class="card card-error">
+        <div class="card-meta"><span class="date">${p.date}</span></div>
+        <h2 class="title">⚠️ 渲染失败: ${escapeHtml(p.id)}</h2>
+        <p class="summary">${escapeHtml(String(e && e.message || e))}</p>
+      </div>
+    `;
+    TIMELINE.insertBefore(errItem, LOAD_MORE);
+    console.error('[timeline] 渲染失败', p.id, e);
+  }
+}
+
+// ===== 渲染下一批 (每批 PAGE_SIZE 条) =====
+function renderNextBatch() {
+  if (renderedCount >= posts.length) return false;
+  const start = renderedCount;
+  const end = Math.min(start + PAGE_SIZE, posts.length);
+  for (let i = start; i < end; i++) {
+    appendItem(posts[i]);
+  }
+  renderedCount = end;
+  return true;
+}
+
+// ===== 加载中状态 =====
+function showLoading(show) {
+  LOAD_MORE.style.display = show ? 'block' : 'none';
+}
+
+// ===== 初始化 =====
+function init() {
+  TOTAL.textContent = posts.length;
+  const startPage = getInitialPage();
+  // 跳过前 (startPage-1) 页, 渲染第 startPage 页
+  renderedCount = (startPage - 1) * PAGE_SIZE;
+  renderNextBatch();
+  if (renderedCount < posts.length) {
+    showLoading(true);
+  }
+  requestAnimationFrame(updateFocus);
+}
+
+init();
+
 // ===== 焦点中央 =====
-let lastFocus = null;
 function updateFocus() {
   const items = TIMELINE.querySelectorAll('.timeline-item:not(.hidden)');
   if (items.length === 0) return;
@@ -407,15 +465,31 @@ function updateFocus() {
   }
 }
 
+// ===== 滚动监听 (含分页懒加载) =====
 let scrollTicking = false;
+function isNearBottom() {
+  // 距底部 200px 内触发
+  return window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+}
 window.addEventListener('scroll', () => {
   if (scrollTicking) return;
   scrollTicking = true;
-  requestAnimationFrame(() => { updateFocus(); scrollTicking = false; });
+  requestAnimationFrame(() => {
+    updateFocus();
+    // 分页懒加载: 滚动到底 → 渲染下一批
+    if (isNearBottom() && renderedCount < posts.length) {
+      showLoading(false);
+      renderNextBatch();
+    }
+    if (renderedCount >= posts.length) {
+      showLoading(false);
+    }
+    scrollTicking = false;
+  });
 }, { passive: true });
 window.addEventListener('resize', () => requestAnimationFrame(updateFocus));
 
-// ===== 搜索（模糊匹配） =====
+// ===== 搜索（client-side, in-memory 跨所有 manifest posts） =====
 function highlight(text, query) {
   if (!query) return escapeHtml(text);
   const lower = text.toLowerCase();
@@ -445,7 +519,6 @@ function applyFilter() {
     if (matched) {
       visible++;
       visibleIds.add(id);
-      // 重渲染 title + summary 高亮
       item.querySelector('.title').innerHTML = highlight(post.title, q);
       item.querySelector('.summary').innerHTML = highlight(post.summary, q);
     } else {
@@ -453,7 +526,6 @@ function applyFilter() {
     }
   });
   EMPTY.style.display = visible === 0 ? 'block' : 'none';
-  // 重置 focus 状态
   if (lastFocus) { lastFocus.classList.remove('focused'); lastFocus = null; }
   requestAnimationFrame(updateFocus);
 }
@@ -474,6 +546,10 @@ document.addEventListener('keydown', e => {
   e.preventDefault();
   const items = [...TIMELINE.querySelectorAll('.timeline-item:not(.hidden)')];
   if (items.length === 0) return;
+  // 如果滚动到底附近, 先加载下一批
+  if (isNearBottom() && renderedCount < posts.length) {
+    renderNextBatch();
+  }
   const idx = items.indexOf(lastFocus);
   let next = idx;
   if (e.key === 'ArrowDown' || e.key === 'PageDown') next = Math.min(items.length - 1, idx + 1);
@@ -482,8 +558,6 @@ document.addEventListener('keydown', e => {
     items[next].scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 });
-
-render();
 </script>
 
 </body>

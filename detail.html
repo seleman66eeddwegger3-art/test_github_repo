@@ -6,7 +6,7 @@
 <title>笔记 — Hermes Agent</title>
 <meta name="description" content="Hermes Agent 解决问题的方法记录，可一键复制发给其他智能体参考。" />
 <script src="https://cdn.jsdelivr.net/npm/marked@13.0.3/marked.min.js"></script>
-<script src="posts.js"></script>
+<script src="posts-manifest.js"></script>
 <style>
   :root {
     --bg: #000;
@@ -263,6 +263,9 @@
 const root = document.getElementById('root');
 const navTitle = document.getElementById('navTitle');
 
+// ===== 数据源: manifest (无 body) =====
+const M = window.HERMES_MANIFEST || { posts: [] };
+
 function getQueryId() {
   const params = new URLSearchParams(window.location.search);
   return params.get('id');
@@ -276,13 +279,29 @@ function renderError(msg) {
   root.innerHTML = `<div class="status">${msg}<br/><br/><a href="index.html" style="color:var(--accent);">← 返回主页</a></div>`;
 }
 
-async function load() {
-  const id = getQueryId();
-  if (!id) { renderError('未指定问题 ID。'); return; }
-  const posts = (window.HERMES_POSTS || []);
-  const post = posts.find(p => p.id === id);
-  if (!post) { renderError(`没找到 id 为 <code>${escapeHtml(id)}</code> 的笔记。`); return; }
+// 动态加载 posts-N.js (带缓存: 同一 page 多次 fetch 复用)
+const _pageCache = {};
+function loadPage(pageNo) {
+  if (_pageCache[pageNo]) return Promise.resolve(_pageCache[pageNo]);
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = `posts-${pageNo}.js`;
+    script.onload = () => {
+      const posts = window[`HERMES_PAGE_${pageNo}`];
+      if (Array.isArray(posts)) {
+        _pageCache[pageNo] = posts;
+        resolve(posts);
+      } else {
+        reject(new Error(`posts-${pageNo}.js 加载后未找到 HERMES_PAGE_${pageNo}`));
+      }
+    };
+    script.onerror = () => reject(new Error(`posts-${pageNo}.js 网络失败`));
+    document.head.appendChild(script);
+  });
+}
 
+// 渲染 hero + content (post 可含 body, 也可不含)
+function renderPost(post) {
   // nav title
   navTitle.textContent = post.date;
   document.title = `${post.title} — Hermes Agent 笔记`;
@@ -313,6 +332,20 @@ async function load() {
 
   // 渲染 markdown (单条错误隔离: marked 解析失败降级到 <pre>)
   const content = document.getElementById('content');
+  if (post.body == null) {
+    // 降级: manifest 元数据不含 body, 显示 summary + 提示
+    content.innerHTML = `
+      <div class="status" style="text-align: left; padding: 20px;">
+        <div style="margin-bottom: 12px; color: #ff9f0a;">⚠️ 该笔记的完整内容暂未加载 (page ${post._page} 加载失败)</div>
+        <div style="font-size: 14px; color: var(--text-2);">已显示摘要 + 元数据. 详细排查记录请返回主页重试.</div>
+        <div style="margin-top: 16px;"><a href="index.html" style="color: var(--accent);">← 返回主页</a></div>
+      </div>
+    `;
+    // 复制按钮也降级: 复制元信息
+    setupCopyFallback(post);
+    return;
+  }
+
   try {
     if (window.marked) {
       marked.setOptions({ gfm: true, breaks: false });
@@ -332,36 +365,39 @@ async function load() {
     console.error('[detail] marked.parse 失败', post.id, e);
   }
 
-  // ===== 复制 =====
+  // 复制按钮 (含 body 完整版)
+  setupCopy(post);
+}
+
+function buildCopyText(post) {
+  const meta = [
+    '---',
+    `id: ${post.id}`,
+    `date: ${post.date}`,
+    `tags: [${post.tags.join(', ')}]`,
+    `title: ${post.title}`,
+    `summary: ${post.summary}`,
+    '---',
+    '',
+  ].join('\n');
+  return meta + (post.body || '').trim() + '\n';
+}
+
+function setupCopy(post) {
   const btn = document.getElementById('copyBtn');
   const label = document.getElementById('copyLabel');
   const icon = document.getElementById('copyIcon');
+  if (!btn) return;
   const ORIGINAL_ICON = icon.innerHTML;
   const ORIGINAL_LABEL = label.textContent;
-
-  function buildCopyText() {
-    const meta = [
-      '---',
-      `id: ${post.id}`,
-      `date: ${post.date}`,
-      `tags: [${post.tags.join(', ')}]`,
-      `title: ${post.title}`,
-      `summary: ${post.summary}`,
-      '---',
-      '',
-    ].join('\n');
-    return meta + post.body.trim() + '\n';
-  }
-
   async function copy() {
-    const text = buildCopyText();
+    const text = buildCopyText(post);
     let ok = false;
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text);
         ok = true;
       } else {
-        // fallback: textarea + execCommand
         const ta = document.createElement('textarea');
         ta.value = text;
         ta.style.position = 'fixed'; ta.style.opacity = '0';
@@ -371,7 +407,6 @@ async function load() {
         document.body.removeChild(ta);
       }
     } catch (e) { ok = false; }
-
     if (ok) {
       btn.classList.add('copied');
       icon.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
@@ -386,8 +421,6 @@ async function load() {
     }
   }
   btn.addEventListener('click', copy);
-
-  // 快捷键 ⌘/Ctrl + C（仅在没选中文本时）
   document.addEventListener('keydown', e => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
       const sel = window.getSelection();
@@ -397,6 +430,64 @@ async function load() {
       }
     }
   });
+}
+
+function setupCopyFallback(post) {
+  // body 缺失时, 复制按钮仍能用 (复制元信息)
+  const btn = document.getElementById('copyBtn');
+  const label = document.getElementById('copyLabel');
+  const icon = document.getElementById('copyIcon');
+  if (!btn) return;
+  label.textContent = '复制元信息 (含摘要, 不含完整 body)';
+  const ORIGINAL_LABEL = label.textContent;
+  const ORIGINAL_ICON = icon.innerHTML;
+  async function copy() {
+    const text = buildCopyText(post);
+    try {
+      await navigator.clipboard.writeText(text);
+      label.textContent = '已复制 · 元信息版';
+      setTimeout(() => { label.textContent = ORIGINAL_LABEL; }, 2200);
+    } catch (e) { label.textContent = '复制失败'; }
+  }
+  btn.addEventListener('click', copy);
+}
+
+async function load() {
+  const id = getQueryId();
+  if (!id) { renderError('未指定问题 ID。'); return; }
+
+  // 1. 查 manifest 找 page
+  const meta = M.posts.find(p => p.id === id);
+  if (!meta) {
+    renderError(`没找到 id 为 <code>${escapeHtml(id)}</code> 的笔记。`);
+    return;
+  }
+  const pageNo = meta.page;
+
+  // 2. 先用 manifest 元数据 (无 body) 渲染 hero, 避免空白
+  // (这是设计取舍: 用户立即看到标题/摘要, body 在后台加载)
+
+  // 3. fetch 对应 page
+  let pagePosts;
+  try {
+    pagePosts = await loadPage(pageNo);
+  } catch (e) {
+    console.error('[detail] 加载 page 失败', pageNo, e);
+    // 降级: 用 manifest 元数据渲染, 不含 body
+    renderPost({ ...meta, _page: pageNo, body: null });
+    return;
+  }
+
+  // 4. 找 entry
+  const post = pagePosts.find(p => p.id === id);
+  if (!post) {
+    // page 加载成功但找不到 id (数据不一致)
+    renderPost({ ...meta, _page: pageNo, body: null });
+    return;
+  }
+
+  // 5. 完整渲染 (含 body)
+  renderPost(post);
 }
 
 load();
