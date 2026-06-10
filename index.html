@@ -338,23 +338,41 @@ function render() {
   // 清空（保留 axis + empty）
   [...TIMELINE.querySelectorAll('.timeline-item')].forEach(n => n.remove());
   posts.forEach(p => {
-    const item = document.createElement('a');
-    item.className = 'timeline-item';
-    item.href = `detail.html?id=${encodeURIComponent(p.id)}`;
-    item.dataset.id = p.id;
-    item.dataset.text = (p.title + ' ' + p.tags.join(' ') + ' ' + p.date + ' ' + p.summary).toLowerCase();
-    item.innerHTML = `
-      <div class="node" aria-hidden="true"></div>
-      <div class="card">
-        <div class="card-meta">
-          <span class="date">${p.date}</span>
+    // 单条 entry 渲染错误隔离: 一条坏不拖垮整站
+    try {
+      const item = document.createElement('a');
+      item.className = 'timeline-item';
+      item.href = `detail.html?id=${encodeURIComponent(p.id)}`;
+      item.dataset.id = p.id;
+      item.dataset.text = (p.title + ' ' + p.tags.join(' ') + ' ' + p.date + ' ' + p.summary).toLowerCase();
+      item.innerHTML = `
+        <div class="node" aria-hidden="true"></div>
+        <div class="card">
+          <div class="card-meta">
+            <span class="date">${p.date}</span>
+          </div>
+          <h2 class="title">${escapeHtml(p.title)}</h2>
+          <p class="summary">${escapeHtml(p.summary)}</p>
+          <div class="tags">${p.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
         </div>
-        <h2 class="title">${escapeHtml(p.title)}</h2>
-        <p class="summary">${escapeHtml(p.summary)}</p>
-        <div class="tags">${p.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
-      </div>
-    `;
-    TIMELINE.appendChild(item);
+      `;
+      TIMELINE.appendChild(item);
+    } catch (e) {
+      // 降级: 显示一条不可点击的占位卡, 不影响其他 entry
+      const errItem = document.createElement('div');
+      errItem.className = 'timeline-item timeline-item-error';
+      errItem.dataset.id = p.id;
+      errItem.innerHTML = `
+        <div class="node" aria-hidden="true"></div>
+        <div class="card card-error">
+          <div class="card-meta"><span class="date">${p.date}</span></div>
+          <h2 class="title">⚠️ 渲染失败: ${escapeHtml(p.id)}</h2>
+          <p class="summary">${escapeHtml(String(e && e.message || e))}</p>
+        </div>
+      `;
+      TIMELINE.appendChild(errItem);
+      console.error('[timeline] 渲染失败', p.id, e);
+    }
   });
   visibleIds = new Set(posts.map(p => p.id));
   // 初始 focus 第一条（但要等布局完）

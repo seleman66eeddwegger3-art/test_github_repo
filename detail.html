@@ -311,13 +311,25 @@ async function load() {
     </div>
   `;
 
-  // 渲染 markdown
+  // 渲染 markdown (单条错误隔离: marked 解析失败降级到 <pre>)
   const content = document.getElementById('content');
-  if (window.marked) {
-    marked.setOptions({ gfm: true, breaks: false });
-    content.innerHTML = marked.parse(post.body);
-  } else {
-    content.innerHTML = `<pre>${escapeHtml(post.body)}</pre>`;
+  try {
+    if (window.marked) {
+      marked.setOptions({ gfm: true, breaks: false });
+      content.innerHTML = marked.parse(post.body);
+    } else {
+      content.innerHTML = `<pre>${escapeHtml(post.body)}</pre>`;
+    }
+  } catch (e) {
+    // 降级: 显示原始 markdown + 错误信息
+    content.innerHTML = `
+      <div class="status" style="color: var(--text-2); text-align: left; padding: 20px;">
+        <div style="margin-bottom: 12px; color: #ff9f0a;">⚠️ Markdown 渲染失败, 显示原始内容</div>
+        <div style="font-size: 13px; color: var(--text-3); margin-bottom: 16px;">${escapeHtml(String(e && e.message || e))}</div>
+        <pre style="background: var(--bg-soft); border: 1px solid var(--hairline); border-radius: 12px; padding: 16px; overflow-x: auto; font-size: 14px; line-height: 1.6; color: var(--text-2);">${escapeHtml(post.body)}</pre>
+      </div>
+    `;
+    console.error('[detail] marked.parse 失败', post.id, e);
   }
 
   // ===== 复制 =====
