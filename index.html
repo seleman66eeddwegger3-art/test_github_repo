@@ -113,7 +113,7 @@
     position: relative;
     max-width: 1100px;
     margin: 0 auto;
-    padding: 24px 24px 80px;
+    padding: 24px 24px 40px;
   }
   .timeline-axis {
     position: absolute; left: 50%; top: 0; bottom: 0;
@@ -238,29 +238,10 @@
     border-radius: 2px;
   }
 
-  /* 加载更多 / 状态提示 */
-  .timeline-status {
-    text-align: center;
-    padding: 40px 24px;
-    color: var(--text-3);
-    font-size: 14px;
-  }
-  .timeline-status .spinner {
-    display: inline-block;
-    width: 14px; height: 14px;
-    border: 2px solid var(--hairline);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-right: 8px;
-    vertical-align: middle;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
   /* 计数 + 提示 */
   .meta-strip {
     text-align: center;
-    padding: 0 24px 40px;
+    padding: 0 24px 24px;
     color: var(--text-3);
     font-size: 13px;
   }
@@ -271,6 +252,54 @@
     background: #fff;
     border: 1px solid var(--hairline);
     color: var(--text-2);
+  }
+
+  /* ===== 显式分页 (页码按钮组) ===== */
+  .pagination {
+    max-width: 1100px;
+    margin: 24px auto 0;
+    padding: 0 24px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .page-btn {
+    appearance: none;
+    background: #fff;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    color: var(--text);
+    font: inherit; font-size: 14px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+    min-width: 40px;
+  }
+  .page-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .page-btn.current {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+  .page-btn.current:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+  .page-info {
+    color: var(--text-3);
+    font-size: 13px;
+    margin: 0 8px;
   }
 
   /* 底部 */
@@ -286,7 +315,7 @@
   @media (max-width: 720px) {
     .hero h1 { font-size: 36px; }
     .hero p { font-size: 17px; }
-    .timeline { padding: 16px 16px 60px; }
+    .timeline { padding: 16px 16px 24px; }
     .timeline-axis { left: 18px; }
     .timeline-item {
       grid-template-columns: 36px 1fr;
@@ -305,6 +334,7 @@
     /* 移动端：切换为短名 */
     .nav-brand .brand-full { display: none; }
     .nav-brand .brand-short { display: inline; }
+    .page-btn { padding: 6px 10px; font-size: 13px; min-width: 36px; }
   }
 </style>
 </head>
@@ -325,15 +355,18 @@
 </section>
 
 <div class="meta-strip" id="metaStrip">
-  <span id="totalCount">0</span> 条记录 · 当前显示 <span id="loadedCount">0</span> 条 · 滚到底加载更多 · <kbd>↑</kbd>/<kbd>↓</kbd> 翻页
+  共 <span id="totalCount">0</span> 条 · 第 <span id="rangeStart">0</span>-<span id="rangeEnd">0</span> 条 · <span id="totalPagesText">0</span> 页
 </div>
 
 <div class="timeline" id="timeline">
   <div class="timeline-axis"></div>
   <div class="timeline-empty" id="empty" style="display:none;">没有找到匹配的问题。</div>
-  <div class="timeline-status" id="loadMore" style="display:none;">
-    <span class="spinner"></span>加载中…
-  </div>
+</div>
+
+<div class="pagination" id="pagination">
+  <button class="page-btn" id="prevPage" disabled>← 上一页</button>
+  <div id="pageNumbers"></div>
+  <button class="page-btn" id="nextPage" disabled>下一页 →</button>
 </div>
 
 <footer>
@@ -346,9 +379,14 @@ const SEARCH = document.getElementById('searchInput');
 const CLEAR = document.getElementById('clearBtn');
 const WRAP = document.getElementById('searchWrap');
 const EMPTY = document.getElementById('empty');
-const TOTAL = document.getElementById('totalCount');
-const LOADED = document.getElementById('loadedCount');
-const LOAD_MORE = document.getElementById('loadMore');
+const TOTAL_EL = document.getElementById('totalCount');
+const RANGE_START = document.getElementById('rangeStart');
+const RANGE_END = document.getElementById('rangeEnd');
+const TOTAL_PAGES_TEXT = document.getElementById('totalPagesText');
+const PAGINATION = document.getElementById('pagination');
+const PREV_BTN = document.getElementById('prevPage');
+const NEXT_BTN = document.getElementById('nextPage');
+const PAGE_NUMBERS = document.getElementById('pageNumbers');
 
 // ===== 数据源: manifest (无 body, 仅元数据) =====
 const M = window.HERMES_MANIFEST || { totalPosts: 0, pageSize: 9, totalPages: 0, posts: [] };
@@ -356,15 +394,21 @@ let posts = M.posts.slice().sort((a, b) =>
   b.date.localeCompare(a.date) || (b.time || "00:00").localeCompare(a.time || "00:00")
 );
 const PAGE_SIZE = M.pageSize || 9;
-let renderedCount = 0;     // 已渲染到 timeline 的条数
+let currentPage = 1;
 let lastFocus = null;
 let visibleIds = new Set();
 
-// 初始 URL ?page=N
-function getInitialPage() {
+function getPageFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const p = parseInt(params.get('page') || '1', 10);
-  return Math.max(1, Math.min(M.totalPages || 1, p));
+  return Math.max(1, Math.min(M.totalPages || 1, p || 1));
+}
+
+function setPageInUrl(pageNo) {
+  const url = new URL(window.location);
+  if (pageNo <= 1) url.searchParams.delete('page');
+  else url.searchParams.set('page', pageNo);
+  history.pushState(null, '', url);
 }
 
 function escapeHtml(s) {
@@ -390,11 +434,9 @@ function appendItem(p) {
         <div class="tags">${p.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
       </div>
     `;
-    // 插在 axis/empty/loadMore 之前
-    TIMELINE.insertBefore(item, LOAD_MORE);
+    TIMELINE.appendChild(item);
     visibleIds.add(p.id);
   } catch (e) {
-    // 降级: 占位卡, 不影响其他
     const errItem = document.createElement('div');
     errItem.className = 'timeline-item timeline-item-error';
     errItem.dataset.id = p.id;
@@ -406,50 +448,78 @@ function appendItem(p) {
         <p class="summary">${escapeHtml(String(e && e.message || e))}</p>
       </div>
     `;
-    TIMELINE.insertBefore(errItem, LOAD_MORE);
+    TIMELINE.appendChild(errItem);
     console.error('[timeline] 渲染失败', p.id, e);
   }
 }
 
-// ===== 渲染下一批 (每批 PAGE_SIZE 条) =====
-function renderNextBatch() {
-  if (renderedCount >= posts.length) return false;
-  const start = renderedCount;
+// ===== 渲染整个 page (清空 + 重渲当前页) =====
+function renderPage(pageNo) {
+  // 清空
+  TIMELINE.querySelectorAll('.timeline-item').forEach(n => n.remove());
+  visibleIds.clear();
+
+  currentPage = pageNo;
+  const start = (pageNo - 1) * PAGE_SIZE;
   const end = Math.min(start + PAGE_SIZE, posts.length);
   for (let i = start; i < end; i++) {
     appendItem(posts[i]);
   }
-  renderedCount = end;
-  return true;
+
+  updateMetaStrip();
+  renderPageNumbers();
+  setPageInUrl(pageNo);
+  window.scrollTo(0, 0);
+  lastFocus = null;
+  requestAnimationFrame(updateFocus);
 }
 
-// ===== 加载中状态 =====
-function showLoading(show) {
-  LOAD_MORE.style.display = show ? 'block' : 'none';
+function updateMetaStrip() {
+  TOTAL_EL.textContent = posts.length;
+  RANGE_START.textContent = (currentPage - 1) * PAGE_SIZE + 1;
+  RANGE_END.textContent = Math.min(currentPage * PAGE_SIZE, posts.length);
+  TOTAL_PAGES_TEXT.textContent = M.totalPages;
 }
 
-// ===== 实时更新 "当前显示 N / total 条" =====
-function updateLoadedCount() {
-  LOADED.textContent = renderedCount;
+function renderPageNumbers() {
+  PAGE_NUMBERS.innerHTML = '';
+  PREV_BTN.disabled = currentPage <= 1;
+  NEXT_BTN.disabled = currentPage >= M.totalPages;
+
+  for (let i = 1; i <= M.totalPages; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'page-btn' + (i === currentPage ? ' current' : '');
+    btn.textContent = i;
+    btn.dataset.page = i;
+    if (i !== currentPage) {
+      btn.addEventListener('click', () => renderPage(i));
+    }
+    PAGE_NUMBERS.appendChild(btn);
+  }
 }
+
+PREV_BTN.addEventListener('click', () => {
+  if (currentPage > 1) renderPage(currentPage - 1);
+});
+NEXT_BTN.addEventListener('click', () => {
+  if (currentPage < M.totalPages) renderPage(currentPage + 1);
+});
+
+// 浏览器前进/后退
+window.addEventListener('popstate', () => {
+  const newPage = getPageFromUrl();
+  if (newPage !== currentPage) renderPage(newPage);
+});
 
 // ===== 初始化 =====
 function init() {
-  TOTAL.textContent = posts.length;
-  const startPage = getInitialPage();
-  // 跳过前 (startPage-1) 页, 渲染第 startPage 页
-  renderedCount = (startPage - 1) * PAGE_SIZE;
-  renderNextBatch();
-  updateLoadedCount();
-  if (renderedCount < posts.length) {
-    showLoading(true);
-  }
-  requestAnimationFrame(updateFocus);
+  const startPage = getPageFromUrl();
+  renderPage(startPage);
 }
 
 init();
 
-// ===== 焦点中央 =====
+// ===== 焦点中央 (当前页内) =====
 function updateFocus() {
   const items = TIMELINE.querySelectorAll('.timeline-item:not(.hidden)');
   if (items.length === 0) return;
@@ -472,32 +542,15 @@ function updateFocus() {
   }
 }
 
-// ===== 滚动监听 (含分页懒加载) =====
 let scrollTicking = false;
-function isNearBottom() {
-  // 距底部 200px 内触发
-  return window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
-}
 window.addEventListener('scroll', () => {
   if (scrollTicking) return;
   scrollTicking = true;
-  requestAnimationFrame(() => {
-    updateFocus();
-    // 分页懒加载: 滚动到底 → 渲染下一批
-    if (isNearBottom() && renderedCount < posts.length) {
-      showLoading(false);
-      renderNextBatch();
-      updateLoadedCount();
-    }
-    if (renderedCount >= posts.length) {
-      showLoading(false);
-    }
-    scrollTicking = false;
-  });
+  requestAnimationFrame(() => { updateFocus(); scrollTicking = false; });
 }, { passive: true });
 window.addEventListener('resize', () => requestAnimationFrame(updateFocus));
 
-// ===== 搜索（client-side, in-memory 跨所有 manifest posts） =====
+// ===== 搜索 (client-side, 跨所有 manifest posts) =====
 function highlight(text, query) {
   if (!query) return escapeHtml(text);
   const lower = text.toLowerCase();
@@ -547,24 +600,28 @@ SEARCH.addEventListener('keydown', e => {
   }
 });
 
-// 键盘上下翻页
+// ===== 键盘翻页 / 当前页内翻卡片 =====
+// ← / →  翻上一页 / 下一页
+// ↑ / ↓  当前页内滚到上一/下一张卡片
 document.addEventListener('keydown', e => {
   if (e.target === SEARCH) return;
-  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'PageDown' && e.key !== 'PageUp') return;
-  e.preventDefault();
-  const items = [...TIMELINE.querySelectorAll('.timeline-item:not(.hidden)')];
-  if (items.length === 0) return;
-  // 如果滚动到底附近, 先加载下一批
-  if (isNearBottom() && renderedCount < posts.length) {
-    renderNextBatch();
-    updateLoadedCount();
-  }
-  const idx = items.indexOf(lastFocus);
-  let next = idx;
-  if (e.key === 'ArrowDown' || e.key === 'PageDown') next = Math.min(items.length - 1, idx + 1);
-  if (e.key === 'ArrowUp' || e.key === 'PageUp') next = Math.max(0, idx - 1);
-  if (next !== idx && items[next]) {
-    items[next].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+    e.preventDefault();
+    if (currentPage > 1) renderPage(currentPage - 1);
+  } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+    e.preventDefault();
+    if (currentPage < M.totalPages) renderPage(currentPage + 1);
+  } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const items = [...TIMELINE.querySelectorAll('.timeline-item:not(.hidden)')];
+    if (items.length === 0) return;
+    const idx = items.indexOf(lastFocus);
+    let next = idx;
+    if (e.key === 'ArrowDown') next = Math.min(items.length - 1, idx + 1);
+    if (e.key === 'ArrowUp') next = Math.max(0, idx - 1);
+    if (next !== idx && items[next]) {
+      items[next].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 });
 </script>
