@@ -1,0 +1,7 @@
+# 临时脚手架 (git checkout 之前留的)
+posts.js.before-*
+generate_*.py
+# Python 缓存
+__pycache__/
+*.pyc
+.DS_Store

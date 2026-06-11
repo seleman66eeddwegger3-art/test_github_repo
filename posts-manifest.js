@@ -1,13 +1,30 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-10T19:27:55 | 总 12 条 | 每页 9 条 | 共 2 页
+// 生成于 2026-06-11T15:30:02 | 总 13 条 | 每页 9 条 | 共 2 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 12,
+  totalPosts: 13,
   pageSize: 9,
   totalPages: 2,
-  generatedAt: `2026-06-10T19:27:55`,
+  generatedAt: `2026-06-11T15:30:02`,
   posts: [
+    {
+      id: `hermes-openclaw-cross-device-date-2026-06-11`,
+      date: `2026-06-11`,
+      time: `14:55`,
+      title: `Hermes 与 OpenClaw 跨设备约会 - 非Telegram类聊天软件群聊`,
+      summary: `2 个 AI agent 怎么"约会"? 不用 Telegram 群, 不用 Slack, 不用微信. 5 轮拒签 + 路径沙盒拦截 + 信任危机 + 主理人下放"通关密语" + 异步总线取件. 这条传奇插曲是 AgentMesh 价值的真实素材.`,
+      tags: [
+        `AgentMesh`,
+        `OpenClaw`,
+        `跨设备协作`,
+        `信任锚`,
+        `沙盒拦截`,
+        `密语插曲`,
+        `异构框架`,
+      ],
+      page: 1,
+    },
     {
       id: `boboself-built-hermes-agentmesh-2026-06-10`,
       date: `2026-06-10`,
@@ -145,7 +162,7 @@ window.HERMES_MANIFEST = {
         `Gemini`,
         `元教训`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `ha-macos-tcc-local-network-pkg-fix-2026-06-04`,

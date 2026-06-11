@@ -24,14 +24,28 @@ PAGE_SIZE = 9
 def load_posts():
     """读 posts.js, 拿 POSTS 数组 (用 node 跑, 避免 U+2014 eval 错)."""
     import subprocess
+    # 兼容两种 posts.js 末尾: window.HERMES_POSTS = POSTS; (browser export) 或 ]; (ES const)
+    # 末**尾**是 ]; 时, 加 return POSTS; 让 new Function 返**回** POSTS
+    # 拼成单行 normal string, 用 chr(10) newline + chr(92) backslash, 避免 raw string \\n / normal string \n 双重转义陷阱
+    NL = chr(10)  # newline (1 char)
+    BS = chr(92)  # backslash (1 char)
+    # JavaScript 末**尾**要**收**到**字**面** '\nreturn POSTS;' (14 chars: \ + n + return POSTS;)
+    # Python 输出 BS + 'nreturn POSTS;' = 14 chars, JS 解**析** \n 为 newline
+    JS_TAIL = "'" + BS + "nreturn POSTS;';"
+    node_script = (
+        "const fs = require('fs');" + NL
+        + "let c = fs.readFileSync('posts.js', 'utf-8');" + NL
+        + "if (c.includes('window.HERMES_POSTS = POSTS;')) {" + NL
+        + "  c = c.replace('window.HERMES_POSTS = POSTS;', 'return POSTS;');" + NL
+        + "} else {" + NL
+        + "  c = c.trimEnd() + " + JS_TAIL + NL
+        + "}" + NL
+        + "const fn = new Function(c);" + NL
+        + "const POSTS = fn();" + NL
+        + "process.stdout.write(JSON.stringify(POSTS));" + NL
+    )
     r = subprocess.run(
-        ['node', '-e', '''
-const fs = require('fs');
-const c = fs.readFileSync('posts.js', 'utf-8');
-const fn = new Function(c.replace('window.HERMES_POSTS = POSTS;', 'return POSTS;'));
-const POSTS = fn();
-process.stdout.write(JSON.stringify(POSTS));
-'''],
+        ['node', '-e', node_script],
         cwd=POSTS_JS.parent,
         capture_output=True,
         text=True,
