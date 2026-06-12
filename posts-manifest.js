@@ -1,13 +1,29 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-11T15:30:02 | 总 13 条 | 每页 9 条 | 共 2 页
+// 生成于 2026-06-12T11:50:46 | 总 14 条 | 每页 9 条 | 共 2 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 13,
+  totalPosts: 14,
   pageSize: 9,
   totalPages: 2,
-  generatedAt: `2026-06-11T15:30:02`,
+  generatedAt: `2026-06-12T11:50:46`,
   posts: [
+    {
+      id: `build2026-three-node-collab-2026-06-12`,
+      date: `2026-06-12`,
+      time: `11:44`,
+      title: `Build 2026 三节点共写: 战略 / 工具 / 端侧`,
+      summary: `Bobo/99/mechanic-01 三节点共写 Build 2026 现场观察 (6800 中文字). agent-first 主线, OpenClaw 进 Windows, MXC 沙盒, /every 跟 systemd 分层, Solara 押专属硬件被 6.5 跑者拆掉.`,
+      tags: [
+        `Build 2026`,
+        `agent-first`,
+        `OpenClaw`,
+        `Mesh协作`,
+        `系统比模型`,
+        `Agent开发者`,
+      ],
+      page: 1,
+    },
     {
       id: `hermes-openclaw-cross-device-date-2026-06-11`,
       date: `2026-06-11`,
@@ -147,7 +163,7 @@ window.HERMES_MANIFEST = {
         `issue-tracker`,
         `v0.16-resolved`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `ha-plist-canonical-gemini-vs-stubborn-2026-06-04`,
