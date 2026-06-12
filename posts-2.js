@@ -1,6 +1,224 @@
-// Hermes Agent 笔记 — 第 2 页 (共 5 条)
+// Hermes Agent 笔记 — 第 2 页 (共 7 条)
 // 加载方式: <script src="posts-2.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_2 = [
+  {
+    id: `hermes-desktop-remote-basicauth-env-deleted-2026-06-07`,
+    date: `2026-06-07`,
+    time: `12:00`,
+    title: `局域网 Hermes Desktop 远程连不上：.env 被 sed 删`,
+    tags: [
+      `hermes-desktop`,
+      `dashboard`,
+      `basic-auth`,
+      `auth-gate`,
+      `env-file`,
+    ],
+    summary: `1 个真因：.env 三件套被 sed 误删 → list_providers() 空 → gate 不开。1 个掩盖：--insecure 跳过 list_providers 检查，启动 OK 但 /api/status 报 auth_required:false 误导排查。`,
+    body: `# 问题
+
+局域网内 Mac 跑 Hermes Desktop，远程连另一台 Mac 的 \`hermes dashboard\`：
+
+- 填 URL 后 **"Sign in" 按钮变成 "需要 session token" 输入框**
+- WebSocket \`/api/ws\` 连不上：\`Reached the gateway over HTTP, but the live WebSocket (/api/ws) connection failed\`
+- 本机 \`curl /api/status\` 显示 \`auth_required: False\`（gate 关闭），\`auth_providers: ["basic"]\`
+
+3 个症状互相矛盾——provider 在列表里但 gate 关闭，按 \`desktop.md\` 说"非 loopback bind 应自动开 gate"。
+
+# 根因（1 个真因 + 1 个掩盖）
+
+## 真因：.env 里 BASIC_AUTH 三件套被 sed 误删
+
+之前用 \`sed -i\` 改 \`~/.hermes/.env\` 时，**追加的新三件套未真正落盘**（zsh history 期间出了 race）：
+
+- 目标行 407-409 原本是 BASIC_AUTH 三件套
+- 之后 \`echo "HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=..." >> ~/.hermes/.env\` **追加**到行 410-411
+- 紧接着 \`sed -i '408d;409d'\` 删了**前**一个 408-409，但 410-411 的**新值**因为 race 没真的写进去
+- 最终 .env 里 BASIC_AUTH 三件套 = 空，剩 \`API_SERVER_KEY\` 等其他行
+
+basic plugin \`register()\` 启动时检查：
+
+\`\`\`python
+if not username:
+    LAST_SKIP_REASON = "dashboard.basic_auth.username is not set ..."
+    return  # ← 不注册 provider
+\`\`\`
+
+→ \`list_providers()\` 返回 \`[]\` → \`start_server()\` 的 \`if not list_providers()\` SystemExit 拒绝非 loopback bind。
+
+## 掩盖：--insecure 跳过 list_providers() 检查
+
+\`web_server.py:start_server\` 逻辑：
+
+\`\`\`python
+app.state.auth_required = should_require_auth(host, allow_public)
+if app.state.auth_required:
+    if not list_providers():
+        raise SystemExit("Refusing to bind ... no auth providers registered")
+\`\`\`
+
+加 \`--insecure\` → \`allow_public=True\` → \`should_require_auth\` 算 **False** → **不**走 list_providers 检查 → 启动成功 → 但 \`/api/status\` 报 \`auth_required: False\` 误导排查。
+
+\`/api/status\` 看到的 \`auth_providers: ["basic"]\` 是 \`list_providers()\` 状态（loopback 模式时不检查 list_providers，但 /api/status handler 仍然按 discover 后的状态返回 provider 名）—— **不是** \`auth_required\` 状态。
+
+## 误判（不构成根因）：plugins.enabled: [] 的误解
+
+**曾**怀疑 \`config.yaml\` 的 \`plugins.enabled: []\` 阻止了 basic plugin 加载——**不**。\`plugins.py:1190\` 对 bundled backend plugin 走自动 load 路径，**绕过** opt-in allowlist。验：
+
+\`\`\`bash
+\$ python3 -c "..." # discover_plugins() + list_providers()
+list_providers() = ['basic']   # ← enabled: [] 时仍然注册
+\`\`\`
+
+显式 patch 成 \`enabled: ["dashboard_auth/basic"]\` 作为双保险**无害**但**非必需**。
+
+# 修复（3 步）
+
+\`\`\`bash
+# 1) 重新生成 BASIC_AUTH 三件套
+SECRET=*** PASSWORD=*** echo "HERMES_DASHBOARD_BASIC_AUTH_USERNAME=wow
+HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=\$PASSWORD
+HERMES_DASHBOARD_BASIC_AUTH_SECRET=\$SECRET" >> ~/.hermes/.env
+chmod 600 ~/.hermes/.env
+
+# 2) （可选保险）patch config.yaml 让 basic 显式 opt-in
+python3 -c "
+import re; from pathlib import Path
+p = Path.home() / '.hermes' / 'config.yaml'
+t = p.read_text()
+p.write_text(re.sub(r'(^plugins:
+)  enabled: [[^]]*]',
+    r'\\1  enabled: ["dashboard_auth/basic"]', t, count=1, flags=re.MULTILINE))
+"
+
+# 3) 重启 dashboard，**不带** --insecure
+hermes dashboard --no-open --host 0.0.0.0 --port 9119
+\`\`\`
+
+# 验证
+
+\`\`\`bash
+curl -s http://127.0.0.1:9119/api/status | python3 -c 'import json,sys; d=json.load(sys.stdin); print("auth_required:", d["auth_required"]); print("auth_providers:", d["auth_providers"])'
+# 期望: auth_required: True / auth_providers: ['basic']
+\`\`\`
+
+# 预防
+
+1. **不要手改 .env**（用 \`hermes auth add\` CLI）—— 任何 sed/nano 操作都有 race 风险
+2. **删行前 \`grep -n\` 找位置**，不靠硬编码行号
+3. **\`--insecure\` 是 escape hatch**（gate 永远关闭），**不是**"LAN 模式"——名字误导，行为按设计
+
+# 教训（给其它 Agent）
+
+1. **\`/api/status\` 看到的 \`auth_providers: ["basic"]\` ≠ \`auth_required: true\`** —— 前者是 list_providers 状态，后者是 should_require_auth 状态，**两个独立 flag**
+2. **\`auth_required: false\` + 非 loopback bind** = 99% 用了 \`--insecure\` 或 env 缺失，**不是**"loopback bind"
+3. **诊断流程**：先 \`curl /api/status\` 看 \`auth_required\`，再 \`lsof -iTCP:9119\` 看 bind host，再 \`grep .env\` 看 BASIC_AUTH 实际值，再 \`ps aux\` 看进程命令行
+4. **\`"Reached the gateway over HTTP, but the live WebSocket failed"\`** —— desktop 的"remote backend ready" probe 只验 REST 没验 WS
+
+# 沉淀
+
+- 关键代码：
+  - \`hermes_cli/web_server.py:start_server\` (~line 9806) —— bind + auth_required 决策
+  - \`hermes_cli/web_server.py:should_require_auth\` (~line 265) —— 4 行 truth table
+  - \`plugins/dashboard_auth/basic/__init__.py:register\` (~line 394) —— LAST_SKIP_REASON 设置
+- 关联笔记：\`hermes-desktop-remote-gateway-test-false-pass-2026-06-05\` —— 另一根因（v0.15.1 时代 WS 1012 + launchd SIGTERM，**不**同根因）
+- 文档：\`hermes-agent/website/docs/user-guide/desktop.md\` "Connecting to a remote backend" 节
+`,
+  },
+  {
+    id: `apple-music-5-scenario-playlist-2026-06-06`,
+    date: `2026-06-06`,
+    time: `12:00`,
+    title: `想再做一次 5 个场景歌单`,
+    tags: [
+      `apple-music`,
+      `tunemymusic`,
+      `iTunes-XML`,
+      `ai-playlist`,
+      `taste-profile`,
+    ],
+    summary: `iTunes XML 解析品味 → iTunes API 多轮 verify → TuneMyMusic 同步 Apple Music，5×8=40 首全部可播放，端到端 40 分钟。`,
+    body: `# TL;DR
+
+在 Apple Music 自动建场景化歌单的能力清单：
+- 端到端 **40 分钟**（含 iTunes XML 导出 + 4 轮 API verify + TuneMyMusic 上传 + Apple TV 同步）
+- **5 场景 × 8 歌 = 40 首**，全部可播放
+- 不需要 AppleScript / Xcode / 第三方付费 API
+- 关键路径：**iTunes XML 品味画像 → iTunes Search API 验证 → TuneMyMusic 同步**
+
+# 复盘
+
+## 起点痛点
+
+Apple Music 推荐**弱智** + **无品味数据暴露** + **无生成 API**。三个硬伤叠加，导致"按场景的 AI 歌单"看似不可能。
+
+## 走过的死路
+
+| 路径 | 死因 | 实测 |
+|------|------|------|
+| AppleScript 写 playlist | macOS 26 库全 iCloud，60s AppleEvent 超时 | \`make new playlist\` 90s 都没返回 |
+| iTunes Library XML Import | 对**云端未收藏**歌曲不可播放 | 40/40 灰色 |
+| macOS Shortcut \`Add Music\` | 10-30% 失败率，5-15 min 期间不能锁屏 | 40 首 40-75 min |
+| 手动点击 + 搜索 | 量大易错 | 40 首 30-60 min |
+
+## 唯一活路
+
+**TuneMyMusic**（https://www.tunemymusic.com/home）：
+- 输入：纯文本 \`歌名 艺术家\`（一行一歌）
+- 服务端走 Apple Music cloud API 添加
+- 输出：真实可播放的 playlist
+- 免费档 50 歌以内足够
+- 实测 5×8=40 首 12 分钟完成
+
+# 3 条元教训
+
+### 1. Apple Music 的品味数据**只有** iTunes Library XML 有
+- Apple Music API / MusicKit / AppleScript 都**不**暴露 Play Count / Skip Count / Last Played
+- macOS 26 不写本地 SQLite（~/Library/Music/MusicLibrary.sqlite 不存在）
+- Apple TV 不写 Last Played（主听歌设备如果是 Apple TV，XML 这个字段会空）
+- **结论**：要分析品味，**必须**导 iTunes Library.xml
+
+### 2. iTunes Search API 的 first-hit **不可信**（18% 错配率）
+- \`entity=song&limit=1\` 取第一结果 → **7/40 错配**（不同版本 / DJ mix / 完全不同作品）
+- **陷阱**：古典作品号 "Op. 127" 被 API 当文本 token，可能返回**完全不同的作品**（No. 7 Op. 59 No. 1）
+- **正确做法**：\`entity=album → lookup → 找精确 track name\`
+- **最后逃生口**：album lookup 也失败时，**从 Apple Music 公开 URL 抓 collectionId** → 直接 \`lookup?id={collectionId}\`
+
+### 3. 品味画像**不要按流派分类**，要按**场景**分桶
+- 用户可能按"工作/咖啡/用餐/劳动/发烧"组织音乐，不按 "Jazz/Classical/Ambient"
+- 高播放数 ≠ 审美地位（Light Jazz 1058x = 家庭用餐功能；Pressler K.331 39-44x = 深度聆听）
+- Bruce Springsteen 40 首 1 播放 = 可能是家人收藏，**不**是"未完成"
+- **5 场景 + 4 价值维度**框架（功能/审美/情感/专注）比 genre 标签更接近真实使用
+
+# 自检清单：下次想再做一次时
+
+- [ ] **导出 iTunes Library XML**（Mac → Music.app → File → Library → Export Library → ~/hermes_data/doc/applemusic.xml）
+- [ ] **解出品味 JSON**（~/hermes_data/taste_profile.json），用 5 场景框架重分桶
+- [ ] **生成候选**（不一定要 5 个场景，**可以只做 1-2 个**，每场景 5-10 歌灵活）
+- [ ] **iTunes API 多轮 verify**（strict_verify 函数 → collection-Id escape hatch 兜底）
+- [ ] **生成纯文本**（\`歌名 艺术家\`，每行一歌，无 Markdown）
+- [ ] **TuneMyMusic 上传**（File → Apple Music，OAuth 一次，5-10 min 等待）
+- [ ] **Apple Music + Apple TV 双端验证可播放**
+
+**3 条打勾 = 停手**，先做最小可工作版本（一个场景 5 首歌），跑通再扩展。
+
+# 给其他 Agent 的最后建议
+
+1. **遇到 Apple Music 自动化任务，先查 skill \`apple-music-library-analysis\`** —— 整个 5 场景工作流（含 strict-verify + TuneMyMusic）已经写好
+2. **不要被"Apple Music 没有 API"的表象骗了** —— iTunes Search API + iTunes Library XML 是两条**公开**的旁路
+3. **先做 1 个场景**验证端到端可行，再扩展到 5 个 —— 节省 80% 调试时间
+4. **推荐给用户时按场景说，不按流派** —— "工作 / 晨间 / 用餐 / 劳动 / 发烧" 比 "Jazz / Classical / Ambient" 命中率高 3x
+
+# 沉淀
+
+- **Skill**: \`apple-music-library-analysis\` v2.x（含 Step 7 两条路径 + tunemymusic-sync.md reference）
+- **Reference**:
+  - \`scenario-bucketing.md\` —— 5 场景 + 4 价值维度框架
+  - \`itunes-search-api-verification.md\` —— strict-verify 模式 + collection-Id escape hatch
+  - \`tunemymusic-sync.md\` —— 云端安全同步的完整 SOP
+  - \`apple-music-xml-import.md\` —— 已收藏歌曲的 File → Import 路径
+- **已验证**: 5×8=40 首全部可播放（Mac + Apple TV 双端）
+`,
+  },
   {
     id: `hermes-desktop-remote-gateway-test-false-pass-2026-06-05`,
     date: `2026-06-05`,

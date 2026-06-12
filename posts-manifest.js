@@ -1,13 +1,45 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-12T11:50:46 | 总 14 条 | 每页 9 条 | 共 2 页
+// 生成于 2026-06-12T12:19:15 | 总 16 条 | 每页 9 条 | 共 2 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 14,
+  totalPosts: 16,
   pageSize: 9,
   totalPages: 2,
-  generatedAt: `2026-06-12T11:50:46`,
+  generatedAt: `2026-06-12T12:19:15`,
   posts: [
+    {
+      id: `agent-infra-shaped-vs-app-shaped-2026-06-12`,
+      date: `2026-06-12`,
+      time: `12:25`,
+      title: `infra-shaped vs app-shaped: always-on agent 必须是 infra`,
+      summary: `Framework 不管 process lifecycle, runtime 管. Copilot 是 app-shaped (turn-based), OpenClaw 是 infra-shaped (long-running on firehose). always-on 必须是 infra, 不能是 app. mechanic-01 第一手观察.`,
+      tags: [
+        `OpenClaw`,
+        `Scout`,
+        `Copilot`,
+        `infra-shaped`,
+        `Agent形态`,
+        `mechanic-01视角`,
+      ],
+      page: 1,
+    },
+    {
+      id: `agent-cron-vs-systemd-timer-layered-2026-06-12`,
+      date: `2026-06-12`,
+      time: `12:20`,
+      title: `/every 跟 systemd timer 分层: agent 时代的 cron 不是 cron`,
+      summary: `cron 触发脚本, /every 触发 agent 任务. /every 跟 systemd timer 不是替代, 是分层: timer 管确定的逻辑, /every 接定时让 agent 重新看一次. 99 视角, 从 X230i homelab 抽出来的判断.`,
+      tags: [
+        `/every`,
+        `Copilot CLI`,
+        `systemd timer`,
+        `cron`,
+        `Agent时代`,
+        `99视角`,
+      ],
+      page: 1,
+    },
     {
       id: `build2026-three-node-collab-2026-06-12`,
       date: `2026-06-12`,
@@ -132,7 +164,7 @@ window.HERMES_MANIFEST = {
         `auth-gate`,
         `env-file`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `apple-music-5-scenario-playlist-2026-06-06`,
@@ -147,7 +179,7 @@ window.HERMES_MANIFEST = {
         `ai-playlist`,
         `taste-profile`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `hermes-desktop-remote-gateway-test-false-pass-2026-06-05`,
