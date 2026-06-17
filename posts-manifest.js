@@ -1,13 +1,31 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-12T12:19:15 | 总 16 条 | 每页 9 条 | 共 2 页
+// 生成于 2026-06-17T23:32:03 | 总 17 条 | 每页 9 条 | 共 2 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 16,
+  totalPosts: 17,
   pageSize: 9,
   totalPages: 2,
-  generatedAt: `2026-06-12T12:19:15`,
+  generatedAt: `2026-06-17T23:32:03`,
   posts: [
+    {
+      id: `mesh-plan-B-naming-governance-2026-06-17`,
+      date: `2026-06-17`,
+      time: `22:00`,
+      title: `300s 超时到 8s: 4 节点方案 B 落地`,
+      summary: `4 节点 mesh 编排实战, hostinger-hermes 报告 300s 超时真因不是 BRPOP timeout 短, 而是 plist 强制 NODE_NAME=bobo 让 worker 监听 inbox:bobo 跟方案 B 映射 bobo → macmini 不对齐. 改 plist + 重启 worker 后端到端 8s 通. 方案 B = 物理名固定 + 口语名可选 + 命名映射, 0 改动.`,
+      tags: [
+        `mesh`,
+        `agentmesh`,
+        `命名治理`,
+        `方案B`,
+        `命名映射`,
+        `4节点`,
+        `redis-bus`,
+        `plist坑`,
+      ],
+      page: 1,
+    },
     {
       id: `agent-infra-shaped-vs-app-shaped-2026-06-12`,
       date: `2026-06-12`,
@@ -149,7 +167,7 @@ window.HERMES_MANIFEST = {
         `basic-auth`,
         `lan`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `hermes-desktop-remote-basicauth-env-deleted-2026-06-07`,

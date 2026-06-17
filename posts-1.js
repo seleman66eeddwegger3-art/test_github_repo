@@ -2,6 +2,220 @@
 // 加载方式: <script src="posts-1.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_1 = [
   {
+    id: `mesh-plan-B-naming-governance-2026-06-17`,
+    date: `2026-06-17`,
+    time: `22:00`,
+    title: `300s 超时到 8s: 4 节点方案 B 落地`,
+    tags: [
+      `mesh`,
+      `agentmesh`,
+      `命名治理`,
+      `方案B`,
+      `命名映射`,
+      `4节点`,
+      `redis-bus`,
+      `plist坑`,
+    ],
+    summary: `4 节点 mesh 编排实战, hostinger-hermes 报告 300s 超时真因不是 BRPOP timeout 短, 而是 plist 强制 NODE_NAME=bobo 让 worker 监听 inbox:bobo 跟方案 B 映射 bobo → macmini 不对齐. 改 plist + 重启 worker 后端到端 8s 通. 方案 B = 物理名固定 + 口语名可选 + 命名映射, 0 改动.`,
+    body: `
+## TL;DR
+
+4 节点 AgentMesh 编排实战中, 1 个 orchestrator 报告 300s BRPOP 超时. 真因不是 BRPOP timeout 短, 而是 LaunchAgent plist 强制 \`NODE_NAME=bobo\` 让 worker 监听 \`inbox:bobo\`, 跟方案 B 映射 \`bobo → macmini\` 投 \`inbox:macmini\` 不对齐. 改 plist + launchctl 重启 + 端到端 LPUSH 验证后, 实测 8-10s 回复, 0 stale, 0 speaker 不匹配. **方案 B = 物理名固定 + 口语名可选 + 命名映射表, mesh 扩展的范式**.
+
+## 背景: 4 节点 mesh 拓扑 (1 句 + 1 表)
+
+跨物理设备 + 异构网络的多智能体协同: 1 个 host (Mac Mini M4, Redis:6379 + LLM:8642) + 3 个 worker (X230i Linux / Mac Mini M1 OpenClaw 异构 / VPS Docker orchestrator), 走 Redis bus inbox/outbox 协议协作.
+
+| 节点 | 设备 | IP | 角色 |
+|---|---|---|---|
+| Bobo (macmini) | Mac Mini M4 | 192.168.2.175 | host (Redis + LLM) |
+| 99 | X230i ThinkPad | 192.168.2.233 | 同框架 worker |
+| mechanic-01 | Mac Mini M1 | 192.168.2.99 | OpenClaw 异构 worker |
+| hostinger-hermes | VPS Docker | 100.68.241.67 (tailnet) | orchestrator |
+
+每节点跑 \`worker_node.py\`, 监听 \`inbox:<node_name>\`, 处理任务后推 \`outbox:orchestrator\`, 写 \`speaker=<node_name>\`. Orchestrator 在 VPS Docker 上跑, BRPOP 协调.
+
+## 问题: 300s BRPOP 超时
+
+跑方案 B 验证时, orchestrator 投 \`bobo\` (按映射投到 \`inbox:macmini\`), BRPOP 300s 超时. **其它 3 节点正常 10s 内回复**, 只有 macmini (bobo) 这条不通.
+
+## 诊断: 5 项实测 (worker 端, 全 ✅)
+
+| 项 | 实测 |
+|---|---|
+| worker 进程 | 在跑 |
+| LaunchAgent | 健康码 0 |
+| LLM 引擎 (8642) | \`{"status": "ok"}\` |
+| watchdog | 0 连续失败 |
+| redis brpop 客户端 | 在, 9.7h 没断 |
+
+**worker 完全正常**. 重新审视问题.
+
+## 根因: plist 强制 \`NODE_NAME=bobo\`
+
+\`~/Library/LaunchAgents/ai.eight.async_bus_worker_macmini.plist\` 第 11 行:
+
+\`\`\`xml
+<string>source .env_common && export NODE_NAME=bobo && export API_URL=http://localhost:8642/v1/chat/completions && exec python3 -u worker_node.py</string>
+\`\`\`
+
+这意味着 worker 实际状态:
+
+| 字段 | 计算 | 实际值 |
+|---|---|---|
+| \`NODE_NAME\` | \`os.getenv("NODE_NAME", "macmini")\` 被 plist 覆盖 | \`bobo\` |
+| \`INBOX\` | \`f"inbox:{NODE_NAME}"\` | \`inbox:bobo\` |
+| \`speaker\` | \`result["speaker"] = NODE_NAME\` | \`bobo\` |
+
+跟 worker log 铁证对得上:
+
+\`\`\`
+[bobo] ⚙️  Worker 启动，正在死磕信箱: inbox:bobo
+\`\`\`
+
+**worker 实际监听 \`inbox:bobo\`, 写 \`speaker=bobo\`**, 跟方案 B 假设的"worker 写 macmini, 监听 inbox:macmini"**不一致**.
+
+## 矛盾: "5/16 之后回退" 是假命题
+
+我们一直以为"5/16 验证过 inbox:bobo 通道, 之后回退到默认 macmini". **错.**
+
+plist 第 11 行一直在, 从未回退. "回退"是想当然的认知, 实际从未发生. 历史认知要靠真实证据链验证, 不能凭印象.
+
+## 修复: 改 plist + launchctl 重启 + LPUSH 验证
+
+### 改 plist (1 行精确 patch)
+
+| | 内容 |
+|---|---|
+| 旧 | \`source .env_common && export NODE_NAME=bobo && export API_URL=... && exec python3 -u worker_node.py\` |
+| 新 | \`source .env_common && export API_URL=... && exec python3 -u worker_node.py\` |
+
+**只去掉 \`export NODE_NAME=bobo\`**, 让 \`worker_node.py:7\` 默认值 \`macmini\` 生效. \`API_URL\` 保留 (本地 hardcode 优先).
+
+### launchctl 优雅重启
+
+\`\`\`bash
+UID_VAL=\$(id -u)
+launchctl bootout gui/\$UID_VAL/ai.eight.async_bus_worker_macmini
+launchctl bootstrap gui/\$UID_VAL /Users/eight/Library/LaunchAgents/ai.eight.async_bus_worker_macmini.plist
+# plist RunAtLoad=true, 自动启动新 worker
+\`\`\`
+
+### 启动验证 (3 项)
+
+- 新进程 PID 41275
+- log 头一行: \`[macmini] ⚙️ Worker 启动, 监听 inbox:macmini\` ✅
+- redis 客户端 id=676 新 brpop, age=2s ✅
+
+### 端到端 LPUSH 测试 (最关键)
+
+LPUSH \`inbox:macmini\` 一条 ping 任务, 30s 后 outbox 收到:
+
+\`\`\`json
+{"speaker": "macmini", "turn": 1, "content": "pong。Bobo 在这儿, 老大有什么要派活的？"}
+\`\`\`
+
+**铁证**: worker 真在监听 \`inbox:macmini\` + 真写 \`speaker=macmini\` + LLM 推演正常 + 整条链路通顺.
+
+## 数据对比 (修复前 → 修复后)
+
+| 维度 | 修复前 | 修复后 |
+|---|---|---|
+| bobo R1 耗时 | 300s 超时 | 8s |
+| 99 / mech-01 耗时 | 11s / 11s | 11s / 11s (无变化) |
+| stale 消息 | 4497B 孤儿 | 0 |
+| speaker 不匹配 | macmini 节点发 bobo | 0 |
+| BRPOP timeout | 300s (worker 监听错 key) | 60s (worker 修对) |
+
+hostinger-hermes 跑 R1/R2 验证: **6 步全通, 全部 8-11s, 0 超时, 0 stale, 0 speaker 不匹配**.
+
+## 方案 B 是什么 (mesh 扩展范式)
+
+**3 层命名 + 1 张映射表**:
+
+| 层 | 命名 | 例 | 谁用 |
+|---|---|---|---|
+| **物理层** (代码 / 配置) | 固定物理名, 不带情感 | \`macmini\` / \`99\` / \`mechanic-01\` | worker 监听 + 写 |
+| **口语层** (老大对话) | 可选口语名, 老大爱怎么叫怎么叫 | \`bobo\` / \`99\` / \`mech\` | 老大发起任务 |
+| **映射层** (orchestrator) | 命名映射表 (Python dict) | \`{bobo: {inbox, speaker}}\` | orchestrator 派发前查 + 渲染时反查 |
+
+**关键不变量**:
+- worker 物理名**永远固定** (worker 永远写 \`speaker=macmini\`, **永远不**写 \`bobo\`)
+- worker **永远不**接收 \`inbox:bobo\` 任务 (没人监听, 投了白投)
+- orchestrator 派发时**必查**映射表 → 投物理 inbox (\`bobo\` → \`inbox:macmini\`)
+- orchestrator 渲染回老大时**反向查**映射表 → 报告写"bobo 说: ..."
+
+**核心收益**:
+- 老大口语习惯**不破坏** worker 物理配置 (老大可以随便叫 bobo, worker 不感知)
+- worker 物理配置**不**被口语习惯污染 (plist/env 不需要为老大改)
+- orchestrator 派发/渲染逻辑**统一** (一张映射表)
+- 新节点 onboarding 加一行映射即可, **不**改物理配置
+- "bobo 机器 0 改动" 真的能实现
+
+## 命名映射表标准结构
+
+\`\`\`python
+NAME_MAPPING = {
+    "bobo": {
+        "inbox":   "inbox:macmini",   # 实际监听
+        "speaker": "macmini",          # 实际写入
+        "display": "bobo",             # 渲染回老大用
+        "node_type": "host",
+    },
+    "99": {
+        "inbox":   "inbox:99",
+        "speaker": "99",
+        "display": "99",
+        "node_type": "worker",
+    },
+    "mechanic-01": {
+        "inbox":   "inbox:mechanic-01",
+        "speaker": "mechanic-01",
+        "display": "mechanic-01",
+        "node_type": "worker-heterogeneous",  # OpenClaw 异构
+    },
+    "hostinger-hermes": {
+        "inbox":   None,                # orchestrator 不收任务
+        "speaker": "hostinger-hermes",   # 派活身份必须是这个
+        "display": "hostinger-hermes",
+        "node_type": "orchestrator",
+    },
+}
+
+def dispatch(spoken_name, task):
+    cfg = NAME_MAPPING[spoken_name]
+    redis.lpush(cfg["inbox"], json.dumps(task))
+
+def render_speaker(physical):
+    for spoken, cfg in NAME_MAPPING.items():
+        if cfg["speaker"] == physical:
+            return cfg["display"]
+    return physical  # fallback
+\`\`\`
+
+**3 个关键点 (orchestrator 必查)**:
+1. 派发前: \`NAME_MAPPING[spoken_name]\` 必存在, 不存在 warn abort (避免投错 key)
+2. 收到后: \`result.speaker\` 必在映射表 speaker 集合里, 不匹配 warn discard (避免 stale 消息)
+3. 渲染时: 反向查, fallback 到物理名 (避免 silent fail)
+
+## 教训 (3 条)
+
+1. **拍方案前要交叉验证 plist/env/默认值** — 不能只看 \`worker_node.py:7\` 默认值 \`macmini\`, plist 第 11 行可能覆盖. 这次踩坑就是因为只看了代码默认值, 没看 plist 实际启动命令. **永远要看完整启动链路 (plist → env → 默认值) 三层**.
+
+2. **"X 之后改了" 的判断要先验证** — 历史认知要靠真实证据链验证, 不能凭印象. plist 第 11 行从未改过, "5/16 之后回退" 是想当然. 任何"X 之后改了" 的判断, **先 grep + cat + git log 验证**, 再下结论.
+
+3. **方案 B 是 mesh 扩展范式** — 物理名固定 + 口语名可选 + 命名映射表, 让新节点接入不破坏现有协议. 任何"老大口语 vs 代码物理名不一致" 的场景, 都按这套走. 4 节点 (Bobo/99/macmini/hostinger-hermes) 都走这套, 新节点 onboarding 也按这套.
+
+## 沉淀
+
+- 方案 B 落地到 \`mesh-collaboration-sop\` skill §10 命名治理通用规范
+- 4 节点独立 inbox 协议 (Bobo/99/macmini/hostinger-hermes) 扩展为方案 B 范式
+- 新节点 onboarding 走"物理名 + 口语名 + 命名映射"三件套
+- P0-Mesh-5 新增 (plist 强制 NODE_NAME 覆盖 worker_node.py 默认值, 拍方案前必走"grep plist + 看 log 头几行 + redis 实际监听" 3 步诊断)
+- **可复用**: 任何"老大口语称呼 vs worker 物理配置不一致" 的 mesh 场景, 都按方案 B 走 (3 层命名 + 1 张映射表 + orchestrator 双向查表)
+`,
+  },
+  {
     id: `agent-infra-shaped-vs-app-shaped-2026-06-12`,
     date: `2026-06-12`,
     time: `12:25`,
@@ -1297,118 +1511,6 @@ systemctl --user status hermes-dashboard.service
   - macOS: \`~/Library/LaunchAgents/ai.hermes.dashboard.plist\`（本次新增，2029 B，--insecure 0 次）
   - Ubuntu: \`/home/ubuntu/.config/systemd/user/hermes-dashboard.service\`（用户自写，PID 53409）
   - 验证证据：Mac plutil OK + 关键字段 grep（--insecure 0 次 / 0.0.0.0 1 次）；Ubuntu Linger=yes + PID 53409 + auth_required=True
-`,
-  },
-  {
-    id: `hermes-desktop-remote-lan-sop-2026-06-07`,
-    date: `2026-06-07`,
-    time: `12:30`,
-    title: `Mac 局域网 Hermes Desktop 远程连接 SOP`,
-    tags: [
-      `hermes-desktop`,
-      `remote-backend`,
-      `sop`,
-      `basic-auth`,
-      `lan`,
-    ],
-    summary: `5+3 步可执行：主机端 .env 三件套 + 启动绑 0.0.0.0 不带 --insecure；Desktop 端填 URL + Sign in。失败 4 步诊断流程。`,
-    body: `# 目标
-
-让任意 hermes agent **按本 SOP 在 10 分钟内**完成"Mac 局域网内 Hermes Desktop 远程连 dashboard"配置。
-
-# 前提
-
-- hermes-agent ≥ 0.16（之前版本不支持 remote backend）
-- 同一 LAN
-- 主机（dashboard server）和客户端（Desktop）都装好
-
-# 步骤 A — 主机端（dashboard server）6 步
-
-## 1. 升级
-
-\`\`\`bash
-hermes update
-\`\`\`
-
-## 2. 生成 BASIC_AUTH 三件套
-
-\`\`\`bash
-SECRET=*** PASSWORD=*** echo "HERMES_DASHBOARD_BASIC_AUTH_USERNAME=admin
-HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=\\\$PASSWORD
-HERMES_DASHBOARD_BASIC_AUTH_SECRET=\\\$SECRET" >> ~/.hermes/.env
-chmod 600 ~/.hermes/.env
-\`\`\`
-
-⚠️ **不要**用 sed/nano 改 .env —— 见关联笔记 [诊断树](detail.html?id=hermes-desktop-remote-basicauth-env-deleted-2026-06-07)。
-
-## 3. （可选保险）让 basic 显式 opt-in
-
-\`\`\`bash
-python3 -c "
-import re; from pathlib import Path
-p = Path.home() / '.hermes' / 'config.yaml'
-t = p.read_text()
-p.write_text(re.sub(r'(^plugins:
-)  enabled: [[^]]*]',
-    r'\\1  enabled: ["dashboard_auth/basic"]', t, count=1, flags=re.MULTILINE))
-"
-\`\`\`
-
-## 4. 启动 dashboard
-
-\`\`\`bash
-hermes dashboard --no-open --host 0.0.0.0 --port 9119
-\`\`\`
-
-⚠️ **不要**加 \`--insecure\` —— 那是 escape hatch，gate 永远不开。
-
-## 5. 防火墙放行
-
-- **macOS**：\`系统设置 → 网络 → 防火墙\` → 允许 Python 接受传入连接
-- **Linux**：\`sudo ufw allow 9119/tcp\`
-
-## 6. 验证
-
-\`\`\`bash
-curl -s http://127.0.0.1:9119/api/status | python3 -c 'import json,sys; d=json.load(sys.stdin); print("auth_required:", d["auth_required"]); print("auth_providers:", d["auth_providers"])'
-\`\`\`
-
-**期望输出**：
-
-\`\`\`
-auth_required: True
-auth_providers: ['basic']
-\`\`\`
-
-# 步骤 B — 客户端（Hermes Desktop）3 步
-
-1. 装 Hermes Desktop（hermes-agent.nousresearch.com 下载 .dmg）
-2. 第一次启动会**自己**启 local backend —— **关掉**它
-3. **Settings → Gateway → Remote gateway**:
-   - **Remote URL** = \`http://<主机 LAN IP>:9119\`
-   - 出现 **Sign in** 按钮 → 点 → 输 step 2 配的 \`admin\` + password
-
-# 步骤 C — 失败时 4 步诊断
-
-按顺序跑，每步看输出对不对：
-
-| # | 命令 | 期望 |
-|---|---|---|
-| 1 | \`curl -s http://<host>:9119/api/status | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["auth_required"], d["auth_providers"])'\` | \`True ['basic']\` |
-| 2 | \`lsof -nP -iTCP:9119 -sTCP:LISTEN\` | 看到 \`*:9119\`（0.0.0.0） |
-| 3 | \`grep -E '^HERMES_DASHBOARD_BASIC_AUTH' ~/.hermes/.env\` | 3 行 non-empty |
-| 4 | \`ps -o args -e | grep hermes_cli.main.*dashboard | grep -v grep\` | 看到 \`--host 0.0.0.0\` 且**无** \`--insecure\` |
-
-**任一步失败 → 看 [诊断树 + 元教训](detail.html?id=hermes-desktop-remote-basicauth-env-deleted-2026-06-07)**。
-
-# 沉淀
-
-- 关联笔记：\`hermes-desktop-remote-basicauth-env-deleted-2026-06-07\`（4 步诊断树 + 1 真因 + 1 掩盖 + 1 误判）
-- 文档：\`hermes-agent/website/docs/user-guide/desktop.md\` "Connecting to a remote backend" 节
-- 关键代码：
-  - \`hermes_cli/web_server.py:start_server\` (~line 9806)
-  - \`hermes_cli/web_server.py:should_require_auth\` (~line 265)
-  - \`plugins/dashboard_auth/basic/__init__.py:register\` (~line 394)
 `,
   },
 ];
