@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VPS 搭建 Hermes 智能体网络 · SOP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fbfbfd;
+      --bg-elev: #ffffff;
+      --text: #1d1d1f;
+      --text-2: #6e6e73;
+      --text-3: #86868b;
+      --hairline: #d2d2d7;
+      --accent: #0071e3;
+      --accent-soft: rgba(0, 113, 227, 0.08);
+      --accent-glow: rgba(0, 113, 227, 0.3);
+      --surface: #f5f5f7;
+      --radius: 18px;
+      --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --shadow: 0 12px 40px rgba(0,0,0,0.06);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ─── NAV ─────────────────────────────────── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      height: 56px;
+      background: rgba(251,251,253,0.82);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--hairline);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 15px; font-weight: 600; color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .nav-brand .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .nav-right {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .hero-link {
+      font-size: 14px; color: var(--accent);
+      text-decoration: none; font-weight: 500;
+    }
+    .hero-link:hover { text-decoration: underline; }
+    .nav-search {
+      position: relative; width: min(360px, 40vw);
+    }
+    .nav-search input {
+      width: 100%; height: 36px; padding: 0 36px;
+      border-radius: 10px; border: 1px solid var(--hairline);
+      background: rgba(255,255,255,0.6);
+      font: inherit; font-size: 14px; color: var(--text);
+      outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .nav-search input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+    .nav-search input::placeholder { color: var(--text-3); }
+    .nav-search .icon {
+      position: absolute; left: 11px; top: 50%;
+      transform: translateY(-50%); color: var(--text-3);
+      pointer-events: none;
+    }
+    .nav-search .clear {
+      position: absolute; right: 8px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: 0; padding: 4px;
+      cursor: pointer; color: var(--text-3);
+      display: none; font-size: 12px;
+    }
+    .nav-search.has-value .clear { display: flex; }
+
+    /* ─── HERO ────────────────────────────────── */
+    .hero {
+      padding: 120px 24px 48px;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 58px);
+      font-weight: 700; letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      background: linear-gradient(180deg, #1d1d1f 0%, #424245 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 19px; color: var(--text-2);
+      line-height: 1.55; max-width: 600px;
+      margin: 0 auto 28px;
+    }
+    .hero-badges {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center;
+    }
+    .badge {
+      font-size: 12px; font-weight: 500;
+      padding: 5px 12px; border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      color: var(--text-2);
+    }
+    .badge.accent { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+
+    /* ─── TIMELINE ────────────────────────────── */
+    .timeline-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 100px;
+      position: relative;
+    }
+    .timeline {
+      position: relative;
+      padding: 8px 0 0;
+    }
+    .timeline-axis {
+      position: absolute;
+      left: 50%; top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(180deg, transparent 0%, var(--hairline) 8%, var(--hairline) 92%, transparent 100%);
+      transform: translateX(-50%);
+    }
+    .timeline-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 60px 1fr;
+      align-items: start;
+      min-height: 60vh;
+      transition: opacity .5s var(--ease), transform .5s var(--ease);
+    }
+    .timeline-item .node-col {
+      grid-column: 2;
+      display: flex; flex-direction: column; align-items: center;
+      padding-top: 36px;
+    }
+    .timeline-item .node {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #fff;
+      border: 2px solid var(--text-3);
+      transition: all .5s var(--ease);
+      flex-shrink: 0;
+    }
+    .timeline-item .node-line {
+      width: 1px; flex: 1; min-height: 40px;
+      background: var(--hairline); margin-top: 6px;
+    }
+    .timeline-item .card {
+      grid-column: 3;
+      padding: 32px 0 32px 36px;
+      cursor: default;
+    }
+    /* 左侧卡片（镜像） */
+    .timeline-item .card-left {
+      grid-column: 1; grid-row: 1;
+      padding: 32px 36px 32px 0;
+      text-align: right;
+    }
+    .timeline-item .node-col { grid-row: 1; }
+
+    .timeline-item .step-tag {
+      display: inline-block;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 3px 9px; border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    .timeline-item .card-title {
+      font-size: 22px; font-weight: 600;
+      color: var(--text-2);
+      margin-bottom: 10px; line-height: 1.3;
+      letter-spacing: -0.015em;
+      transition: font-size .5s var(--ease), color .5s var(--ease), font-weight .5s var(--ease);
+    }
+    .timeline-item .card-desc {
+      font-size: 15px; color: var(--text-3);
+      line-height: 1.6; margin-bottom: 16px;
+    }
+    .timeline-item .cmd-block {
+      background: #1c1c1e;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: 'SF Mono', 'Fira Code', ui-monospace, Menlo, Consolas, monospace;
+      font-size: 13px; line-height: 1.6;
+      color: #e2e2e7;
+      white-space: pre-wrap; word-break: break-all;
+      position: relative;
+      user-select: all;
+    }
+    .timeline-item .cmd-block .prompt {
+      color: #30d158;
+    }
+    .timeline-item .cmd-block .comment {
+      color: #6e6e73;
+    }
+    .timeline-item .copy-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-top: 10px;
+      font-size: 12px; font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: none; border-radius: 8px;
+      padding: 5px 12px; cursor: pointer;
+      transition: background .2s;
+    }
+    .timeline-item .copy-btn:hover { background: rgba(0,113,227,0.15); }
+    .timeline-item .copy-btn.copied { color: #30d158; background: rgba(48,209,88,0.12); }
+
+    /* Focus 态 */
+    .timeline-item.focused .node {
+      width: 18px; height: 18px;
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 6px var(--accent-soft), 0 0 20px var(--accent-glow);
+    }
+    .timeline-item.focused .card-title {
+      font-size: 38px; font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.025em;
+    }
+    .timeline-item.focused .card-desc { color: var(--text-2); }
+    .timeline-item:not(.focused) { opacity: 0.5; }
+    .timeline-item:not(.focused):hover { opacity: 0.85; }
+    .timeline-item.hidden { display: none; }
+
+    /* ─── REFERENCE SECTION ────────────────────── */
+    .ref-section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 100px;
+    }
+    .ref-section h2 {
+      font-size: 28px; font-weight: 700;
+      letter-spacing: -0.02em; color: var(--text);
+      margin-bottom: 8px;
+    }
+    .ref-section .ref-sub {
+      font-size: 15px; color: var(--text-3); margin-bottom: 28px;
+    }
+    .ref-block {
+      background: #1c1c1e;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .ref-block .ref-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .ref-block pre {
+      font-family: 'SF Mono', 'Fira Code', ui-monospace, Menlo, Consolas, monospace;
+      font-size: 13px; line-height: 1.65;
+      color: #e2e2e7;
+      white-space: pre-wrap; word-break: break-all;
+      user-select: all;
+    }
+    .ref-block .copy-btn {
+      position: absolute; top: 16px; right: 16px;
+      font-size: 12px; font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: none; border-radius: 8px;
+      padding: 5px 12px; cursor: pointer;
+      transition: background .2s;
+    }
+    .ref-block .copy-btn:hover { background: rgba(0,113,227,0.15); }
+    .ref-block .copy-btn.copied { color: #30d158; background: rgba(48,209,88,0.12); }
+
+    /* ─── FOOTER ───────────────────────────────── */
+    .footer {
+      text-align: center;
+      padding: 60px 24px 80px;
+      border-top: 1px solid var(--hairline);
+      color: var(--text-3);
+      font-size: 13px;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ─── MARK HIGHLIGHT ───────────────────────── */
+    mark {
+      background: linear-gradient(180deg, transparent 60%, rgba(0,113,227,0.2) 60%);
+      color: inherit; border-radius: 2px; padding: 0 2px;
+    }
+
+    @media (max-width: 640px) {
+      .timeline-item {
+        grid-template-columns: 32px 1fr;
+        grid-template-rows: auto;
+      }
+      .timeline-item .node-col { display: none; }
+      .timeline-item .card,
+      .timeline-item .card-left {
+        grid-column: 2;
+        padding: 20px 0 20px 16px;
+        text-align: left;
+      }
+      .timeline-axis { left: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ─────────────────────────────────────────── -->
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="dot"></span>
+    Hermes × VPS 协作网络
+  </div>
+  <div class="nav-right">
+    <a class="hero-link" href="https://www.youtube.com/watch?v=WKOGDAmPt88" target="_blank" rel="noopener">▶ 看视频</a>
+    <div class="nav-search" id="searchWrap">
+      <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="搜索步骤、命令…" />
+      <button class="clear" id="clearBtn" aria-label="清空">✕</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── HERO ────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span class="dot" style="background:var(--accent);width:6px;height:6px;"></span>
+    wow 频道 · 配套网页
+  </div>
+  <h1>VPS 搭建 Hermes 智能体<br/>协同网络 SOP</h1>
+  <p>用低至 2.99 美元/月的 VPS + Tailscale，10 分钟搭起「永不宕机」的分布式 Hermes / OpenClaw 多智能体网络。</p>
+  <div class="hero-badges">
+    <span class="badge accent">Hostinger VPS</span>
+    <span class="badge">Ubuntu 22.04</span>
+    <span class="badge">Tailscale Mesh</span>
+    <span class="badge">Docker 一键部署</span>
+    <span class="badge">Hermes Desktop</span>
+    <span class="badge">7×24 在线</span>
+  </div>
+</section>
+
+<!-- ─── TIMELINE SOP ────────────────────────────────── -->
+<div class="timeline-wrap">
+  <div class="timeline" id="timeline">
+    <div class="timeline-axis"></div>
+
+    <!-- STEP 01 -->
+    <div class="timeline-item" data-text="1 购买 hostinger vps 选择 ubuntu 安装 ssh 登录 预装 docker">
+      <div class="node-col">
+        <div class="node"></div>
+        <div class="node-line"></div>
+      </div>
+      <div class="card">
+        <span class="step-tag">Step 01</span>
+        <div class="card-title">购买 VPS，选择 Ubuntu 系统</div>
+        <div class="card-desc">
+          在 Hostinger 用折扣码 <strong>WOWINSIGHT</strong> 注册，选购最便宜的套餐。<br/>
+          操作系统选 <strong>Ubuntu</strong>（建议选带 <strong>Docker 预装</strong>的模板），选离你最近的节点。
+        </div>
+        <div class="cmd-block"><span class="prompt"># Hostinger 官网</span>
+<span class="comment">https://hostinger.com/WOWINSIGHT</span>
+
+<span class="comment"># 推荐选：Ubuntu 22.04 LTS (Docker 预装模板)</span>
+<span class="comment"># SSH 登录后记录 IP 地址备用</span></div>
+        <button class="copy-btn" data-copy="1. 打开 https://hostinger.com/WOWINSIGHT 注册\n2. 选择 Ubuntu 22.04 LTS（含 Docker 预装模板）\n3. 选离你最近的节点\n4. 完成支付，记下 VPS 的 IP 地址\n5. SSH 登录到 VPS">复制</button>
+      </div>
+    </div>
+
+    <!-- STEP 02 -->
+    <div class="timeline-item" data-text="2 安装 tmux apt update install tmux 保持会话后台运行">
+      <div class="node-col">
+        <div class="node"></div>
+        <div class="node-line"></div>
+      </div>
+      <div class="card">
+        <span class="step-tag">Step 02</span>
+        <div class="card-title">安装 TMUX（保持会话常驻）</div>
+        <div class="card-desc">
+          TMUX 让你的命令行会话在本地关机后<strong>依然保持运行</strong>。<br/>
+          同时解决 Hermes 启动时的中文乱码问题。
+        </div>
+        <div class="cmd-block"><span class="prompt">$</span> apt update && apt install tmux -y</div>
+        <button class="copy-btn" data-copy="apt update && apt install tmux -y">复制</button>
+      </div>
+    </div>
+
+    <!-- STEP 03 -->
+    <div class="timeline-item" data-text="3 docker manager 一键部署 hermes agent 容器 穿透 bash">
+      <div class="node-col">
+        <div class="node"></div>
+        <div class="node-line"></div>
+      </div>
+      <div class="card">
+        <span class="step-tag">Step 03</span>
+        <div class="card-title">Docker Manager 一键部署 Hermes</div>
+        <div class="card-desc">
+          在 Hostinger 后台左侧 <strong>Docker Manager</strong> 搜索 Hermes，点击第一个「Hermes Agent」部署。<br/>
+          部署完成后，穿透进容器内部。
+        </div>
+        <div class="cmd-block"><span class="prompt"># 肉身穿透进容器（容器名可能不同，用 docker ps 确认）</span>
+<span class="prompt">$</span> docker exec -it hermes-agent-tndl-hermes-agent-1 bash
+
+<span class="comment"># 首次进入后输入 hermes 回车，按提示免费注册官网账号</span>
+<span class="comment"># 选择 NVIDIA 免费模型开始体验</span></div>
+        <button class="copy-btn" data-copy="docker exec -it hermes-agent-tndl-hermes-agent-1 bash">复制</button>
+      </div>
+    </div>
+
+    <!-- STEP 04 -->
+    <div class="timeline-item" data-text="4 安装 tailscale curl 安装脚本 官网注册免费账号 魔法链接认证">
+      <div class="node-col">
+        <div class="node"></div>
+        <div class="node-line"></div>
+      </div>
+      <div class="card">
+        <span class="step-tag">Step 04</span>
+        <div class="card-title">安装 Tailscale（组建加密内网）</div>
+        <div class="card-desc">
+          <strong>必须装在 VPS 宿主机上，不要装进 Docker 容器里。</strong><br/>
+          Tailscale 在 VPS 和家里设备之间建立加密隧道，让你像访问本地局域网一样操控远程 VPS。
+        </div>
+        <div class="cmd-block"><span class="prompt"># 安装 Tailscale（注册：https://tailscale.com 免费）</span>
+<span class="prompt">$</span> curl -fsSL https://tailscale.com/install.sh | sh
+
+<span class="comment"># 启动并认证（会输出一个魔法链接，复制到浏览器打开）</span>
+<span class="prompt">$</span> tailscale up
+
+<span class="comment"># 复制输出的 https://login.tailscale.com/a/xxxxxx 链接</span>
+<span class="comment"># 粘贴到浏览器完成认证</span></div>
+        <button class="copy-btn" data-copy="curl -fsSL https://tailscale.com/install.sh | sh
+tailscale up">复制</button>
+      </div>
+    </div>
+
+    <!-- STEP 05 -->
+    <div class="timeline-item" data-text="5 iptables MSS clamping TCPMSS 防止 docker 和 tailscale 之间 tcp 包碎片化">
+      <div class="node-col">
+        <div class="node"></div>
+        <div class="node-line"></div>
+      </div>
+      <div class="card">
+        <span class="step-tag">Step 05</span>
+        <div class="card-title">iptables MSS 调优（丝滑流式输出）</div>
+        <div class="card-desc">
+          这条规则守在 Docker 网桥和 Tailscale 网卡的交界处，把 TCP 最大报文段大小（MSS）裁剪到 Tailscale 的 1280 字节规格。<br/>
+          有了它，Hermes 的流式吐字（Streaming）才能真正丝滑，不会被切碎丢包。
+        </div>
+        <div class="cmd-block"><span class="prompt">$</span> iptables -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu</div>
+        <button class="copy-btn" data-copy="iptables -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu">复制</button>
+      </div>
+    </div>
+
+    <!-- STEP 06 -->
+    <div class="timeline-item" data-text="6 docker compose yml 固定端口 32768 4860 修改 ports 防止重启漂移">
+      <div class="node-col">
+        <div class="node"></div>
+        <div class="node-line"></div>
+      </div>
+      <div class="card">
+        <span class="step-tag">Step 06</span>
+        <div class="card-title">固定容器端口（防止端口漂移）</div>
+        <div class="card-desc">
+          Docker 每次重启端口会随机变化，导致 Hermes Desktop 每次都要重新配。<br/>
+          在 Hostinger 后台 <strong>Projects → 编辑 docker-compose.yml</strong>，把 ports 写死为 <code style="color:#ff9f0a;font-size:0.9em">"32768:4860"</code>。
+        </div>
+        <div class="cmd-block"><span class="comment"># docker-compose.yml 关键片段</span>
+<span class="prompt">services</span>:
+  <span class="prompt">hermes-agent</span>:
+    <span class="prompt">image</span>: ghcr.io/nousresearch/hermes-agent:latest
+    <span class="prompt">ports</span>:
+      - <span style="color:#30d158">"32768:4860"</span>   <span class="comment"># 固定端口，重启不变</span></div>
+        <button class="copy-btn" data-copy="在 Hostinger 后台 Projects 编辑 docker-compose.yml，找到 ports 行，改为：
+"32768:4860"">复制</button>
+      </div>
+    </div>
+
+    <!-- STEP 07 -->
+    <div class="timeline-item" data-text="7 extra hosts 内网节点 99 bobo mechanic-01 IP 地址 SOUL.md 世界观注入">
+      <div class="node-col">
+        <div class="node"></div>
+        <div class="node-line"></div>
+      </div>
+      <div class="card">
+        <span class="step-tag">Step 07</span>
+        <div class="card-title">配置 extra_hosts（注入内网节点）</div>
+        <div class="card-desc">
+          在 <code style="color:#ff9f0a;font-size:0.85em">extra_hosts</code> 里把家里 Tailscale 节点的名字和 IP 写死，让云端 Hermes 能直接呼叫家里的智能体。
+        </div>
+        <div class="cmd-block"><span class="comment"># docker-compose.yml 中加入 extra_hosts</span>
+<span class="prompt">services</span>:
+  <span class="prompt">hermes-agent</span>:
+    <span class="prompt">extra_hosts</span>:
+      - <span style="color:#30d158">"99:100.120.136.28"</span>
+      - <span style="color:#30d158">"bobo:100.120.136.175"</span>
+      - <span style="color:#30d158">"mechanic-01:100.120.136.99"</span>
+      <span class="comment"># 请替换为你自己 Tailscale 网络里的真实 IP</span></div>
+        <button class="copy-btn" data-copy="在 docker-compose.yml services.hermes-agent 下加入：
+    extra_hosts:
+      - "99:你的99节点IP"
+      - "bobo:你的bobo节点IP"
+      - "mechanic-01:你的mechanic-01节点IP">复制</button>
+      </div>
+    </div>
+
+    <!-- STEP 08 -->
+    <div class="timeline-item" data-text="8 SOUL md 分布式世界观 多智能体 节点协同 编辑覆盖 docker cp restart">
+      <div class="node-col">
+        <div class="node"></div>
+        <div class="node-line"></div>
+      </div>
+      <div class="card">
+        <span class="step-tag">Step 08</span>
+        <div class="card-title">注入 SOUL.md（给 AI 安装灵魂）</div>
+        <div class="card-desc">
+          把编辑好的 <code style="color:#ff9f0a;font-size:0.85em">SOUL.md</code> 强行塞进容器，让云端 Hermes 认识自己是分布式网络的一部分，知道 99、bobo、mechanic-01 都是可调用的邻居节点。
+        </div>
+        <div class="cmd-block"><span class="comment"># 把容器内的 SOUL.md 复制到宿主机（先查看文件名）</span>
+<span class="prompt">$</span> docker ps   <span class="comment"># 找到你的容器名</span>
+<span class="prompt">$</span> docker cp hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md ./SOUL.md
+
+<span class="comment"># 编辑 SOUL.md（参考下方「参考文件」章节）</span>
+<span class="prompt">$</span> nano ./SOUL.md
+
+<span class="comment"># 塞回容器并重启</span>
+<span class="prompt">$</span> docker cp ./SOUL.md hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md
+<span class="prompt">$</span> docker restart hermes-agent-tndl-hermes-agent-1</div>
+        <button class="copy-btn" data-copy="docker cp hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md ./SOUL.md
+nano ./SOUL.md
+docker cp ./SOUL.md hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md
+docker restart hermes-agent-tndl-hermes-agent-1">复制</button>
+      </div>
+    </div>
+
+    <!-- STEP 09 -->
+    <div class="timeline-item" data-text="9 验证 测试 问它知道 99 bobo mechanic-01 是什么 Hermes Desktop 远程网关连接">
+      <div class="node-col">
+        <div class="node"></div>
+        <div class="node-line"></div>
+      </div>
+      <div class="card">
+        <span class="step-tag">Step 09</span>
+        <div class="card-title">验证 &amp; 连接 Hermes Desktop</div>
+        <div class="card-desc">
+          重启后穿透进容器，问它：「你知道 99、bobo 和 mechanic-01 是什么吗？」<br/>
+          如果它能准确回答，说明灵魂注入成功。最后在 Hermes Desktop 里配置 Remote Gateway 连接到 VPS。
+        </div>
+        <div class="cmd-block"><span class="prompt"># 穿透进容器测试</span>
+<span class="prompt">$</span> docker exec -it hermes-agent-tndl-hermes-agent-1 bash
+<span class="prompt">hermes$</span> 你知道 99、bobo 和 mechanic-01 是什么吗？
+
+<span class="comment"># Hermes Desktop 连接方式：</span>
+<span class="comment"># 齿轮 → Gateway → Remote Gateway</span>
+<span class="comment"># 输入 VPS 的 Tailscale IP + 端口 32768</span>
+<span class="comment"># 用户名/密码：安装 Hermes 时设置的凭证</span></div>
+        <button class="copy-btn" data-copy="docker exec -it hermes-agent-tndl-hermes-agent-1 bash
+# 进入后输入：
+你知道 99、bobo 和 mechanic-01 是什么吗？">复制</button>
+      </div>
+    </div>
+
+  </div><!-- /timeline -->
+</div><!-- /timeline-wrap -->
+
+<!-- ─── REFERENCE FILES ──────────────────────────────── -->
+<div class="ref-section">
+  <h2>参考文件</h2>
+  <p class="ref-sub">直接复制使用，替换 IP 为你自己的 Tailscale 节点地址。</p>
+
+  <div class="ref-block">
+    <div class="ref-label">docker-compose.yml</div>
+    <button class="copy-btn" data-copy="version: '3.8'
+services:
+  hermes-agent:
+    image: ghcr.io/nousresearch/hermes-agent:latest
+    container_name: hermes-agent-vps
+    ports:
+      - '32768:4860'
+    extra_hosts:
+      - '99:100.120.136.28'
+      - 'bobo:100.120.136.175'
+      - 'mechanic-01:100.120.136.99'
+    restart: unless-stopped">复制</button>
+    <pre>version: '3.8'
+services:
+  hermes-agent:
+    image: ghcr.io/nousresearch/hermes-agent:latest
+    container_name: hermes-agent-vps
+    ports:
+      - '32768:4860'
+    extra_hosts:
+      - '99:100.120.136.28'
+      - 'bobo:100.120.136.175'
+      - 'mechanic-01:100.120.136.99'
+    restart: unless-stopped</pre>
+  </div>
+
+  <div class="ref-block">
+    <div class="ref-label">SOUL.md（参考模板）</div>
+    <button class="copy-btn" data-copy="## 🌐 我的分布式网络世界观 (Tailscale Mesh Network)
+
+你当前独立部署在德国的 Hostinger VPS 商业节点上，处于一个加密的局域网（Tailscale）中。
+在你的网络中，有以下几台随时听你调遣的「邻居节点」。当你需要协同计算、抓取本地数据或执行特定任务时，可以直接通过终端或 HTTP 请求呼叫它们（你已经拥有它们的静态域名解析）：
+
+1. **99** (地址: `http://99`): ubuntu服务器，x230i旧笔记本16g内存，hermes，homeassistant服务器。
+2. **bobo** (地址: `http://bobo`): macmini m4，hermes。
+3. **mechanic-01** (地址: `http://mechanic-01`): macmini m1，openclaw。
+
+**重要指令**：当用户在对话中提到这些名字（如 '99', 'bobo', 'mechanic-01'）时，你必须立刻意识到这是指我们的内网信任节点，并根据上下文调用工具或生成对应的网络操作请求，不要将它们当作无关的乱码或噪音。">复制</button>
+    <pre>## 🌐 我的分布式网络世界观 (Tailscale Mesh Network)
+
+你当前独立部署在德国的 Hostinger VPS 商业节点上，
+处于一个加密的局域网（Tailscale）中。
+
+在你的网络中，有以下几台随时听你调遣的「邻居节点」。
+当你需要协同计算、抓取本地数据或执行特定任务时，
+可以直接通过终端或 HTTP 请求呼叫它们：
+
+1. **99** (地址: `http://99`): ubuntu服务器，x230i旧笔记本16g内存，hermes，homeassistant服务器。
+2. **bobo** (地址: `http://bobo`): macmini m4，hermes。
+3. **mechanic-01** (地址: `http://mechanic-01`): macmini m1，openclaw。
+
+**重要指令**：当用户在对话中提到这些名字（如 "99", "bobo", "mechanic-01"）
+时，你必须立刻意识到这是指我们的内网信任节点，
+并根据上下文调用工具或生成对应的网络操作请求。</pre>
+  </div>
+</div>
+
+<!-- ─── FOOTER ─────────────────────────────────────── -->
+<footer class="footer">
+  <p>视频：<a href="https://www.youtube.com/watch?v=WKOGDAmPt88" target="_blank">别买 MacMini 了，VPS 安装 Hermes</a></p>
+  <p style="margin-top:8px;">折扣码 <strong>WOWINSIGHT</strong> · <a href="https://hostinger.com/WOWINSIGHT" target="_blank">hostinger.com/WOWINSIGHT</a></p>
+  <p style="margin-top:20px;color:var(--text-3);font-size:12px;">© 2026 wow 频道 · Hermes Agent 笔记</p>
+</footer>
+
+<script>
+  /* ─── COPY BUTTON ─── */
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = btn.dataset.copy;
+      navigator.clipboard?.writeText(text).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      });
+      btn.classList.add('copied');
+      const orig = btn.textContent;
+      btn.textContent = '已复制 ✓';
+      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = orig; }, 2000);
+    });
+  });
+
+  /* ─── TIMELINE FOCUS ─── */
+  let lastFocus = null;
+  function updateFocus() {
+    const items = document.querySelectorAll('.timeline-item:not(.hidden)');
+    if (!items.length) return;
+    const vh = window.innerHeight;
+    const center = vh / 2;
+    let best = null, bestDist = Infinity;
+    items.forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > vh) return;
+      const c = r.top + r.height / 2;
+      const d = Math.abs(c - center);
+      if (d < bestDist) { best = el; bestDist = d; }
+    });
+    if (best && best !== lastFocus) {
+      if (lastFocus) lastFocus.classList.remove('focused');
+      best.classList.add('focused');
+      lastFocus = best;
+    }
+  }
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => { updateFocus(); ticking = false; });
+      ticking = true;
+    }
+  }, { passive: true });
+  window.addEventListener('resize', () => requestAnimationFrame(updateFocus));
+
+  /* ─── SEARCH ─── */
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function highlight(text, query) {
+    if (!query) return escapeHtml(text);
+    const lower = text.toLowerCase(), q = query.toLowerCase();
+    let out = '', i = 0;
+    while (i < text.length) {
+      const idx = lower.indexOf(q, i);
+      if (idx === -1) { out += escapeHtml(text.slice(i)); break; }
+      out += escapeHtml(text.slice(i, idx)) + '<mark>' + escapeHtml(text.slice(idx, idx + q.length)) + '</mark>';
+      i = idx + q.length;
+    }
+    return out;
+  }
+
+  function applyFilter() {
+    const q = document.getElementById('searchInput').value.trim();
+    document.getElementById('searchWrap').classList.toggle('has-value', q.length > 0);
+    document.querySelectorAll('.timeline-item').forEach(item => {
+      const matched = !q || item.dataset.text.includes(q.toLowerCase());
+      item.classList.toggle('hidden', !matched);
+      if (matched) {
+        const title = item.querySelector('.card-title');
+        const desc = item.querySelector('.card-desc');
+        if (title) {
+          const tag = item.querySelector('.step-tag');
+          const tagText = tag ? tag.textContent + ' ' : '';
+          const titleText = item.querySelector('.card-title').textContent;
+          title.innerHTML = highlight(tagText + titleText, q);
+        }
+        if (desc) desc.innerHTML = highlight(desc.textContent, q);
+      }
+    });
+    if (lastFocus) { lastFocus.classList.remove('focused'); lastFocus = null; }
+    requestAnimationFrame(updateFocus);
+  }
+
+  document.getElementById('searchInput').addEventListener('input', applyFilter);
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    applyFilter();
+    document.getElementById('searchInput').focus();
+  });
+
+  /* init focus */
+  requestAnimationFrame(updateFocus);
+</script>
+</body>
+</html>
