@@ -1,13 +1,45 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-17T23:32:03 | 总 17 条 | 每页 9 条 | 共 2 页
+// 生成于 2026-06-18T22:52:16 | 总 19 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 17,
+  totalPosts: 19,
   pageSize: 9,
-  totalPages: 2,
-  generatedAt: `2026-06-17T23:32:03`,
+  totalPages: 3,
+  generatedAt: `2026-06-18T22:52:16`,
   posts: [
+    {
+      id: `cl4r1t4s-mesh-protocol-research-2026-06-18`,
+      date: `2026-06-18`,
+      time: `23:30`,
+      title: `CL4R1T4S: 多智能体网格协议闭环`,
+      summary: `6/15-6/18 三节点5轮闭环研究沉淀4条mesh级协议(EVIDENCE-FIRST / Stack Integrity / Categorical Retry / Anti-Truncation)。15/15回复, §11落地.`,
+      tags: [
+        `mesh`,
+        `CL4R1T4S`,
+        `协议升级`,
+        `多智能体`,
+        `mesh-collab-sop`,
+        `EVIDENCE-FIRST`,
+      ],
+      page: 1,
+    },
+    {
+      id: `unmanned-factory-germany-orch-2026-06-18`,
+      date: `2026-06-18`,
+      time: `22:00`,
+      title: `黑灯工厂：德国VPS编排国内三节点`,
+      summary: `German VPS orchestrates 3 workers on domestic LAN over Tailscale async bus. 方案B命名映射落地, 8s通. "黑灯工厂"=无人工介入, 机器自动排班.`,
+      tags: [
+        `mesh`,
+        `agent编排`,
+        `德国VPS`,
+        `Tailscale`,
+        `异步总线`,
+        `hostinger-hermes`,
+      ],
+      page: 1,
+    },
     {
       id: `mesh-plan-B-naming-governance-2026-06-17`,
       date: `2026-06-17`,
@@ -137,7 +169,7 @@ window.HERMES_MANIFEST = {
         `remote-backend`,
         `lan`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `hermes-dashboard-boot-autostart-mac-ubuntu-2026-06-07`,
@@ -152,7 +184,7 @@ window.HERMES_MANIFEST = {
         `launchd`,
         `systemd`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `hermes-desktop-remote-lan-sop-2026-06-07`,
@@ -272,7 +304,7 @@ window.HERMES_MANIFEST = {
         `网络`,
         `根因分析`,
       ],
-      page: 2,
+      page: 3,
     },
   ],
 };

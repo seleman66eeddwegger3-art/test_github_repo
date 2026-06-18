@@ -1,6 +1,373 @@
-// Hermes Agent 笔记 — 第 2 页 (共 8 条)
+// Hermes Agent 笔记 — 第 2 页 (共 9 条)
 // 加载方式: <script src="posts-2.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_2 = [
+  {
+    id: `hermes-remote-oauth-lan-setup-2026-06-07`,
+    date: `2026-06-07`,
+    time: `13:30`,
+    title: `Hermes 远程 OAuth 实战：A/B 方案 + Network error 绕过`,
+    tags: [
+      `hermes`,
+      `dashboard`,
+      `oauth`,
+      `remote-backend`,
+      `lan`,
+    ],
+    summary: `OAuth 远程 Gateway 走通的 2 步：注册 client + Dashboard redirect URI 必填；附 redirect_uri_mismatch 修复 + 官网 Network error 绕过`,
+    body: `# TL;DR
+
+OAuth（Nous Portal）**不需要**公网，**纯局域网能跑通**。\`Dashboard redirect URI\` 留空 = 官网只放行 localhost，从局域网 IP 访问 dashboard 会触发 \`redirect_uri_mismatch\`。两条修复路径：
+
+- **A. 官网 client 配置填局域网 IP**（推荐：操作最直接）
+- **B. SSH 隧道改成 localhost 访问**（推荐：长期稳定，零官网配置）
+
+中间遇到 \`Network error. Please try again.\`？99% 是官网前端问题，跟你的 OAuth 配置无关。
+
+# 复盘
+
+| 阶段 | 操作 | 期望 | 实际 |
+|---|---|---|---|
+| 1. 基础已通 | basic auth 用户名密码走通（上一会话） | \`auth_providers: ['basic']\` | ✅ |
+| 2. 注册 client | hermes 官网注册 OAuth client，拿到 client ID + Dashboard redirect URI 字段（可选） | 两个字段 | ✅ |
+| 3. 写 .env | \`echo HERMES_DASHBOARD_OAUTH_CLIENT_ID=*** >> ~/.hermes/.env\` | client ID 进环境 | ✅ |
+| 4. 重启 dashboard | \`hermes dashboard --stop\` → \`hermes dashboard --no-open --host 0.0.0.0 --port 9119\` | \`*:9119\` 监听 | ✅ |
+| 5. 验证 status | \`curl -s http://127.0.0.1:9119/api/status\` | \`auth_required: True\` + \`auth_providers\` 含 nous | ✅ \`['basic', 'nous']\` |
+| 6. 浏览器登录 | 局域网 IP 打开 → 点 "Sign in with Nous Research" | 跳官网 → 登录 → 回调成功 | ❌ \`redirect_uri_mismatch\` |
+| 7. 修复（方案 A） | 官网填 \`http://192.168.2.233:9119\` | Save 成功 | ⚠️ 官网报 "Network error" |
+| 8. 绕过 Network error | 强制刷新 + 隐身窗口 + 换浏览器 | Save 成功 | ✅ |
+| 9. 重新登录 | 浏览器再点 Sign in | 回调成功 + 进 dashboard | ✅ |
+
+# 方案 A — 官网 client 配置填局域网 IP
+
+## 步骤
+
+**1. 写 client ID 到 .env（如果还没写）**
+
+\`\`\`bash
+echo 'HERMES_DASHBOARD_OAUTH_CLIENT_ID=*** >> ~/.hermes/.env
+chmod 600 ~/.hermes/.env
+\`\`\`
+
+**2. 重启 dashboard（不要带 --insecure）**
+
+\`\`\`bash
+hermes dashboard --stop
+sleep 2
+hermes dashboard --no-open --host 0.0.0.0 --port 9119
+\`\`\`
+
+**3. 验证 provider 已注册**
+
+\`\`\`bash
+curl -s http://127.0.0.1:9119/api/status | python3 -c '
+import json,sys
+d=json.load(sys.stdin)
+print("auth_required:", d["auth_required"])
+print("auth_providers:", d["auth_providers"])
+'
+\`\`\`
+
+期望：
+
+\`\`\`
+auth_required: True
+auth_providers: ['basic', 'nous']
+\`\`\`
+
+**4. 官网填 Dashboard redirect URI**
+
+在 hermes 官网 OAuth client 配置页，\`Dashboard redirect URI\` 字段填：
+
+\`\`\`
+http://<你的局域网IP>:9119
+\`\`\`
+
+> 不要加 \`/auth/callback\`，官网会自动加。
+> 例子：\`http://192.168.2.233:9119\`
+
+## 遇到 "Network error. Please try again." 怎么绕
+
+按顺序试：
+
+1. **强制刷新页面**（\`Cmd+Shift+R\` / \`Ctrl+Shift+R\`）— 清 CSRF token + stale session
+2. **隐身窗口**重新登录官网 → 重填 IP → Save
+3. **换浏览器**（Chrome → Safari / Firefox）— 排除扩展拦截
+
+这 3 步能解决 90% 的"Network error"。
+
+# 方案 B — SSH 隧道改 localhost 访问
+
+## 思路
+
+不改任何配置，物理上让浏览器以 \`localhost\` 身份打开 dashboard → OAuth callback 走 \`http://localhost:9119/auth/callback\` → 官网默认放行。
+
+## 步骤
+
+**1. 在你常用电脑（不是 ha）开 SSH 隧道**
+
+\`\`\`bash
+ssh -L 9119:127.0.0.1:9119 ubuntu@ha
+\`\`\`
+
+**2. 浏览器开**
+
+\`\`\`
+http://localhost:9119
+\`\`\`
+
+**3. 点 "Sign in with Nous Research"**
+
+回调走 localhost → 官网放行 → 登录成功。
+
+## 优势
+
+- \`~/.hermes/.env\` 不动
+- 官网 client 配置不动
+- 物理上让 callback 回到 localhost，零配置依赖
+
+# A vs B 怎么选
+
+| 维度 | 方案 A（填 IP） | 方案 B（SSH 隧道） |
+|---|---|---|
+| 官网配置改动 | 必填一次 | 零 |
+| \`.env\` 改动 | 必填 client ID | 必填 client ID |
+| 多设备访问 | ✅ 任何同网段设备都能开 | ❌ 必须先 SSH 隧道 |
+| 公网访问 | ❌（仍是 LAN 限定） | ❌ |
+| 维护成本 | 低（填一次） | 中（每次开隧道） |
+| 推荐场景 | 长期、多设备 | 临时验证、单机调试 |
+
+**两个可以共存**—— 方案 A 解决多设备日常访问，方案 B 用于临时 debug。
+
+# 3 条元教训
+
+### 1. "Localhost is always allowed automatically" ≠ "LAN IP 也被允许"
+
+文档原话让你以为"Localhost allowed" = "本地都允许"，但实际只放行 \`127.0.0.1\`/\`localhost\`。局域网 IP（如 \`192.168.x.x\`）需要**显式填**到 client 配置里。
+
+### 2. OAuth callback 从 host header 推导
+
+dashboard 没有"我的对外地址"配置，OAuth 跳转时它从浏览器访问用的 \`Host\` 字段反推 callback URL。所以：
+
+- \`http://localhost:9119\` 打开 → callback 是 \`http://localhost:9119/auth/callback\`
+- \`http://192.168.x.x:9119\` 打开 → callback 是 \`http://192.168.x.x:9119/auth/callback\`
+
+→ 想稳定走 localhost，就让用户用 localhost 打开（方案 B 思路）。
+
+### 3. 官网"Network error" 99% 是前端
+
+OAuth 失败类错误如果发生在**配置页 Save 按钮**，几乎都不是网络问题。是：
+
+- CSRF token 过期
+- Session cookie 丢失
+- 浏览器扩展拦截 fetch
+- 官网临时服务抽风
+
+\`curl\` 后端 API 没用 — 这层是 SPA 在打。直接刷新/隐身/换浏览器，比排查"网络哪里不通"快 10 倍。
+
+# 自检清单（5 条全打勾 = 远程 OAuth 就绪）
+
+- [ ] \`curl /api/status\` 显示 \`auth_required: True\`
+- [ ] \`auth_providers\` 列表**包含** \`nous\`（不是只有 \`basic\`）
+- [ ] \`lsof -nP -iTCP:9119 -sTCP:LISTEN\` 显示 \`*:9119\`（不是 \`127.0.0.1:9119\`）
+- [ ] \`~/.hermes/.env\` 含 \`HERMES_DASHBOARD_OAUTH_CLIENT_ID=*** 且 \`chmod 600\`
+- [ ] dashboard 启动命令**无** \`--insecure\` 参数
+
+# 沉淀
+
+- 关联 skill: \`hermes-remote-backend-setup\` v1.0.0（auth-gate truth table / 三种 path 对比表）
+- **建议补**：skill 加 "OAuth on LAN" 章节，明确 redirect URI 留空的行为差异、A/B 方案对比
+- 关联笔记: \`hermes-desktop-remote-basicauth-env-deleted-2026-06-07\`（basic auth 失败诊断树）
+- 关键命令: \`hermes dashboard --host 0.0.0.0 --port 9119\`（无 \`--insecure\`，basic + OAuth 共用）
+`,
+  },
+  {
+    id: `hermes-dashboard-boot-autostart-mac-ubuntu-2026-06-07`,
+    date: `2026-06-07`,
+    time: `13:00`,
+    title: `Hermes Dashboard 开机自启：Mac + Ubuntu 双方案`,
+    tags: [
+      `hermes-desktop`,
+      `remote-backend`,
+      `autostart`,
+      `launchd`,
+      `systemd`,
+    ],
+    summary: `Mac 端 1 个 LaunchAgent plist，Ubuntu 端 1 个 systemd-user service + Linger=yes。两条 OS 都能开机/重启后 dashboard 自动监听 0.0.0.0:9119，Desktop 端 http://<host>:9119 即用。`,
+    body: `# 目标
+
+让 hermes agent 按 SOP 完成 **Mac + Ubuntu 双 OS 环境下，Hermes dashboard 开机自启**——重启后 dashboard 仍监听 0.0.0.0:9119，Desktop 端 \`http://<host>:9119\` 即用。
+
+# 前提
+
+- Mac 端：hermes-agent 0.16+（dashboard 服务端，venv 装在 \`~/.hermes/hermes-agent/venv\`）
+- Ubuntu 端：hermes-agent 0.16+（用户已 systemd-user 装）
+- 同一 LAN（用户实配：Mac 192.168.2.175 + Ubuntu 192.168.2.233）
+- **\`.env\` BASIC_AUTH 三件套已配**（见 \`hermes-desktop-remote-lan-sop-2026-06-07\` 步骤 A.2）
+- **\`config.yaml\` 的 \`plugins.enabled\` 含 basic 显式 opt-in**（同上步骤 A.3，保险）
+
+# 步骤 A — Mac 端（LaunchAgent plist）
+
+## 1. 写 plist
+
+**关键**：**不带** \`--insecure\`（escape hatch，gate 永远不开）。
+
+路径：\`~/Library/LaunchAgents/ai.hermes.dashboard.plist\`
+
+\`\`\`xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>ai.hermes.dashboard</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/eight/.hermes/hermes-agent/venv/bin/python</string>
+        <string>-m</string>
+        <string>hermes_cli.main</string>
+        <string>dashboard</string>
+        <string>--no-open</string>
+        <string>--host</string>
+        <string>0.0.0.0</string>
+        <string>--port</string>
+        <string>9119</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/eight/.hermes</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/eight/.hermes/hermes-agent/venv/bin:/Users/eight/.hermes/hermes-agent/node_modules/.bin:/Users/eight/.hermes/node/bin:/Users/eight/Library/Python/3.9/bin:/Users/eight/.local/bin:/Library/Frameworks/Python.framework/Versions/3.14/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pkg/env/active/bin:/opt/pmk/env/global/bin</string>
+        <key>VIRTUAL_ENV</key>
+        <string>/Users/eight/.hermes/hermes-agent/venv</string>
+        <key>HERMES_HOME</key>
+        <string>/Users/eight/.hermes</string>
+    </dict>
+
+    <key>LimitLoadToSessionType</key>
+    <array>
+        <string>Aqua</string>
+        <string>Background</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/eight/.hermes/logs/dashboard.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/eight/.hermes/logs/dashboard.error.log</string>
+</dict>
+</plist>
+\`\`\`
+
+## 2. 加载 + 验证
+
+\`\`\`bash
+plutil -lint ~/Library/LaunchAgents/ai.hermes.dashboard.plist
+launchctl bootstrap gui/\$(id -u) ~/Library/LaunchAgents/ai.hermes.dashboard.plist
+sleep 5
+lsof -nP -iTCP:9119 -sTCP:LISTEN
+curl -s http://127.0.0.1:9119/api/status | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["auth_required"]); print(d["auth_providers"])'
+\`\`\`
+
+**期望**：
+- plutil: \`OK\`
+- lsof: \`python3.x PID xxx ... TCP *:9119 (LISTEN)\` ← \`*\` = 绑 0.0.0.0
+- curl: \`True / ['basic']\`
+
+## 3. 开机自启行为
+
+- \`RunAtLoad: true\` → 登录 / 开机时 launchd 拉起
+- \`KeepAlive: true\` → 进程死了 launchd 立刻重启（systemd 的 \`Restart=always\` 等价）
+- \`LimitLoadToSessionType: [Aqua, Background]\` → 用户登录 GUI 或 Background session 时加载（**不是** SSH-only headless 模式）
+
+# 步骤 B — Ubuntu 端（systemd-user service）
+
+> 用户实配版本（v0.16, X230i, user-level service）：
+
+## 1. Unit 文件
+
+路径：\`/home/ubuntu/.config/systemd/user/hermes-dashboard.service\`
+
+\`\`\`ini
+[Unit]
+Description=Hermes Dashboard (user service)
+After=network.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+WorkingDirectory=/home/ubuntu/.hermes
+Environment="HERMES_HOME=/home/ubuntu/.hermes"
+ExecStart=/home/ubuntu/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main dashboard --no-open --host 0.0.0.0 --port 9119
+StandardOutput=append:/home/ubuntu/.hermes/logs/dashboard.log
+StandardError=append:/home/ubuntu/.hermes/logs/dashboard.error.log
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+\`\`\`
+
+## 2. enable + start
+
+\`\`\`bash
+# 必须 Linger=yes，user service 在登出/server 启动后才会跑
+loginctl enable-linger ubuntu
+loginctl show-user ubuntu | grep Linger   # 期望: Linger=yes
+
+systemctl --user enable --now hermes-dashboard.service
+systemctl --user status hermes-dashboard.service
+\`\`\`
+
+**期望**：
+- \`Linger=yes\`
+- \`status\` 显示 \`active (running)\` + PID 53409（实测）
+- 监听 0.0.0.0:9119，**无** \`--insecure\`
+
+## 3. 注意：gateway service 仍 disabled
+
+\`hermes gateway\` service 这次**没**启——**只** dashboard。**重启 X230i 后只会拉起 dashboard**，不拉起 messaging gateway（用户明确选择：desktop 端不需要 messaging gateway）。
+
+# 步骤 C — Desktop 端（不变）
+
+按 \`hermes-desktop-remote-lan-sop-2026-06-07\` 步骤 B：填 \`http://<host>:9119\` + Sign in。
+
+# 验证（双 OS 共用 + 关键：重启验证）
+
+| # | 命令 | 期望 |
+|---|---|---|
+| 1 | \`lsof -nP -iTCP:9119 -sTCP:LISTEN\`（macOS）/ \`ss -tlnp\`（Linux） | \`*:9119\` 或 \`0.0.0.0:9119\` |
+| 2 | \`curl http://<host>:9119/api/status\` 看 \`auth_required\` | \`true\` |
+| 3 | \`curl http://<host>:9119/api/status\` 看 \`auth_providers\` | \`['basic']\` |
+| 4 | **重启 host → 等待 30s → 重跑 1-3** | 仍 \`*:9119\` / \`True\` / \`['basic']\` |
+
+**步骤 4 是关键**——\`KeepAlive\` / \`RemainAfterExit\` 只能保证**进程**自动起来，不能保证**配置**对。重启后**必须**重跑 1-3。
+
+# 元教训
+
+1. **\`--insecure\` 任何时候都不出现在开机自启 plist/unit**——它是 escape hatch，永久 opt-out gate
+2. **\`KeepAlive=true\` (macOS) ≈ \`Restart=on-failure\` (systemd) + \`RemainAfterExit=yes\`**——三者组合保证进程死了重启 + service 状态正确
+3. **user service (systemd) 必须 \`Linger=yes\`**——否则 SSH 登出就停
+4. **不要假设 \`enable --now\` 后配置自动正确**——重启验证（步骤 4）才是真理
+
+# 沉淀
+
+- 关联 SOP: \`hermes-desktop-remote-lan-sop-2026-06-07\`（\`.env\` + \`config.yaml\` 配 + 启动命令）
+- 关联诊断: \`hermes-desktop-remote-basicauth-env-deleted-2026-06-07\`（4 步诊断树）
+- 关键文件：
+  - macOS: \`~/Library/LaunchAgents/ai.hermes.dashboard.plist\`（本次新增，2029 B，--insecure 0 次）
+  - Ubuntu: \`/home/ubuntu/.config/systemd/user/hermes-dashboard.service\`（用户自写，PID 53409）
+  - 验证证据：Mac plutil OK + 关键字段 grep（--insecure 0 次 / 0.0.0.0 1 次）；Ubuntu Linger=yes + PID 53409 + auth_required=True
+`,
+  },
   {
     id: `hermes-desktop-remote-lan-sop-2026-06-07`,
     date: `2026-06-07`,
@@ -897,90 +1264,6 @@ session 长了之后脑子里装满：
 - 完整技术细节（plist→tmux→homebrew Python 三层 wrap）：见 skill \`homeassistant-connection-debugging\` v2.5.0
 - 自我修养手册：见 skill \`debugging-session-discipline\`
 - 这次的具体 HA 案例笔记：\`ha-macos-tahoe-venv-python-2026-06-03\`
-`,
-  },
-  {
-    id: `ha-macos-tahoe-venv-python-2026-06-03`,
-    date: `2026-06-03`,
-    time: `12:00`,
-    title: `macOS Tahoe 26.4.1 永久限制 venv python 访问 LAN，导致 Hermes gateway 连不上 Home Assistant`,
-    tags: [
-      `HomeAssistant`,
-      `macOS`,
-      `网络`,
-      `根因分析`,
-    ],
-    summary: `venv python 报 EHOSTUNREACH 到 192.168.2.233，但 nc / /usr/bin/python3 都通；重启 Mac 不修；等 hermes 自升级切到 homebrew Python 自动恢复。`,
-    body: `# 问题
-Hermes Agent 的 gateway（launchd 托管）持续报：
-\`\`\`
-[Homeassistant] Failed to connect: Cannot connect to host 192.168.2.233:8123 ssl:default [No route to host]
-\`\`\`
-也就是 \`EHOSTUNREACH (errno 65)\`。
-
-但 5月30日 修复后稳定了 3 天，到 6月2日 20:25 Mac sleep 16 分钟唤醒后突然断。
-\`hermes gateway restart\`、\`hermes config check\`、\`kanban.db\` 清剿、IPv6 重新 patch——全部无效。
-**6月3日 重启 Mac 也不修**。这是异常的信号：之前的 IPv6 根因一重启就能恢复。
-
-# 排查铁律：永远先做三方对比
-在 Mac 终端跑这三行（不是 venv 内的 Python）：
-\`\`\`bash
-# 1. 系统 nc 工具
-nc -vz 192.168.2.233 8123
-# 2. 系统自带的 Python
-/usr/bin/python3 -c "import socket; s=socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.settimeout(5); s.connect(('192.168.2.233', 8123)); print('OK'); s.close()"
-# 3. venv 里的 Python
-~/.hermes/hermes-agent/venv/bin/python3 -c "import socket; s=socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.settimeout(5); s.connect(('192.168.2.233', 8123)); print('OK'); s.close()"
-\`\`\`
-
-**这次结果是 nc 通、/usr/bin/python3 通、venv python 失败。**
-
-# 根因
-**macOS Tahoe 26.4.1 系统层面对 ad-hoc signed 的 3rd party binary 永久限制网络访问权限。**
-
-venv python 来自 uv 默认下载的 cpython-build-standalone（如 cpython-3.11.15-macos-aarch64），
-codesign 检查 \`Identifier=-\`（ad-hoc, linker-signed，没有 Apple 信任），entitlements 是空的。
-Mac 状态变化（sleep/唤醒/重启）时系统会重新评估这个 binary 的网络访问权限——直接拦截 LAN 流量，
-报错就是 EHOSTUNREACH (errno 65)。
-
-不是 IPv6 优先（patch 加载了 \`family=AF_INET, ssl=False\`），
-不是 SQLite 死锁（\`kanban.db*\` 三件套都干净），
-不是僵尸进程（launchd 托管的 PPID=1 进程正常）。
-
-# 修复
-两条路，任选其一：
-
-## 方案 A：等 hermes 自升级（推荐）
-\`hermes gateway install\` 会触发 hermes 升级 plist，把 venv 切到 homebrew Python。
-- 旧 venv: \`~/.hermes/hermes-agent/venv\` (cpython-3.11.15, uv standalone, ad-hoc signed)
-- 新 venv: \`/opt/homebrew/Cellar/python@3.14/3.14.5\` (**Apple-notarized**)
-
-homebrew Python 是 Apple 信任的 binary，**永久通过** Tahoe 的网络限制检查。
-我们这边 6月3日 15:02 跑完 \`hermes gateway install\` 之后，homeassistant 自动恢复。
-
-## 方案 B：手动切到 homebrew Python
-\`\`\`bash
-cd ~/.hermes/hermes-agent
-uv tool install --python /opt/homebrew/bin/python3 --force -e .
-\`\`\`
-
-# 预防
-\`\`\`bash
-# 让 uv 优先用系统 Python，避免再次下载有 bug 的 standalone
-echo 'export UV_PYTHON_PREFERENCE=system' >> ~/.zshrc
-source ~/.zshrc
-\`\`\`
-
-# 教训
-1. **重启 Mac 不修 = 不是 transient，是系统级永久限制**——不要继续 restart，浪费时间
-2. **三方对比铁律**：nc + /usr/bin/python3 + venv python 必跑，确认根因再修
-3. **不要给 venv python 加 Developer ID 签名**（\$99/年），等 hermes 自升级或装 homebrew Python 就行
-4. **venv python 的 socket 是黑盒**——错误往往发生在底层 Socket 系统调用与 OS 内核交互的边界处，urllib / aiohttp 高层代码无能为力
-5. **控制变量法威力巨大**：在 macOS 上遇到罕见网络报错时，一定要对比 System Python 和 Standalone Python 的行为差异
-
-# 沉淀
-- Skill: \`homeassistant-connection-debugging\` v2.0.0（根因四：macOS Tahoe 永久限制）
-- Skill: \`hermes-dashboard-bootstrap\` v1.0.0（plist 模板 + web UI build）
 `,
   },
 ];
