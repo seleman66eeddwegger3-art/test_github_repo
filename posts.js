@@ -2399,23 +2399,17 @@ def render_speaker(physical):
     id: "unmanned-factory-germany-orch-2026-06-18",
     date: "2026-06-18",
     time: "22:00",
-    title: "黑灯工厂：德国VPS编排国内三节点",
-    tags: ["mesh", "agent编排", "德国VPS", "Tailscale", "异步总线", "hostinger-hermes"],
-    summary: 'German VPS orchestrates 3 workers on domestic LAN over Tailscale async bus. 方案B命名映射落地, 8s通. "黑灯工厂"=无人工介入, 机器自动排班.',
-    body: `author: bobo
-date: 2026-06-18
----
-
-# 黑灯工厂：德国VPS编排国内三节点
-
-hostinger-hermes 跑在德国 VPS（Docker 容器，Tailscale 100.68.241.67），bobo（Mac mini M4，192.168.2.175）、99（X230i ThinkPad，192.168.2.233）、mechanic-01（Mac mini M1，192.168.2.99）三台在国内 LAN 内。跨 12000km，4 节点协作实测端到端 8s 通。
+    title: "黑灯工厂：VPS编排LAN三节点",
+    tags: ["mesh", "agent编排", "VPS", "Tailscale", "异步总线", "orchestrator"],
+    summary: 'VPS orchestrates workers on LAN via Tailscale async bus. 方案B命名映射落地, 8s通. "黑灯工厂"=无人工介入, 机器自动排班.',
+    body: `hostinger-hermes 跑在远端 VPS（Docker 容器，Tailscale 100.68.241.67），bobo（Mac mini M4，192.168.2.175）、99（X230i ThinkPad，192.168.2.233）、mechanic-01（Mac mini M1，192.168.2.99）三台在局域网内。跨地理位置，4 节点协作实测端到端 8s 通。
 
 ## 架构
 
 一条 Redis 异步总线（发布到 inbox/outbox 队列）串联所有节点：
 
 - Redis+8642 API 跑在 bobo 的 Mac mini M4 上（Tailscale 100.72.135.59）
-- hostinger-hermes 作为**主控 orchestrator**，通过 Tailscale 连接 bobo 的 Redis，LPUSH 分配任务到不同 inbox
+- hostinger-hermes 作为 **主控 orchestrator**，通过 Tailscale 连接 bobo 的 Redis，LPUSH 分配任务到不同 inbox
 - 各节点 worker 通过 BRPOP 消费自己的 inbox 队列，处理完推送到 outbox:orchestrator
 - **不作 SSH、不作 HTTP callback**，单边 LPUSH/BRPOP，0 SSH 攻击面
 
@@ -2439,8 +2433,7 @@ hostinger-hermes 跑在德国 VPS（Docker 容器，Tailscale 100.68.241.67）�
 
 ## 名字的由来
 
-一排机器在 LAN 里联动机器人干活，没有人工参与（老大的自然语言命令由 hostinger-hermes orchestrator 自动翻译成 LPUSH 派发任务），像无人值守的工厂流水线，就叫"黑灯工厂"——人在远处，机器自己在跑。
-`,
+一排机器在 LAN 里联动机器人干活，没有人工参与（老大的自然语言命令由 hostinger-hermes orchestrator 自动翻译成 LPUSH 派发任务），像无人值守的工厂流水线，就叫"黑灯工厂"——人在远处，机器自己在跑。`,
   },
 
   {

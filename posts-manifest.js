@@ -1,12 +1,12 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-18T22:52:16 | 总 19 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-06-18T23:11:11 | 总 19 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
   totalPosts: 19,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-06-18T22:52:16`,
+  generatedAt: `2026-06-18T23:11:11`,
   posts: [
     {
       id: `cl4r1t4s-mesh-protocol-research-2026-06-18`,
@@ -28,15 +28,15 @@ window.HERMES_MANIFEST = {
       id: `unmanned-factory-germany-orch-2026-06-18`,
       date: `2026-06-18`,
       time: `22:00`,
-      title: `黑灯工厂：德国VPS编排国内三节点`,
-      summary: `German VPS orchestrates 3 workers on domestic LAN over Tailscale async bus. 方案B命名映射落地, 8s通. "黑灯工厂"=无人工介入, 机器自动排班.`,
+      title: `黑灯工厂：VPS编排LAN三节点`,
+      summary: `VPS orchestrates workers on LAN via Tailscale async bus. 方案B命名映射落地, 8s通. "黑灯工厂"=无人工介入, 机器自动排班.`,
       tags: [
         `mesh`,
         `agent编排`,
-        `德国VPS`,
+        `VPS`,
         `Tailscale`,
         `异步总线`,
-        `hostinger-hermes`,
+        `orchestrator`,
       ],
       page: 1,
     },
