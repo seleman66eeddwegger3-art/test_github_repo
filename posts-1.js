@@ -31,7 +31,8 @@ window.HERMES_PAGE_1 = [
 # Step 1 · 购买 Hostinger VPS（折扣码 WOWINSIGHT）
 
 ## 推荐链接
-https://hostinger.com/WOWINSIGHT
+- **优惠码**：WOWINSIGHT
+- **追踪链接**：https://www.hostinger.com/applications/hermes-agent?utm_medium=affiliate&utm_source=aff236393&utm_campaign=815&session=102095ccc5f900b923cf6b49549886
 
 ## 操作系统选择
 
