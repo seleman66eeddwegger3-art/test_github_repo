@@ -2735,6 +2735,106 @@ services:
 `,
   },
 
+  {
+    id: "google-tv-wireless-adb-bilibili-2026-06-19",
+    date: "2026-06-19",
+    time: "21:00",
+    title: "Google TV 无线 ADB 安装 B 站 SOP",
+    tags: ["Google TV", "ADB", "BBLL", "Bilibili", "电视", "无线调试", "APK"],
+    summary: "用 Mac Studio 通过无线 ADB 把 BBLL（第三方 B 站客户端）装进 Google TV，全程无需U盘，单命令推送，覆盖安装不丢数据。",
+    body: `# 环境说明
+
+| 角色 | 设备 / 信息 |
+|---|---|
+| 控制端 | Mac Studio (miomio@MioMios-Mac-Studio-EU) |
+| 接收端 | Google TV (192.168.2.9) |
+| 目标应用 | BBLL 电视端客户端 (BBLL_1.5.5.apk) |
+
+# 第一阶段：控制端（Mac）环境初始化
+
+打开 Mac 终端，一行命令搞定 ADB 工具链的安装与环境变量配置：
+
+\`\`\`bash
+# 1. 使用 Homebrew 一键安装 Android 工具包
+brew install android-platform-tools
+
+# 2. 验证安装是否成功（输出版本号即代表环境 Ok）
+adb --version
+\`\`\`
+
+# 第二阶段：接收端（电视）网络调试准备
+
+1. **激活开发者模式**：进入 Google TV Settings → System → About，连击最下方 Android TV OS Build 直到提示已处于开发者模式。
+
+2. **开启无线调试**：进入 Developer options，打开 Wireless debugging（无线调试）开关。
+
+3. **获取配对凭证**：点击进入 Wireless debugging 详情页，点击 "Pair device with pairing code"，保持此画面不动，记录屏幕上的动态数据：
+   - Wi-Fi pairing code（配对码）：769879
+   - IP address & Port（配对端口）：192.168.2.9:45235
+
+# 第三阶段：终端握手与精准推送
+
+严格按**"配对 → 连接 → 指定端口安装"**的闭环执行。
+
+## Step 1：设备物理配对（仅首次连接需要）
+
+使用电视弹窗上的**配对端口（45235）**进行安全握手：
+
+\`\`\`bash
+adb pair 192.168.2.9:45235
+\`\`\`
+
+终端会提示输入验证码，手动键入配对码并回车：
+
+\`\`\`
+Enter pairing code: 769879
+Successfully paired to 192.168.2.9:45235 [guid=adb-xxxxxx]
+\`\`\`
+
+> 此时电视上的配对小弹窗会自动消失，系统回到无线调试主界面。
+
+## Step 2：建立正式连接管道
+
+查看电视无线调试主界面当前显示的 IP address & Port（此时为**连接端口 35513**）：
+
+\`\`\`bash
+adb connect 192.168.2.9:35513
+\`\`\`
+
+预期输出：
+
+\`\`\`
+connected to 192.168.2.9:35513
+\`\`\`
+
+## Step 3：规避多设备冲突，定向覆盖安装
+
+由于局域网内可能存在其他安卓设备干扰，必须使用 \`-s\` 参数锁定电视的通信管道，并配合 \`-r\` 参数实现不丢失大屏端数据的覆盖升级：
+
+\`\`\`bash
+adb -s 192.168.2.9:35513 install -r BBLL_1.5.5.apk
+\`\`\`
+
+预期输出：
+
+\`\`\`
+Performing Streamed Install
+Success
+\`\`\`
+
+> 终端吐出 Success，代表 APK 已完美写入 Google TV。
+
+# 常见异常对策
+
+| 错误现象 | 触发原因 | 快速解决方案 |
+|---|---|---|
+| Connection refused | 电视端未开启无线调试，或连接了错误的端口 | 检查电视端开关，确保使用的是主界面实时的 Port |
+| adb: more than one device | Mac 连着其他安卓手机、或后台开着模拟器 | 使用 \`adb devices\` 查明，或在安装时强制加 \`-s IP:Port\` 限制 |
+| INSTALL_PARSE_FAILED_NOT_APK | 命令行下载被墙，下到了损坏的文件或 HTML 网页 | 在 Mac 浏览器中重新手动下载完整的 APK 文件并替换 |
+| command not found: adb | 新开终端标签页，系统未实时刷新环境变量 | 终端执行 \`source ~/.zshrc\` 刷新环境，或重启终端 |
+`,
+  },
+
 ];
 
 window.HERMES_POSTS = POSTS;

@@ -1,6 +1,145 @@
-// Hermes Agent 笔记 — 第 3 页 (共 2 条)
+// Hermes Agent 笔记 — 第 3 页 (共 3 条)
 // 加载方式: <script src="posts-3.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_3 = [
+  {
+    id: `ha-macos-tcc-local-network-pkg-fix-2026-06-04`,
+    date: `2026-06-04`,
+    time: `12:00`,
+    title: `venv python 真因：TCC + python.org 根治（6月3日结论错了）`,
+    tags: [
+      `HomeAssistant`,
+      `macOS`,
+      `TCC`,
+      `根因纠正`,
+      `python.org`,
+    ],
+    summary: `6月3日我说 homebrew python 是 Apple 签名。6月4日 homebrew 也被 macOS 拒了，codesign 实测 ad-hoc。换 python.org 官方 .pkg 才真通，13:45 launchctl reset 后 HA connected。`,
+    body: `# 6月3日结论错了
+
+[6月3日笔记](/detail.html?id=ha-macos-tahoe-venv-python-2026-06-03) 核心结论：
+
+> 新 venv: \`/opt/homebrew/Cellar/python@3.14/3.14.5\` (**Apple-notarized**) — homebrew Python 是 Apple 信任的 binary，**永久通过** Tahoe 的网络限制检查。
+
+**6月4日 实测 homebrew python 也是 ad-hoc signed**，不是 Apple-notarized。6月3日的"修复"真机制是"**换 binary 路径触发 macOS 重新评估 ACL**"这个副作用，**不是** homebrew python 本身有特殊信任。
+
+# 问题
+
+6月4日 03:30 跑 \`hermes update\`（v0.15.1 → v0.15.2，pull 450 commits）后，Home Assistant platform 立刻断：
+
+\`\`\`
+ERROR gateway.platforms.homeassistant: Failed to connect: Cannot connect to host 192.168.2.233:8123 ssl:default [No route to host]
+\`\`\`
+
+升级前稳定 18 小时，升级后立刻断，每 5 分钟重试都 fail。
+
+# 3-way 鉴别（6月4日 12:08）
+
+| 通道 | 结果 |
+|---|---|
+| \`/usr/bin/python3\` raw socket | OK |
+| venv python (homebrew 3.14.5) raw socket | **FAIL [Errno 65]** |
+| \`nc -vz 192.168.2.233 8123\` | OK |
+
+模式 = \`OK/FAIL/OK\` → 根因不是 IPv6，是 binary 信任问题。
+
+# codesign 实测：homebrew python 也是 ad-hoc
+
+\`\`\`
+codesign -dvv /opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/Resources/Python.app
+→ Identifier=org.python.python
+→ Signature=adhoc
+→ TeamIdentifier=not set
+\`\`\`
+
+跟 uv standalone python 一模一样。**6月3日 Skill 文档把"换 binary 路径触发 ACL 重评"误读成"homebrew 是 Apple 签名"**。错。
+
+# 真因：TCC Local Network 隐私
+
+**macOS 14+ 引入的 TCC (Transparency, Consent, and Control) Local Network 隐私机制**。
+
+行为：
+- 任何 binary 第一次访问 RFC1918 私网地址时，**理论上**弹"xxx 想加入本地网络吗"
+- **交互式前台 GUI** 应用会弹
+- **后台进程（launchd daemon / cron / SSH）不弹，直接静默丢包**返回 \`[Errno 65]\`
+- 判定 key = \`binary 路径 + cdhash\`
+  - Apple 真的签名（\`Identifier=com.apple.*\` 或 \`Identifier=python3\` + 真签名）→ 默认通过
+  - ad-hoc / linker-signed → 默认拒绝
+
+# 修复（6月4日 13:45 实测根治）
+
+## 首选：装 python.org 官方 .pkg
+
+GUI: https://www.python.org/downloads/macos/ → Python 3.12/3.13 universal2 installer，要 admin 密码。
+
+\`\`\`bash
+# 装完位置: /Library/Frameworks/Python.framework/Versions/3.12/
+
+rm -rf ~/.hermes/hermes-agent/venv
+/Library/Frameworks/Python.framework/Versions/3.12/bin/python3 -m venv ~/.hermes/hermes-agent/venv
+source ~/.hermes/hermes-agent/venv/bin/activate
+uv pip install -e ~/.hermes/hermes-agent
+
+# 必须接 launchctl reset（不是 kickstart）
+launchctl bootout gui/\$UID/ai.hermes.gateway 2>/dev/null
+sleep 2
+launchctl bootstrap gui/\$UID ~/Library/LaunchAgents/ai.hermes.gateway.plist
+sleep 8
+\`\`\`
+
+codesign 实测：
+\`\`\`
+Identifier=python3
+Signature size=9072
+flags=0x10000(runtime hardened)
+\`\`\`
+
+**Apple 真的签名，TCC 默认信任。HA 第一次连接就通**，不重试。
+
+## 次选：切到 \`/usr/bin/python3\`
+
+Apple 系统签名（\`com.apple.dt.xcode_select.tool-shim-public\`），TCC 祖父授权。Python 3.9 老，可能要降级包。
+
+## 应急：hctl 旁路
+
+不修 gateway 本身，HA 控制走 Mac 终端直接 curl REST。详见 \`~/.hermes/skills/devops/homeassistant-connection-debugging/templates/hctl.sh\`。
+
+# ❌ 不再推荐的修复（6月4日 实测无效）
+
+**1. \`codesign --force --deep --sign -\` 重签 homebrew python**
+- inner binary mtime 更新了
+- \`.app\` wrapper mtime 没改（\`--deep\` 不传递 wrapper 签名）
+- macOS TCC 用 \`.app\` wrapper 签名决策，不重评
+- **别再推荐**
+
+**2. venv 重建后手动 \`hermes gateway run --replace\` + Ctrl+C**
+- 造 ghost 状态：launchctl 留下注册 PID 但进程死
+- \`kickstart -k\` 无效
+- 必须 \`bootout + bootstrap\` 硬 reset
+
+# 预防
+
+1. **永远用 python.org 官方 .pkg 装 Python**（Apple-notarized）— 不用 homebrew / uv / pyenv 作 venv base
+2. **venv 重建后必做 launchctl reset**（不是 kickstart）
+3. **永远不要用 \`hermes gateway run --replace\` 手动启动**
+4. **3-way 鉴别**永远先做：\`/usr/bin/python3\` + venv python + nc 三方对比
+5. **重启 Mac 不修** → TCC 限制（永久）— 别重复 restart
+
+# 教训
+
+1. **看 codesign，别信文档** — Skill 文档写"homebrew Python 3.14+ 是 Apple notarized"是错的，实测是 ad-hoc
+2. **重签同一路径不触发 ACL 重评** — macOS 缓存了负向决策
+3. **venv 重建后 launchctl reset 是必做的** — 不是可选
+4. **\`hermes gateway run --replace\` 是脚手架命令，不是生产启动方式** — 用 launchctl bootstrap
+5. **3-way 鉴别是金标准** — 区分根因一/四/TCC 的唯一可靠方法
+6. **完整发之前先看 skill 沉淀** — 6月3日 Skill 写了"homebrew 是 Apple 签名"但**没人验证**；6月4日实测后立刻升到 v3.0.0 修正
+
+# 沉淀
+
+- Skill: \`homeassistant-connection-debugging\` **v3.0.0**（加 TCC 根因零 + launchctl reset + ghost 警告 + python.org PKG 修复）
+- Reference: \`references/macos-tahoe-binary-restriction.md\`（TCC 机制详解 + 6月4日终极方案）
+- 笔记: \`ha-macos-tahoe-venv-python-2026-06-03\`（**已过期**，仅作历史参考）
+`,
+  },
   {
     id: `agent-debug-self-recovery-thrashing-2026-06-03`,
     date: `2026-06-03`,

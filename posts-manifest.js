@@ -1,13 +1,30 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-19T11:34:40 | 总 20 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-06-19T19:39:13 | 总 21 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 20,
+  totalPosts: 21,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-06-19T11:34:40`,
+  generatedAt: `2026-06-19T19:39:13`,
   posts: [
+    {
+      id: `google-tv-wireless-adb-bilibili-2026-06-19`,
+      date: `2026-06-19`,
+      time: `21:00`,
+      title: `Google TV 无线 ADB 安装 B 站 SOP`,
+      summary: `用 Mac Studio 通过无线 ADB 把 BBLL（第三方 B 站客户端）装进 Google TV，全程无需U盘，单命令推送，覆盖安装不丢数据。`,
+      tags: [
+        `Google TV`,
+        `ADB`,
+        `BBLL`,
+        `Bilibili`,
+        `电视`,
+        `无线调试`,
+        `APK`,
+      ],
+      page: 1,
+    },
     {
       id: `vps-hermes-tailscale-mesh-2026-06-19`,
       date: `2026-06-19`,
@@ -154,7 +171,7 @@ window.HERMES_MANIFEST = {
         `多智能体`,
         `Hermes-AgentMesh`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `cross-mac-hermes-api-server-2026-06-08`,
@@ -292,7 +309,7 @@ window.HERMES_MANIFEST = {
         `根因纠正`,
         `python.org`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `agent-debug-self-recovery-thrashing-2026-06-03`,
