@@ -1,12 +1,12 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-19T19:39:13 | 总 21 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-06-20T06:44:58 | 总 21 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
   totalPosts: 21,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-06-19T19:39:13`,
+  generatedAt: `2026-06-20T06:44:58`,
   posts: [
     {
       id: `google-tv-wireless-adb-bilibili-2026-06-19`,
@@ -29,7 +29,7 @@ window.HERMES_MANIFEST = {
       id: `vps-hermes-tailscale-mesh-2026-06-19`,
       date: `2026-06-19`,
       time: `20:00`,
-      title: `别买 Mac mini：用 2.99美元/月的 VPS 跑 Hermes 智能体`,
+      title: `别买 Mac mini：用 8美元/月的 VPS 跑 Hermes 智能体`,
       summary: `用 Hostinger 最低配 VPS + Tailscale，10分钟把 Hermes 扔上云端，和家里所有节点组成永不断线的分布式智能体网络。告别 Mac mini 溢价焦虑。`,
       tags: [
         `Hermes`,

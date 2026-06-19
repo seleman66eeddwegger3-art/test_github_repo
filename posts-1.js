@@ -112,7 +112,7 @@ Success
     id: `vps-hermes-tailscale-mesh-2026-06-19`,
     date: `2026-06-19`,
     time: `20:00`,
-    title: `别买 Mac mini：用 2.99美元/月的 VPS 跑 Hermes 智能体`,
+    title: `别买 Mac mini：用 8美元/月的 VPS 跑 Hermes 智能体`,
     tags: [
       `Hermes`,
       `VPS`,
@@ -128,7 +128,7 @@ Success
 2026 WWDC 刚过，传言中的 Mac mini M5 没来，现有 Mac mini M4 入门版全网断货或高溢价。
 
 但 VPS 方案更划算：
-- 最低 2.99 美元/月（约 20 元人民币）
+- 最低 8.09 美元/月
 - 7×24 小时永不掉线
 - 无噪音，省电
 - 家里多台 Hermes 并发跑时旁路由可能崩溃，VPS 没有这个问题

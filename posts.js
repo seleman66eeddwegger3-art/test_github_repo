@@ -2509,7 +2509,7 @@ M3（MiniMax SDK）不支持 Anthropic 独有的 \`thinking\` + \`budget_tokens\
     id: "vps-hermes-tailscale-mesh-2026-06-19",
     date: "2026-06-19",
     time: "20:00",
-    title: "别买 Mac mini：用 2.99美元/月的 VPS 跑 Hermes 智能体",
+    title: "别买 Mac mini：用 8美元/月的 VPS 跑 Hermes 智能体",
     tags: ["Hermes", "VPS", "Tailscale", "Hostinger", "多智能体", "Docker", "Ubuntu24.04"],
     summary: "用 Hostinger 最低配 VPS + Tailscale，10分钟把 Hermes 扔上云端，和家里所有节点组成永不断线的分布式智能体网络。告别 Mac mini 溢价焦虑。",
     body: `# 背景：为什么不用 Mac mini 跑 Hermes？
@@ -2517,7 +2517,7 @@ M3（MiniMax SDK）不支持 Anthropic 独有的 \`thinking\` + \`budget_tokens\
 2026 WWDC 刚过，传言中的 Mac mini M5 没来，现有 Mac mini M4 入门版全网断货或高溢价。
 
 但 VPS 方案更划算：
-- 最低 2.99 美元/月（约 20 元人民币）
+- 最低 8.09 美元/月
 - 7×24 小时永不掉线
 - 无噪音，省电
 - 家里多台 Hermes 并发跑时旁路由可能崩溃，VPS 没有这个问题
