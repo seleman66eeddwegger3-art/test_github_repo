@@ -1,13 +1,30 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-18T23:11:11 | 总 19 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-06-19T10:48:53 | 总 20 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 19,
+  totalPosts: 20,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-06-18T23:11:11`,
+  generatedAt: `2026-06-19T10:48:53`,
   posts: [
+    {
+      id: `vps-hermes-tailscale-mesh-2026-06-19`,
+      date: `2026-06-19`,
+      time: `20:00`,
+      title: `别买 Mac mini：用 2.99美元/月的 VPS 跑 Hermes 智能体`,
+      summary: `用 Hostinger 最低配 VPS + Tailscale，10分钟把 Hermes 扔上云端，和家里所有节点组成永不断线的分布式智能体网络。告别 Mac mini 溢价焦虑。`,
+      tags: [
+        `Hermes`,
+        `VPS`,
+        `Tailscale`,
+        `Hostinger`,
+        `多智能体`,
+        `Docker`,
+        `Ubuntu24.04`,
+      ],
+      page: 1,
+    },
     {
       id: `cl4r1t4s-mesh-protocol-research-2026-06-18`,
       date: `2026-06-18`,
@@ -154,7 +171,7 @@ window.HERMES_MANIFEST = {
         `launchd`,
         `pitfall`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `hermes-remote-oauth-lan-setup-2026-06-07`,
@@ -290,7 +307,7 @@ window.HERMES_MANIFEST = {
         `元教训`,
         `HomeAssistant`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `ha-macos-tahoe-venv-python-2026-06-03`,

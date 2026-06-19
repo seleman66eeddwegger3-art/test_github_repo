@@ -2505,6 +2505,235 @@ M3（MiniMax SDK）不支持 Anthropic 独有的 \`thinking\` + \`budget_tokens\
 `,
   },
 
+  {
+    id: "vps-hermes-tailscale-mesh-2026-06-19",
+    date: "2026-06-19",
+    time: "20:00",
+    title: "别买 Mac mini：用 2.99美元/月的 VPS 跑 Hermes 智能体",
+    tags: ["Hermes", "VPS", "Tailscale", "Hostinger", "多智能体", "Docker", "Ubuntu24.04"],
+    summary: "用 Hostinger 最低配 VPS + Tailscale，10分钟把 Hermes 扔上云端，和家里所有节点组成永不断线的分布式智能体网络。告别 Mac mini 溢价焦虑。",
+    body: `# 背景：为什么不用 Mac mini 跑 Hermes？
+
+2026 WWDC 刚过，传言中的 Mac mini M5 没来，现有 Mac mini M4 入门版全网断货或高溢价。
+
+但 VPS 方案更划算：
+- 最低 2.99 美元/月（约 20 元人民币）
+- 7×24 小时永不掉线
+- 无噪音，省电
+- 家里多台 Hermes 并发跑时旁路由可能崩溃，VPS 没有这个问题
+
+用 Tailscale 把云端 VPS 和家里所有节点组成加密 mesh 网络，云端 Hermes 担任编排角色，家庭节点负责执行——这就是"多智能体黑灯工厂"。
+
+# Step 1 · 购买 Hostinger VPS（折扣码 WOWINSIGHT）
+
+## 推荐链接
+https://hostinger.com/WOWINSIGHT
+
+## 操作系统选择
+- **必须选 Linux**（Ubuntu，不要选带 GUI 的发行版）
+- 推荐选 **Ubuntu 24.04 LTS**（24.04 不是 22.04）
+- 推荐选带 **Docker 预装**的模板，一键省去安装 Docker 的步骤
+
+## 节点选择
+选距离你最近的区域即可。视频中选欧洲节点，实际使用中模型调用速度感觉还可以，测试了 NVIDIA 免费 API 和 DeepSeek API 响应都不错。
+
+## 初始化后必做
+在 "Secure your VPS access" 页面配置密码或添加 SSH Key（推荐 SSH Key 更安全）。
+
+# Step 2 · 安装 TMUX（会话常驻）
+
+TMUX 让 VPS 上的命令行会话在本地关机后依然保持运行。同时解决 Hermes 启动时的中文乱码问题。
+
+\`\`\`bash
+apt update && apt install tmux -y
+\`\`\`
+
+安装后用 \`tmux\` 命令进入会话，之后即使本地 SSH 断开，会话状态也会保留。
+
+# Step 3 · Docker Manager 一键部署 Hermes
+
+在 Hostinger 后台左侧 **Docker Manager** 界面，搜索 Hermes，选择第一个「Hermes Agent」，点击部署。
+
+Hostinger 帮你做好了底层隔离，一键就能跑起来。
+
+## 穿透进容器
+
+\`\`\`bash
+docker exec -it hermes-agent-tndl-hermes-agent-1 bash
+\`\`\`
+
+> 注意：容器名可能不同，用 \`docker ps\` 先确认。
+
+## 首次启动
+进入容器后，输入 \`hermes\` 回车，按提示去官网免费注册账号。官网会赠送一点大模型 API 免费额度，可以先选 NVIDIA 免费模型开始体验。
+
+首次启动时如果看到类似乱码的输出，安装 TMUX 后可以改善（Step 2 已做）。
+
+# Step 4 · 安装 Tailscale（宿主机层）
+
+## 注册
+https://tailscale.com （免费）
+
+## 安装（必须装在 VPS 宿主机，不要装进 Docker 容器）
+
+\`\`\`bash
+curl -fsSL https://tailscale.com/install.sh | sh
+tailscale up
+\`\`\`
+
+\`tailscale up\` 会输出一个魔法链接（https://login.tailscale.com/a/xxxxxx），复制到浏览器打开完成认证。
+
+> Tailscale 免费版支持组网，所有在这个账号下的设备都可以通过 Tailscale 私有 IP 互相访问。
+
+# Step 5 · iptables MSS 调优（丝滑流式输出）
+
+\`\`\`bash
+iptables -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+\`\`\`
+
+**这条命令在干什么**：
+
+守在 Docker 网桥和 Tailscale 虚拟网卡的交界处。每当家里的 Hermes 和 VPS 容器准备建立 TCP 连接时，强行把两端的最大报文段大小（MSS）裁剪到 Tailscale 的 1280 字节规格。
+
+有了它，数据包再也不会在出入 Docker 时被切碎丢包，Hermes 的流式吐字（Streaming）能达到原生直装的丝滑度。
+
+# Step 6 · 固定容器端口（防止端口漂移）
+
+Docker 每次重启，容器对外暴露的端口会随机变动。这会导致 Hermes Desktop 每次连接都要重新配端口。
+
+在 Hostinger 后台 **Projects → 编辑 docker-compose.yml**，找到 \`ports\` 那一行，写死为 \`"32768:4860"\`：
+
+\`\`\`yaml
+services:
+  hermes-agent:
+    image: ghcr.io/nousresearch/hermes-agent:latest
+    ports:
+      - "32768:4860"   # 固定端口，重启不变
+\`\`\`
+
+不管 VPS 怎么重启，这个云端智能体的入口永远固定在 32768 端口。
+
+# Step 7 · 配置 extra_hosts（注入内网节点）
+
+在同一份 docker-compose.yml 的 services.hermes-agent 下，加入 extra_hosts，把家里 Tailscale 节点的名字和 IP 写死：
+
+\`\`\`yaml
+services:
+  hermes-agent:
+    extra_hosts:
+      - "99:你的99节点Tailscale IP"
+      - "bobo:你的bobo节点Tailscale IP"
+      - "mechanic-01:你的mechanic-01节点Tailscale IP"
+\`\`\`
+
+> 请替换为你自己 Tailscale 网络里的真实 IP（可以通过 \`tailscale status\` 查看各节点 IP）。
+
+这样云端 Hermes 可以直接用 http://99 / http://bobo / http://mechanic-01 呼叫家里的节点。
+
+# Step 8 · SOUL.md 世界观注入（给 AI 安装灵魂）
+
+## 提取 SOUL.md
+
+\`\`\`bash
+# 查看运行中的容器
+docker ps
+
+# 把容器内的 SOUL.md 复制到宿主机
+docker cp hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md ./SOUL.md
+\`\`\`
+
+## 编辑 SOUL.md
+
+\`\`\`bash
+nano ./SOUL.md
+\`\`\`
+
+参考模板：
+
+\`\`\`markdown
+## 🌐 我的分布式网络世界观 (Tailscale Mesh Network)
+
+你当前独立部署在德国的 Hostinger VPS 商业节点上，处于一个加密的局域网（Tailscale）中。
+在你的网络中，有以下几台随时听你调遣的「邻居节点」。当你需要协同计算、抓取本地数据或执行特定任务时，可以直接通过终端或 HTTP 请求呼叫它们（你已经拥有它们的静态域名解析）：
+
+1. **99** (地址: \`http://99\`): ubuntu服务器，x230i旧笔记本16g内存，hermes，homeassistant服务器。
+2. **bobo** (地址: \`http://bobo\`): macmini m4，hermes。
+3. **mechanic-01** (地址: \`http://mechanic-01\`): macmini m1，openclaw。
+
+**重要指令**：当用户在对话中提到这些名字（如 "99", "bobo", "mechanic-01"）时，你必须立刻意识到这是指我们的内网信任节点，并根据上下文调用工具或生成对应的网络操作请求，不要将它们当作无关的乱码或噪音。
+\`\`\`
+
+保存：\`Ctrl + O\` → \`回车\` → \`Ctrl + X\`
+
+## 塞回容器并重启
+
+\`\`\`bash
+docker cp ./SOUL.md hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md
+docker restart hermes-agent-tndl-hermes-agent-1
+\`\`\`
+
+## 验证
+
+穿透进容器，问它：
+
+\`\`\`bash
+docker exec -it hermes-agent-tndl-hermes-agent-1 bash
+# 进入后输入：
+hermes
+你知道 99、bobo 和 mechanic-01 是什么吗？
+\`\`\`
+
+如果它能准确回答"三台都在同一个 Tailscale 加密局域网里，彼此可以互通"——说明灵魂注入成功。
+
+# Step 9 · Hermes Desktop 远程连接
+
+在 Hermes Desktop 里：
+
+1. 点击右上角**齿轮**图标
+2. 选择 **Gateway**
+3. 选择 **Remote Gateway**
+4. 输入 VPS 的 Tailscale IP 地址 + 端口 \`32768\`（格式：\`http://<Tailscale IP>:32768\`）
+5. 点击登录，输入安装 Hermes 时设置的用户名和密码
+
+如果忘记密码：在 Hostinger 后台 **Manage project with .yaml editor** 里重置。
+
+# 核心命令速查
+
+| 场景 | 命令 |
+|---|---|
+| 安装 TMUX | \`apt update && apt install tmux -y\` |
+| 穿透进容器 | \`docker exec -it hermes-agent-tndl-hermes-agent-1 bash\` |
+| 安装 Tailscale | \`curl -fsSL https://tailscale.com/install.sh \| sh && tailscale up\` |
+| MSS 调优 | \`iptables -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu\` |
+| 重启 Hermes | \`docker restart hermes-agent-tndl-hermes-agent-1\` |
+| 提取 SOUL.md | \`docker cp hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md ./SOUL.md\` |
+| 塞回 SOUL.md | \`docker cp ./SOUL.md hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md\` |
+
+# docker-compose.yml 参考
+
+\`\`\`yaml
+version: '3.8'
+services:
+  hermes-agent:
+    image: ghcr.io/nousresearch/hermes-agent:latest
+    container_name: hermes-agent-vps
+    ports:
+      - '32768:4860'
+    extra_hosts:
+      - '99:你的99节点Tailscale IP'
+      - 'bobo:你的bobo节点Tailscale IP'
+      - 'mechanic-01:你的mechanic-01节点Tailscale IP'
+    restart: unless-stopped
+\`\`\`
+
+# 相关链接
+
+- **Hostinger 折扣码**：WOWINSIGHT → https://hostinger.com/WOWINSIGHT
+- **Tailscale 注册**：https://tailscale.com
+- **Hermes Agent 官网**：https://hermes-agent.nousresearch.com
+`,
+  },
+
 ];
 
 window.HERMES_POSTS = POSTS;
