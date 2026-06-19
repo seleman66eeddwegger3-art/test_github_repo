@@ -34,7 +34,7 @@ window.HERMES_PAGE_1 = [
 https://hostinger.com/WOWINSIGHT
 
 ## 操作系统选择
-- **必须选 Linux**（Ubuntu，不要选带 GUI 的发行版）
+
 - 推荐选 **Ubuntu 24.04 LTS**
 - 推荐选带 **Docker 预装**的模板，一键省去安装 Docker 的步骤
 

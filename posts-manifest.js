@@ -1,12 +1,12 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-19T11:10:48 | 总 20 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-06-19T11:13:02 | 总 20 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
   totalPosts: 20,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-06-19T11:10:48`,
+  generatedAt: `2026-06-19T11:13:02`,
   posts: [
     {
       id: `vps-hermes-tailscale-mesh-2026-06-19`,
