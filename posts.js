@@ -2835,6 +2835,140 @@ Success
 `,
   },
 
+{
+    id: "hermes-container-venv-recovery-2026-06-19",
+    date: "2026-06-19",
+    time: "22:00",
+    title: "hermes: command not found？Docker 升级 3 步修",
+    tags: ["Hermes", "Docker", "venv", "故障恢复", "升级翻车", "VPS", "SOP"],
+    summary: "Hermes Desktop 触发容器升级后，Docker 内 /opt/hermes/.venv 被刷掉导致 hermes: command not found。3 步重建 venv 恢复，无需重启容器。",
+    body: `# 故障现象
+
+Hermes Desktop 检测到新版本后点了升级，背后的 Docker 容器被静默拉新镜像，导致容器内 \`/opt/hermes/.venv\` 整个文件夹丢失。
+
+执行任何 \`hermes\` 命令都会报：
+
+\`\`\`
+hermes: not found or not executable
+\`\`\`
+
+容器本身还在运行（\`docker ps\` 能看到），但内部的 Python 虚拟环境已被刷掉。
+
+# 根因
+
+Docker 容器在静默升级时会触发镜像层重构。如果 venv 目录没有做持久化 bind mount，重构后容器内整个 \`/opt/hermes/.venv\` 都会被清理掉。
+
+这是 Docker 升级的标准行为，**不是 bug，无需惊慌**。
+
+# 适用场景
+
+- 容器处于运行状态（\`docker ps\` 能看到）
+- \`hermes\` 命令失效或报 not found
+- \`/opt/hermes/.venv/\` 目录不存在或被破坏
+
+# Step 1 · 登录宿主机并定位容器
+
+使用 SSH 密钥及自定义端口登录 Hostinger 宿主机：
+
+\`\`\`bash
+ssh root@你的服务器IP -p 自定义端口
+\`\`\`
+
+查找当前运行的 Hermes 容器 ID：
+
+\`\`\`bash
+docker ps
+\`\`\`
+
+在输出列表中记下对应的 \`CONTAINER ID\`（例如 \`f7b6a227d976\`）。
+
+# Step 2 · 潜入容器内部终端
+
+使用交互模式进入目标容器（把 \`[CONTAINER_ID]\` 替换为上一步查到的实际 ID）：
+
+\`\`\`bash
+docker exec -it [CONTAINER_ID] bash
+\`\`\`
+
+> 💡 如果容器精简了 bash，请用 \`sh\` 替代：
+>
+> \`\`\`bash
+> docker exec -it [CONTAINER_ID] sh
+> \`\`\`
+
+# Step 3 · 重建 Python 虚拟环境
+
+进入项目根目录，重构 venv 并强制以可编辑模式拉起依赖：
+
+\`\`\`bash
+# 1. 切换至项目主目录
+cd /opt/hermes
+
+# 2. 重新初始化虚拟环境文件夹
+python3 -m venv .venv
+
+# 3. 强制以可编辑模式重新安装项目包（自动生成 bin/hermes）
+./.venv/bin/pip install -e .
+\`\`\`
+
+# Step 4 · 状态验证与启动
+
+## 4.1 验证核心可执行文件是否已生成
+
+\`\`\`bash
+ls -la /opt/hermes/.venv/bin/hermes
+\`\`\`
+
+预期输出：能看到 \`hermes\` 可执行文件存在（带绿色或白色权限位）。
+
+## 4.2 原地拉起 Hermes Agent
+
+\`\`\`bash
+hermes
+\`\`\`
+
+如果能正常进入交互界面，说明恢复成功。
+
+# 避坑提示
+
+## msal / cryptography 红字版本冲突可忽略
+
+执行 \`pip install -e .\` 期间如果提示类似：
+
+\`\`\`
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed.
+msal X.Y.Z requires cryptography>=A.B.C, but you have cryptography M.N.K which is incompatible.
+\`\`\`
+
+**直接忽略**。这是企业级 OAuth 依赖冲突（msal 用于 Microsoft 账户登录链路），不影响本地 Hermes Agent 的核心功能。
+
+# 防御机制（可选）
+
+如果想避免下次升级时再翻车，可以把 venv 目录 bind mount 到宿主机持久化：
+
+\`\`\`bash
+# 停掉现有容器后重新部署，docker-compose.yml 加：
+services:
+  hermes-agent:
+    volumes:
+      - /opt/hermes-venv:/opt/hermes/.venv
+\`\`\`
+
+这样 venv 升级后还能保留。但**绝大多数情况直接走 Step 3 重建即可**，没必要为此折腾持久化。
+
+# 速查命令
+
+| 场景 | 命令 |
+|---|---|
+| 找容器 ID | \`docker ps\` |
+| 潜入容器 | \`docker exec -it [ID] bash\` |
+| 重建 venv | \`python3 -m venv .venv\` |
+| 编辑模式安装 | \`./.venv/bin/pip install -e .\` |
+| 验证 hermes | \`ls /opt/hermes/.venv/bin/hermes\` |
+| 启动 hermes | \`hermes\` |
+`,
+  },
+
 ];
 
 window.HERMES_POSTS = POSTS;

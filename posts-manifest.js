@@ -1,13 +1,30 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-20T06:44:58 | 总 21 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-06-20T21:37:52 | 总 22 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 21,
+  totalPosts: 22,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-06-20T06:44:58`,
+  generatedAt: `2026-06-20T21:37:52`,
   posts: [
+    {
+      id: `hermes-container-venv-recovery-2026-06-19`,
+      date: `2026-06-19`,
+      time: `22:00`,
+      title: `hermes: command not found？Docker 升级 3 步修`,
+      summary: `Hermes Desktop 触发容器升级后，Docker 内 /opt/hermes/.venv 被刷掉导致 hermes: command not found。3 步重建 venv 恢复，无需重启容器。`,
+      tags: [
+        `Hermes`,
+        `Docker`,
+        `venv`,
+        `故障恢复`,
+        `升级翻车`,
+        `VPS`,
+        `SOP`,
+      ],
+      page: 1,
+    },
     {
       id: `google-tv-wireless-adb-bilibili-2026-06-19`,
       date: `2026-06-19`,
@@ -155,7 +172,7 @@ window.HERMES_MANIFEST = {
         `密语插曲`,
         `异构框架`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `boboself-built-hermes-agentmesh-2026-06-10`,
@@ -294,7 +311,7 @@ window.HERMES_MANIFEST = {
         `Gemini`,
         `元教训`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `ha-macos-tcc-local-network-pkg-fix-2026-06-04`,
