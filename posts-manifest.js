@@ -1,13 +1,30 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-20T21:37:52 | 总 22 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-06-21T22:39:43 | 总 23 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 22,
+  totalPosts: 23,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-06-20T21:37:52`,
+  generatedAt: `2026-06-21T22:39:43`,
   posts: [
+    {
+      id: `distributed-agent-m4-m1max-2026-06-21`,
+      date: `2026-06-21`,
+      time: `14:00`,
+      title: `M4 大脑 + M1 Max 后脑：端端协同 Agent 流水线`,
+      summary: `M4 16G 跑 Hermes 控调度, M1 Max 32G 跑 Agents-K1 做推理后脑, 400 GB/s 内存带宽完美绕开 16G 端侧 KV Cache 焦虑`,
+      tags: [
+        `Agent架构`,
+        `MLX`,
+        `Mac mini M4`,
+        `Mac Studio M1 Max`,
+        `端云协同`,
+        `KV Cache`,
+        `Hermes`,
+      ],
+      page: 1,
+    },
     {
       id: `hermes-container-venv-recovery-2026-06-19`,
       date: `2026-06-19`,
@@ -155,7 +172,7 @@ window.HERMES_MANIFEST = {
         `系统比模型`,
         `Agent开发者`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `hermes-openclaw-cross-device-date-2026-06-11`,
@@ -296,7 +313,7 @@ window.HERMES_MANIFEST = {
         `issue-tracker`,
         `v0.16-resolved`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `ha-plist-canonical-gemini-vs-stubborn-2026-06-04`,
