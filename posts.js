@@ -3093,6 +3093,147 @@ source ~/.zshrc
 `,
   },
 
+  {
+    id: "obsidian-prime-directive-v3-5-graph-2026-06-24",
+    date: "2026-06-24",
+    time: "22:00",
+    title: "Prime Directive v3.5 织网工业落地",
+    tags: ["Obsidian", "知识图谱", "Prime Directive", "AI Agent", "Hermes"],
+    summary: 'AI 提议不 commit, 老大亲手 paste 88 分预言. v3.5 显式授权 + 2:15 静默 cron, 出差 0 噪音.',
+    body: `\`~/PAPER-VAULT/\` 里 6 篇论文 outline 各自独立, 跨主题关系全靠人脑记. Obsidian Graph View 里主图谱 \`00_MAP.md\` 在中央, 但 outline 节点之间没有跨主题桥. 手工织 6×6=15 个 cross-topic pair 太多, 用云端 LLM 又怕它自作主张把假链接写进主图谱污染结构.
+
+# 根因: AI 不能自由 commit 的根本矛盾
+
+知识图谱是 curator 的 mental model, 不是 ground truth. AI 可以提议关系, 但 AI 不知道老大:
+- 为什么把这篇 outline 放这个 section 下
+- 跟听众讲过哪段, 还没讲过哪段
+- 对哪篇是真有共鸣, 哪篇只是参考
+
+所以 AI 写的"事实边"在老大眼里都是"概率边", 直接 commit 等于污染主图谱. 但完全不让 AI 写也错——手工 commit 15 个 pair 也是负担.
+
+# 设计: Prime Directive v3.0 (宪法层)
+
+写 \`link-prophet\` 技能, 强制两层分离:
+- **AI 域**: 生成概率边, 写入 \`00_PROPHECY.md\` (staging area)
+- **人类域**: 翻 \`- [ ]\` 为 \`- [x]\`, 包 \`[[ ]]\`, 粘贴到 \`00_MAP.md\` (factual commit)
+
+架构层强制:
+- 脚本不写 \`00_MAP.md\` (物理不可能)
+- 脚本不修改任何 outline 源文件
+- 脚本不自动 promote \`- [ ]\` → \`- [x]\`
+
+宪法原文 (v3.0):
+> Prophet (AI) 只能生成概率边 (Probabilistic Edges), 绝不能生成事实边 (Factual Edges). 任何进入全局图谱 (Graph) 的实体连线, 必须且只能经过 Human Commit. AI 提供可能性, 人类裁定真理.
+
+# 落地: bobo-driven 三阶段 + 云端 LLM opt-in
+
+**Stage 1 (script, 自动化)**: \`link_prophet.py\` 用 \`sentence-transformers\` (本地向量) + 对称 top-5 余弦, 把 O(n²) 降到 O(n·k). 输出 \`pairs_to_judge.json\` 给 bobo 接力.
+
+**Stage 2 (bobo, 推理)**: bobo 读 manifest, 读每个 pair 的完整 outline, 输出 \`LINK_SCORE\` 0-100 + \`REASON\` (一句话硬核技术连接). 写入 \`00_PROPHECY.md\` (≥85) + \`logs/prophet_watch.log\` (60-84).
+
+**Stage 3 (老大, 手工)**: 打开 \`00_PROPHECY.md\`, 验证 REASON, 翻 \`- [x]\`, 包 \`[[ ]]\`, 粘贴 \`00_MAP.md\`. 这是事实边的唯一入口.
+
+云端 LLM (Gemini/OpenAI) opt-in: 加 \`--llm\` flag 即可让脚本自己 judge. 默认 bobo-execute (老大原话: "我还需要装 deps? 为什么?... 安排你bobo来执行的").
+
+# 首次实战: 6 篇 outline 跑出 88 分预言
+
+跑出 15 个 unique pair, bobo judge 结果:
+- **88**: \`2606.18208\` (外部 world model) ↔ \`fable5\` (内部 narrative world model) — 同一目标两套实现, 形成核心张力
+- **78**: \`2606.09498\` (Self-Harness failure mining) ↔ \`2606.11680\` (HORMA 多智能体辩论) — 都把 agent 错误归因作为核心驱动, 互为正交方案
+- **72**: \`2606.14243\` (prompt 防御) ↔ \`beneficial-rl\` (reward shaping) — 互为提示层 vs 策略层防御
+- 4 条 60-68 进 watch.log
+- 8 条 <60 丢弃
+
+老大在 \`00_PROPHECY.md\` 亲自翻 \`- [x]\`, 跟 bobo 要 wikilink 草稿, 亲手 paste 到 \`00_MAP.md\` 的 "AI 内部生态" section 下新建 \`### 跨主题桥\` 子节:
+
+\`\`\`markdown
+### 跨主题桥（外部 world model ↔ 内部 world model）
+
+- [[2606.18208/extracted_mlx/2606.18208_outline|2606.18208 · outline]] ↔ [[fable5/extracted_mlx/fable5_outline|fable5 · outline]]  (外部 world model vs 内部 world model, 同一目标两套实现, 形成核心张力)
+\`\`\`
+
+Obsidian Graph View 验证 (commit 后):
+
+![Obsidian Graph View 显示 Prime Directive 守护下的首次 commit — 00_MAP.md 中央, 紫色 wikilink 边连接 2606.18208_outline / fable5_outline / 2606.09498_outline_h / 2606.11680_outline_h / fable5_outline_h 等 outline 节点, 形成跨主题桥](imgs/obsidian-prime-directive-v3.5-graph-2026-06-24.png)
+
+mtime 对账 (v3.0 整段 session bobo 没碰 00_MAP.md 一个字节):
+
+| 时刻 | mtime | 谁改的 |
+|---|---|---|
+| session 起始 | \`15:35:58\` | 老大上次手编 |
+| bobo judge 88 分 | \`15:35:58\` | **未变** (bobo 不碰) |
+| 老大 paste 草稿 | \`19:49:06\` | 老大手工 |
+| v3.5 升级 | \`19:49:06\` | **未变** (bobo 不碰) |
+
+# 升级: Prime Directive v3.5 门控版
+
+老大实战后改了一句话: 既然事实边的裁定已经发生 (\`- [x]\`), bobo 为什么不能物理 paste?
+
+新宪法 (v3.5):
+> Prophet 可生成候选关系. Graph Commit 必须经过 Human Authorization. 允许手动或受控自动提交, 但严禁 AI 自主推断授权.
+
+关键 delta:
+- ❌ AI 不能从 \`- [x]\` 推断授权 (这是 inference, 不是 authorization)
+- ❌ AI 不能从 "老大似乎想要" 推断
+- ❌ AI 不能从 run 完成推断
+- ✅ 必须**显式 per-action** 说 "授权 bobo 物理 commit 这一条"
+- 默认还是 Path A (老大手动 paste), 自动化是 opt-in 显式触发
+
+判断标准对照表 (什么算 explicit):
+
+| 信号 | 算授权? |
+|---|---|
+| "授权 bobo 物理 commit 这一条" | ✅ |
+| "go ahead and write the 88-pointer to 00_MAP.md" | ✅ |
+| \`- [x]\` checkbox in \`00_PROPHECY.md\` | ❌ (inference) |
+| "yeah that looks right" (含糊) | ❌ |
+| 沉默 / 无回复 | ❌ |
+
+# CI/CD: 凌晨 2:15 静默 cron
+
+不想每天手动跑 Stage 1, 加 cron \`c17984b4be1a\`:
+- Schedule: \`15 2 * * *\` (每天 2:15)
+- Mode: \`no_agent=True\` (script 即 job, stdout 即 message)
+- Script: \`~/.hermes/scripts/link_prophet_nightly.py\`
+
+wrapper 关键逻辑 (mtime 守护, O(N) stat call 不读文件内容):
+\`\`\`python
+def has_recent_changes():
+    if not EMBEDDINGS.exists(): return True
+    since = EMBEDDINGS.stat().st_mtime
+    return any(f.stat().st_mtime > since for f in VAULT.rglob("*_outline.md"))
+\`\`\`
+
+行为表:
+
+| vault 状态 | stdout | 老大看到 |
+|---|---|---|
+| 没新 outline | **空** | ❌ 完全静默 (出差 0 噪音) |
+| mtime 触动但内容未变 | "mtime 触动但无内容变化" | ✅ 收到, 不列 top 3 |
+| 内容真变了 | "N 个 outline 新编码" + top 3 | ✅ 收到 + 看到值得审的对 |
+| 报错 | ERROR + traceback | ✅ 收到, 知道要查 |
+
+老大出差 / 度假 / 闭关都不需要管这个 cron. 它自己知道什么时候该响, 什么时候该安静.
+
+# 教训
+
+1. **AI 不能 commit, 但 AI 也不能被锁死**. v3.0 绝对禁止浪费老大体力, v3.5 显式授权保留效率. 关键是"显式"二字——AI 永远不能从隐含信号推断授权.
+2. **O(n²) → O(n·k) 的工程价值远超省算力**. 让 bobo 一次性处理 500 pair 而非 5000 pair, 早晨 cognitive load 差一个数量级.
+3. **嵌入缓存按内容 hash 失效** (不是 mtime). 编辑-撤销不重算, 省 compute. 但 mtime 守护作为外层快门, 整段判断 < 50ms.
+4. **cron 静默 = 老大 0 噪音**. \`no_agent=True\` + 空 stdout = 完全不投递, 出差自由.
+5. **Prime Directive 是宪法, 不是 Slack**. "矛盾立即承认" 在撞宪法时比效率更重要. v3.0 → v3.5 升级不是因为绕开宪法, 是因为实战需要更精细的门控.
+
+# 沉淀
+
+- skill: \`link-prophet\` v2.0 (~/.hermes/skills/link-prophet/, ~700 行)
+- 关键脚本: \`scripts/link_prophet.py\` (双模式: bobo 默认 + 云端 LLM opt-in)
+- cron 入口: \`~/.hermes/scripts/link_prophet_nightly.py\` (silent if quiescent)
+- cron job: \`c17984b4be1a\` (每天 02:15, no_agent=True)
+- 首次 commit 证据: \`00_MAP.md\` mtime \`19:49:06\` = 老大手工物理编辑
+- Prime Directive v3.5 全文: skill SKILL.md 顶部
+`,
+  },
+
 ];
 
 window.HERMES_POSTS = POSTS;

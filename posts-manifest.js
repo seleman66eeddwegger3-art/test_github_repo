@@ -1,13 +1,28 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-21T22:39:43 | 总 23 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-06-24T21:53:38 | 总 24 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 23,
+  totalPosts: 24,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-06-21T22:39:43`,
+  generatedAt: `2026-06-24T21:53:38`,
   posts: [
+    {
+      id: `obsidian-prime-directive-v3-5-graph-2026-06-24`,
+      date: `2026-06-24`,
+      time: `22:00`,
+      title: `Prime Directive v3.5 织网工业落地`,
+      summary: `AI 提议不 commit, 老大亲手 paste 88 分预言. v3.5 显式授权 + 2:15 静默 cron, 出差 0 噪音.`,
+      tags: [
+        `Obsidian`,
+        `知识图谱`,
+        `Prime Directive`,
+        `AI Agent`,
+        `Hermes`,
+      ],
+      page: 1,
+    },
     {
       id: `distributed-agent-m4-m1max-2026-06-21`,
       date: `2026-06-21`,
@@ -156,7 +171,7 @@ window.HERMES_MANIFEST = {
         `Agent时代`,
         `99视角`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `build2026-three-node-collab-2026-06-12`,
@@ -297,7 +312,7 @@ window.HERMES_MANIFEST = {
         `ai-playlist`,
         `taste-profile`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `hermes-desktop-remote-gateway-test-false-pass-2026-06-05`,
