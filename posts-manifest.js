@@ -1,13 +1,30 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-24T21:53:38 | 总 24 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-06-26T17:50:15 | 总 25 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 24,
+  totalPosts: 25,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-06-24T21:53:38`,
+  generatedAt: `2026-06-26T17:50:15`,
   posts: [
+    {
+      id: `dag-orchestrator-macmini-fleet-2026-06-26`,
+      date: `2026-06-26`,
+      time: `16:30`,
+      title: `OpenClaw + Python daemon 三节点 DAG 跑通`,
+      summary: `Mac mini .175 + .99 联邦跑通 3 步投研评论 DAG, Python daemon 编排 7.7 min 全自动, 含 2 个 P0 bug 修复 (redis-py 8 BRPOP + state key 类型) 与 watchdog 落盘告警`,
+      tags: [
+        `dag`,
+        `redis-bus`,
+        `openclaw`,
+        `macos-launchd`,
+        `multi-agent`,
+        `cron`,
+        `state-machine`,
+      ],
+      page: 1,
+    },
     {
       id: `obsidian-prime-directive-v3-5-graph-2026-06-24`,
       date: `2026-06-24`,
@@ -155,7 +172,7 @@ window.HERMES_MANIFEST = {
         `Agent形态`,
         `mechanic-01视角`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `agent-cron-vs-systemd-timer-layered-2026-06-12`,
@@ -297,7 +314,7 @@ window.HERMES_MANIFEST = {
         `auth-gate`,
         `env-file`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `apple-music-5-scenario-playlist-2026-06-06`,

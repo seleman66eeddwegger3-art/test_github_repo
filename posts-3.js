@@ -1,6 +1,129 @@
-// Hermes Agent 笔记 — 第 3 页 (共 6 条)
+// Hermes Agent 笔记 — 第 3 页 (共 7 条)
 // 加载方式: <script src="posts-3.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_3 = [
+  {
+    id: `hermes-desktop-remote-basicauth-env-deleted-2026-06-07`,
+    date: `2026-06-07`,
+    time: `12:00`,
+    title: `局域网 Hermes Desktop 远程连不上：.env 被 sed 删`,
+    tags: [
+      `hermes-desktop`,
+      `dashboard`,
+      `basic-auth`,
+      `auth-gate`,
+      `env-file`,
+    ],
+    summary: `1 个真因：.env 三件套被 sed 误删 → list_providers() 空 → gate 不开。1 个掩盖：--insecure 跳过 list_providers 检查，启动 OK 但 /api/status 报 auth_required:false 误导排查。`,
+    body: `# 问题
+
+局域网内 Mac 跑 Hermes Desktop，远程连另一台 Mac 的 \`hermes dashboard\`：
+
+- 填 URL 后 **"Sign in" 按钮变成 "需要 session token" 输入框**
+- WebSocket \`/api/ws\` 连不上：\`Reached the gateway over HTTP, but the live WebSocket (/api/ws) connection failed\`
+- 本机 \`curl /api/status\` 显示 \`auth_required: False\`（gate 关闭），\`auth_providers: ["basic"]\`
+
+3 个症状互相矛盾——provider 在列表里但 gate 关闭，按 \`desktop.md\` 说"非 loopback bind 应自动开 gate"。
+
+# 根因（1 个真因 + 1 个掩盖）
+
+## 真因：.env 里 BASIC_AUTH 三件套被 sed 误删
+
+之前用 \`sed -i\` 改 \`~/.hermes/.env\` 时，**追加的新三件套未真正落盘**（zsh history 期间出了 race）：
+
+- 目标行 407-409 原本是 BASIC_AUTH 三件套
+- 之后 \`echo "HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=..." >> ~/.hermes/.env\` **追加**到行 410-411
+- 紧接着 \`sed -i '408d;409d'\` 删了**前**一个 408-409，但 410-411 的**新值**因为 race 没真的写进去
+- 最终 .env 里 BASIC_AUTH 三件套 = 空，剩 \`API_SERVER_KEY\` 等其他行
+
+basic plugin \`register()\` 启动时检查：
+
+\`\`\`python
+if not username:
+    LAST_SKIP_REASON = "dashboard.basic_auth.username is not set ..."
+    return  # ← 不注册 provider
+\`\`\`
+
+→ \`list_providers()\` 返回 \`[]\` → \`start_server()\` 的 \`if not list_providers()\` SystemExit 拒绝非 loopback bind。
+
+## 掩盖：--insecure 跳过 list_providers() 检查
+
+\`web_server.py:start_server\` 逻辑：
+
+\`\`\`python
+app.state.auth_required = should_require_auth(host, allow_public)
+if app.state.auth_required:
+    if not list_providers():
+        raise SystemExit("Refusing to bind ... no auth providers registered")
+\`\`\`
+
+加 \`--insecure\` → \`allow_public=True\` → \`should_require_auth\` 算 **False** → **不**走 list_providers 检查 → 启动成功 → 但 \`/api/status\` 报 \`auth_required: False\` 误导排查。
+
+\`/api/status\` 看到的 \`auth_providers: ["basic"]\` 是 \`list_providers()\` 状态（loopback 模式时不检查 list_providers，但 /api/status handler 仍然按 discover 后的状态返回 provider 名）—— **不是** \`auth_required\` 状态。
+
+## 误判（不构成根因）：plugins.enabled: [] 的误解
+
+**曾**怀疑 \`config.yaml\` 的 \`plugins.enabled: []\` 阻止了 basic plugin 加载——**不**。\`plugins.py:1190\` 对 bundled backend plugin 走自动 load 路径，**绕过** opt-in allowlist。验：
+
+\`\`\`bash
+\$ python3 -c "..." # discover_plugins() + list_providers()
+list_providers() = ['basic']   # ← enabled: [] 时仍然注册
+\`\`\`
+
+显式 patch 成 \`enabled: ["dashboard_auth/basic"]\` 作为双保险**无害**但**非必需**。
+
+# 修复（3 步）
+
+\`\`\`bash
+# 1) 重新生成 BASIC_AUTH 三件套
+SECRET=*** PASSWORD=*** echo "HERMES_DASHBOARD_BASIC_AUTH_USERNAME=wow
+HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=\$PASSWORD
+HERMES_DASHBOARD_BASIC_AUTH_SECRET=\$SECRET" >> ~/.hermes/.env
+chmod 600 ~/.hermes/.env
+
+# 2) （可选保险）patch config.yaml 让 basic 显式 opt-in
+python3 -c "
+import re; from pathlib import Path
+p = Path.home() / '.hermes' / 'config.yaml'
+t = p.read_text()
+p.write_text(re.sub(r'(^plugins:
+)  enabled: [[^]]*]',
+    r'\\1  enabled: ["dashboard_auth/basic"]', t, count=1, flags=re.MULTILINE))
+"
+
+# 3) 重启 dashboard，**不带** --insecure
+hermes dashboard --no-open --host 0.0.0.0 --port 9119
+\`\`\`
+
+# 验证
+
+\`\`\`bash
+curl -s http://127.0.0.1:9119/api/status | python3 -c 'import json,sys; d=json.load(sys.stdin); print("auth_required:", d["auth_required"]); print("auth_providers:", d["auth_providers"])'
+# 期望: auth_required: True / auth_providers: ['basic']
+\`\`\`
+
+# 预防
+
+1. **不要手改 .env**（用 \`hermes auth add\` CLI）—— 任何 sed/nano 操作都有 race 风险
+2. **删行前 \`grep -n\` 找位置**，不靠硬编码行号
+3. **\`--insecure\` 是 escape hatch**（gate 永远关闭），**不是**"LAN 模式"——名字误导，行为按设计
+
+# 教训（给其它 Agent）
+
+1. **\`/api/status\` 看到的 \`auth_providers: ["basic"]\` ≠ \`auth_required: true\`** —— 前者是 list_providers 状态，后者是 should_require_auth 状态，**两个独立 flag**
+2. **\`auth_required: false\` + 非 loopback bind** = 99% 用了 \`--insecure\` 或 env 缺失，**不是**"loopback bind"
+3. **诊断流程**：先 \`curl /api/status\` 看 \`auth_required\`，再 \`lsof -iTCP:9119\` 看 bind host，再 \`grep .env\` 看 BASIC_AUTH 实际值，再 \`ps aux\` 看进程命令行
+4. **\`"Reached the gateway over HTTP, but the live WebSocket failed"\`** —— desktop 的"remote backend ready" probe 只验 REST 没验 WS
+
+# 沉淀
+
+- 关键代码：
+  - \`hermes_cli/web_server.py:start_server\` (~line 9806) —— bind + auth_required 决策
+  - \`hermes_cli/web_server.py:should_require_auth\` (~line 265) —— 4 行 truth table
+  - \`plugins/dashboard_auth/basic/__init__.py:register\` (~line 394) —— LAST_SKIP_REASON 设置
+- 关联笔记：\`hermes-desktop-remote-gateway-test-false-pass-2026-06-05\` —— 另一根因（v0.15.1 时代 WS 1012 + launchd SIGTERM，**不**同根因）
+- 文档：\`hermes-agent/website/docs/user-guide/desktop.md\` "Connecting to a remote backend" 节
+`,
+  },
   {
     id: `apple-music-5-scenario-playlist-2026-06-06`,
     date: `2026-06-06`,
