@@ -15,8 +15,10 @@ window.HERMES_PAGE_1 = [
       `cron`,
       `state-machine`,
     ],
-    summary: `Mac mini .175 + .99 联邦跑通 3 步投研评论 DAG, Python daemon 编排 7.7 min 全自动, 含 2 个 P0 bug 修复 (redis-py 8 BRPOP + state key 类型) 与 watchdog 落盘告警`,
-    body: `> 2026-06-26 实战: Mac mini 联邦跑通 3 步投研评论 DAG, Python daemon 编排 7.7 min 全自动, 含 2 个 P0 bug 修复
+    summary: `Mac mini .175 + .99 联邦跑通 3 步投研评论 DAG, Python daemon 编排 7.7 min 全自动. 6/27 修订: 触发调度改 hermes cronjob (P0 #39 dashboard 可见) + 修 trigger key 冒号 bug (P0 #41), 共 4 个 P0 bug 修复`,
+    body: `# OpenClaw + Python daemon 三节点 DAG 跑通
+
+> 2026-06-26 实战: Mac mini 联邦跑通 3 步投研评论 DAG, Python daemon 编排 7.7 min 全自动, 含 2 个 P0 bug 修复
 
 ## TL;DR
 
@@ -105,34 +107,32 @@ OpenClaw agent 跑在 .99 端本地 (继承 Mac mini 挂载), 通过 \`http://19
 - **PID file**: \`/Users/eight/.hermes/async_bus/orchestrator_dag_hunt.pid\`
 - **try/except 兜底**: 任何未捕获异常 → log + sleep 5s + 继续, 不让 daemon crash
 
-### 4.2 LaunchAgent plist (3 个)
+### 4.2 LaunchAgent plist (1 个) + hermes cronjob (2 个)
 
-| Plist | Label | 触发方式 |
+| 组件 | Label / job_id | 触发方式 |
 |---|---|---|
-| orchestrator_dag_hunt | ai.hermes.orchestrator_dag_hunt | KeepAlive=true, 持续运行 |
-| trigger_hunt_dag | ai.hermes.trigger_hunt_dag | StartCalendarInterval 09:00 daily |
-| watchdog_hunt_dag | ai.hermes.watchdog_hunt_dag | StartCalendarInterval 11:00 daily |
+| orchestrator_dag_hunt.plist | ai.hermes.orchestrator_dag_hunt | launchd KeepAlive=true (常驻服务) |
+| hunt-dag-daily (cronjob) | job_id \`03f57efe76ae\` | hermes cron 09:30 daily (script=\`trigger_hunt_dag.sh\`) |
+| hunt-dag-watchdog (cronjob) | job_id \`08a1c3cada09\` | hermes cron 11:00 daily (script=\`watchdog_hunt_dag.py\`) |
 
-\`launchctl load -w\` 全部生效, 启动顺序: orchestrator (先) → trigger (后) → watchdog (再后).
+**2026-06-27 修订**: trigger + watchdog 改用 hermes cronjob (老大 dashboard 立即可见), launchd plist 已删除. orchestrator daemon 仍 launchd KeepAlive (常驻服务不是 cron).
 
-### 4.3 Shell scripts (3 个)
+### 4.3 Shell scripts (3 个) — 2026-06-27 修订
 
-- \`trigger_hunt_dag.sh\` (1.6K): launchd 09:00 触发入口, LPUSH \`trigger:hunt:dag\`
-- \`watchdog_hunt_dag.sh\` (1.2K): launchd 11:00 触发入口, 透传 watchdog exit code
+- \`trigger_hunt_dag.sh\` (1.6K): **hermes cron 09:30 入口** (P0 #41: TRIGGER_KEY=\`trigger:hunt:dag\` 冒号), LPUSH 到 daemon BRPOP 队列
+- \`watchdog_hunt_dag.sh\` (1.2K): hermes cron 11:00 入口, 透传 watchdog exit code
 - \`monitor_dag.sh\` (3K): debug 用, 后台跑实时打印 state, 完成自动退出
 
-### 4.4 核心文件清单
+### 4.4 核心文件清单 — 2026-06-27 修订
 
 | 文件 | 大小 | 作用 |
 |---|---|---|
-| \`orchestrator_dag_hunt.py\` | 15.4K / 402 行 | 编排 daemon |
-| \`trigger_hunt_dag.sh\` | 1.6K | 09:00 trigger |
-| \`watchdog_hunt_dag.py\` | 7.4K | 异常检测 (3 check) |
-| \`watchdog_hunt_dag.sh\` | 1.2K | watchdog 入口 |
-| \`monitor_dag.sh\` | 3K | debug 实时监控 |
-| \`~/Library/LaunchAgents/ai.hermes.orchestrator_dag_hunt.plist\` | 1.7K | daemon KeepAlive |
-| \`~/Library/LaunchAgents/ai.hermes.trigger_hunt_dag.plist\` | 1.0K | 09:00 daily |
-| \`~/Library/LaunchAgents/ai.hermes.watchdog_hunt_dag.plist\` | 988 B | 11:00 daily |
+| \`orchestrator_dag_hunt.py\` | 15.4K / 402 行 | 编排 daemon (launchd KeepAlive) |
+| \`~/.hermes/scripts/trigger_hunt_dag.sh\` | 1.6K | **hermes cron 09:30 入口** (从 async_bus/ 移过来) |
+| \`~/.hermes/scripts/watchdog_hunt_dag.py\` | 7.4K | **hermes cron 11:00 入口** (3 check + ALERT) |
+| \`~/Library/LaunchAgents/ai.hermes.orchestrator_dag_hunt.plist\` | 1.7K | **唯一保留的** launchd plist (daemon KeepAlive) |
+
+**❌ 已删除 (P0 #39 老大硬规则)**: trigger/watchdog launchd plist — 改用 hermes cronjob (老大 dashboard 立即可见)
 
 ## 五、验证时间线
 
@@ -160,12 +160,14 @@ OpenClaw agent 跑在 .99 端本地 (继承 Mac mini 挂载), 通过 \`http://19
 
 ## 六、后续维护方案
 
-明天的全自动化时间线:
+明天的全自动化时间线 — **2026-06-27 修订 (09:30, hermes cronjob)**:
 
-    09:00  trigger_hunt_dag.sh → LPUSH trigger
-    09:00  orchestrator_dag_hunt (PID 1873) BRPOP → init_run + 投 Step 1
-    ~09:07-09:30  3 step 自动完成 → write DONE.marker + report.md
-    11:00  watchdog_hunt_dag.py → 3 check 静默 → exit 0
+    09:30  hunt-dag-daily (hermes cron) → bash trigger_hunt_dag.sh → LPUSH trigger:hunt:dag (冒号, P0 #41)
+    09:30  orchestrator_dag_hunt (PID 1873, launchd KeepAlive) BRPOP → init_run + 投 Step 1
+    ~09:37-10:00  3 step 自动完成 → write DONE.marker + report.md
+    11:00  hunt-dag-watchdog (hermes cron) → bash watchdog_hunt_dag.py → 3 check 静默 → exit 0
+
+**老大 dashboard 实时监控**: http://192.168.2.175:9119/cron (4 个 cron: wow-site 23:00 / link-prophet 02:15 / hunt-dag-daily 09:30 / hunt-dag-watchdog 11:00)
 
 异常路径 (任一 check 失败):
 
@@ -182,9 +184,9 @@ watchdog 3 个 check:
 
 Bobo 工时释放: 从现在起, Bobo 在 cron / watchdog 链路上 0 介入. 只有当 ALERT 文件出现, 老大才需要叫 Bobo 排查.
 
-## 七、关键经验 (2 个 P0 bug)
+## 七、关键经验 (4 个 P0 bug, 6/26 + 6/27 各 2 个)
 
-### Bug 1: redis-py 8.0.0 BRPOP timeout 返回 None
+### Bug 1: redis-py 8.0.0 BRPOP timeout 返回 None (6/26)
 
     File "orchestrator_dag_hunt.py", line 392, in <module>
         _, trigger = r.brpop(TRIGGER_KEY, timeout=BRPOP_POLL_TIMEOUT)
@@ -201,7 +203,7 @@ Bobo 工时释放: 从现在起, Bobo 在 cron / watchdog 链路上 0 介入. �
             return result[0], result[1]
         return None, result
 
-### Bug 2: state key 类型一致性
+### Bug 2: state key 类型一致性 (6/26)
 
 \`init_run\` 用 \`{1: 1, 2: 1, 3: 2}\` (int), \`trigger_step\` 用 \`state['step_turns'][str(step_num)]\` (str lookup). JSON 序列化后 int key 变 str → KeyError.
 
@@ -209,12 +211,39 @@ Bobo 工时释放: 从现在起, Bobo 在 cron / watchdog 链路上 0 介入. �
 
 两个 bug 都由 try/except 兜底抓到 (主循环外层), daemon 没 crash, 但 Step 1 没投出.
 
+### Bug 3: launchd plist 不在 Hermes dashboard, 老大看不到 = 黑盒 (6/27 老大质询触发)
+
+6/26 部署 trigger + watchdog 用 \`~/Library/LaunchAgents/ai.hermes.trigger_*.plist\` (StartCalendarInterval), 6/27 老大质问: "在 hermes dashboard 的列表没有看到 cron 每天 9:30 调用 ... 今天上午 9:30 实际上没有完成工作. 你是不是不知道自己有这个功能定时安排任务?"
+
+事实链:
+- launchd plist 不出现在 Hermes Dashboard CRON 页面 (http://192.168.2.175:9119/cron)
+- 老大看到 dashboard 只有 2 个 cron (wow-site + link-prophet), 推断 9:30 没工作
+- 实际 launchd plist 跑 cron 是黑盒
+
+修法: 用 \`hermes cronjob\` 工具建 cronjob, script 放 \`~/.hermes/scripts/\`. 老大 dashboard 立即可见. 详见 skill P0 #39.
+
+### Bug 4: trigger key 冒号 vs 下划线不一致, daemon 永远消费不到 (6/27 实战)
+
+\`trigger_hunt_dag.sh\` 之前用 \`TRIGGER_KEY="trigger:hunt_dag"\` (下划线), 但 daemon 代码 \`TRIGGER_KEY = "trigger:hunt:dag"\` (冒号, 跟 v1.0 DAG 文档 §1 一致). 两条 key 是不同 list, daemon BRPOP 冒号永远拿不到 script LPUSH 进去的下划线消息. 6/27 13:08:15 hermes cronjob 触发 LPUSH 返回 4 但 daemon log 没收到, 诊断 3.3 min 后才找到.
+
+修法: trigger script 必须用冒号 key \`trigger:<NAME>:dag\` (跟 daemon TRIGGER_KEY 一致). **必跑链路验证**: bash 跑 script → 看 daemon log \`[TRIGGER] received\` 必须出现 (3s 内). 详见 skill P0 #41.
+
 ## 沉淀
 
-- skill: \`~/.hermes/skills/devops/dag-orchestrator-redis-bus\` (14K, 9 步 SOP + 12 P0 pitfalls + watchdog)
-- 关键文件: \`orchestrator_dag_hunt.py\` (402 行) + 3 个 plist + 3 个 shell
-- 明天自动化时间线: 09:00 trigger → 11:00 watchdog → 静默
-- Vercel 笔记: 完整发版已沉淀, skill 是给 agent 用的精简工作流`,
+- skill: \`~/.hermes/skills/devops/dag-orchestrator-redis-bus\` (16K, 9 步 SOP + **15** P0 pitfalls + watchdog, 6/27 整理)
+- 关键文件: \`orchestrator_dag_hunt.py\` (402 行) + **1 个 daemon plist** (launchd KeepAlive) + **2 个 hermes cronjob** (trigger + watchdog)
+- 明天自动化时间线: **09:30** hermes cron → 11:00 hermes cron → 静默
+- 老大 dashboard 监控: http://192.168.2.175:9119/cron (4 个 cron 可见)
+
+## 📝 修订记录
+
+- **2026-06-27 修订**:
+  - §4.2 plist 表: trigger/watchdog 改用 hermes cronjob (launchd plist 已删除), 时间 09:00 → 09:30
+  - §4.3 shell: trigger 入口改 hermes cron, 强调 P0 #41 冒号 key
+  - §4.4 文件清单: trigger/watchdog 移到 \`~/.hermes/scripts/\` (hermes cronjob 强制位置)
+  - §六、维护方案: 时间线改 09:30 + dashboard URL
+  - §七、关键经验: 从 2 个 P0 bug 加到 **4 个 P0 bug**, 新增 Bug 3 (launchd plist 黑盒, 老大质询触发) + Bug 4 (trigger key 冒号不一致)
+  - 沉淀: skill 加 P0 #41 #42, 时间改 09:30`,
   },
   {
     id: `obsidian-prime-directive-v3-5-graph-2026-06-24`,

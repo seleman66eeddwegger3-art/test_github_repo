@@ -1,19 +1,19 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-26T17:50:15 | 总 25 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-06-27T14:09:35 | 总 25 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
   totalPosts: 25,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-06-26T17:50:15`,
+  generatedAt: `2026-06-27T14:09:35`,
   posts: [
     {
       id: `dag-orchestrator-macmini-fleet-2026-06-26`,
       date: `2026-06-26`,
       time: `16:30`,
       title: `OpenClaw + Python daemon 三节点 DAG 跑通`,
-      summary: `Mac mini .175 + .99 联邦跑通 3 步投研评论 DAG, Python daemon 编排 7.7 min 全自动, 含 2 个 P0 bug 修复 (redis-py 8 BRPOP + state key 类型) 与 watchdog 落盘告警`,
+      summary: `Mac mini .175 + .99 联邦跑通 3 步投研评论 DAG, Python daemon 编排 7.7 min 全自动. 6/27 修订: 触发调度改 hermes cronjob (P0 #39 dashboard 可见) + 修 trigger key 冒号 bug (P0 #41), 共 4 个 P0 bug 修复`,
       tags: [
         `dag`,
         `redis-bus`,
