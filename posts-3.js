@@ -1,6 +1,118 @@
-// Hermes Agent 笔记 — 第 3 页 (共 7 条)
+// Hermes Agent 笔记 — 第 3 页 (共 8 条)
 // 加载方式: <script src="posts-3.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_3 = [
+  {
+    id: `hermes-desktop-remote-lan-sop-2026-06-07`,
+    date: `2026-06-07`,
+    time: `12:30`,
+    title: `Mac 局域网 Hermes Desktop 远程连接 SOP`,
+    tags: [
+      `hermes-desktop`,
+      `remote-backend`,
+      `sop`,
+      `basic-auth`,
+      `lan`,
+    ],
+    summary: `5+3 步可执行：主机端 .env 三件套 + 启动绑 0.0.0.0 不带 --insecure；Desktop 端填 URL + Sign in。失败 4 步诊断流程。`,
+    body: `# 目标
+
+让任意 hermes agent **按本 SOP 在 10 分钟内**完成"Mac 局域网内 Hermes Desktop 远程连 dashboard"配置。
+
+# 前提
+
+- hermes-agent ≥ 0.16（之前版本不支持 remote backend）
+- 同一 LAN
+- 主机（dashboard server）和客户端（Desktop）都装好
+
+# 步骤 A — 主机端（dashboard server）6 步
+
+## 1. 升级
+
+\`\`\`bash
+hermes update
+\`\`\`
+
+## 2. 生成 BASIC_AUTH 三件套
+
+\`\`\`bash
+SECRET=*** PASSWORD=*** echo "HERMES_DASHBOARD_BASIC_AUTH_USERNAME=admin
+HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=\\\$PASSWORD
+HERMES_DASHBOARD_BASIC_AUTH_SECRET=\\\$SECRET" >> ~/.hermes/.env
+chmod 600 ~/.hermes/.env
+\`\`\`
+
+⚠️ **不要**用 sed/nano 改 .env —— 见关联笔记 [诊断树](detail.html?id=hermes-desktop-remote-basicauth-env-deleted-2026-06-07)。
+
+## 3. （可选保险）让 basic 显式 opt-in
+
+\`\`\`bash
+python3 -c "
+import re; from pathlib import Path
+p = Path.home() / '.hermes' / 'config.yaml'
+t = p.read_text()
+p.write_text(re.sub(r'(^plugins:
+)  enabled: [[^]]*]',
+    r'\\1  enabled: ["dashboard_auth/basic"]', t, count=1, flags=re.MULTILINE))
+"
+\`\`\`
+
+## 4. 启动 dashboard
+
+\`\`\`bash
+hermes dashboard --no-open --host 0.0.0.0 --port 9119
+\`\`\`
+
+⚠️ **不要**加 \`--insecure\` —— 那是 escape hatch，gate 永远不开。
+
+## 5. 防火墙放行
+
+- **macOS**：\`系统设置 → 网络 → 防火墙\` → 允许 Python 接受传入连接
+- **Linux**：\`sudo ufw allow 9119/tcp\`
+
+## 6. 验证
+
+\`\`\`bash
+curl -s http://127.0.0.1:9119/api/status | python3 -c 'import json,sys; d=json.load(sys.stdin); print("auth_required:", d["auth_required"]); print("auth_providers:", d["auth_providers"])'
+\`\`\`
+
+**期望输出**：
+
+\`\`\`
+auth_required: True
+auth_providers: ['basic']
+\`\`\`
+
+# 步骤 B — 客户端（Hermes Desktop）3 步
+
+1. 装 Hermes Desktop（hermes-agent.nousresearch.com 下载 .dmg）
+2. 第一次启动会**自己**启 local backend —— **关掉**它
+3. **Settings → Gateway → Remote gateway**:
+   - **Remote URL** = \`http://<主机 LAN IP>:9119\`
+   - 出现 **Sign in** 按钮 → 点 → 输 step 2 配的 \`admin\` + password
+
+# 步骤 C — 失败时 4 步诊断
+
+按顺序跑，每步看输出对不对：
+
+| # | 命令 | 期望 |
+|---|---|---|
+| 1 | \`curl -s http://<host>:9119/api/status | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["auth_required"], d["auth_providers"])'\` | \`True ['basic']\` |
+| 2 | \`lsof -nP -iTCP:9119 -sTCP:LISTEN\` | 看到 \`*:9119\`（0.0.0.0） |
+| 3 | \`grep -E '^HERMES_DASHBOARD_BASIC_AUTH' ~/.hermes/.env\` | 3 行 non-empty |
+| 4 | \`ps -o args -e | grep hermes_cli.main.*dashboard | grep -v grep\` | 看到 \`--host 0.0.0.0\` 且**无** \`--insecure\` |
+
+**任一步失败 → 看 [诊断树 + 元教训](detail.html?id=hermes-desktop-remote-basicauth-env-deleted-2026-06-07)**。
+
+# 沉淀
+
+- 关联笔记：\`hermes-desktop-remote-basicauth-env-deleted-2026-06-07\`（4 步诊断树 + 1 真因 + 1 掩盖 + 1 误判）
+- 文档：\`hermes-agent/website/docs/user-guide/desktop.md\` "Connecting to a remote backend" 节
+- 关键代码：
+  - \`hermes_cli/web_server.py:start_server\` (~line 9806)
+  - \`hermes_cli/web_server.py:should_require_auth\` (~line 265)
+  - \`plugins/dashboard_auth/basic/__init__.py:register\` (~line 394)
+`,
+  },
   {
     id: `hermes-desktop-remote-basicauth-env-deleted-2026-06-07`,
     date: `2026-06-07`,

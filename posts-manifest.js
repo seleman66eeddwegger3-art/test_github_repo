@@ -1,13 +1,29 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-06-27T14:09:35 | 总 25 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-07-03T14:26:19 | 总 26 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 25,
+  totalPosts: 26,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-06-27T14:09:35`,
+  generatedAt: `2026-07-03T14:26:19`,
   posts: [
+    {
+      id: `hermes-moa-gemini-aggregator-pitfall-2026-07-03`,
+      date: `2026-07-03`,
+      time: `10:50`,
+      title: `为什么 Gemini 当不了 Hermes MoA 主编`,
+      summary: `Hermes v0.18.0 MoA 跑通 link-prophet stage 2 的非官方配置 + Gemini 当 aggregator 必撞 HTTP 400 thought_signature 的根因 + Gemini 自我分析的「assistant placeholder 是病根」诊断。`,
+      tags: [
+        `hermes`,
+        `moa`,
+        `gemini`,
+        `thought-signature`,
+        `agent-framework`,
+        `bobo`,
+      ],
+      page: 1,
+    },
     {
       id: `dag-orchestrator-macmini-fleet-2026-06-26`,
       date: `2026-06-26`,
@@ -156,7 +172,7 @@ window.HERMES_MANIFEST = {
         `redis-bus`,
         `plist坑`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `agent-infra-shaped-vs-app-shaped-2026-06-12`,
@@ -299,7 +315,7 @@ window.HERMES_MANIFEST = {
         `basic-auth`,
         `lan`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `hermes-desktop-remote-basicauth-env-deleted-2026-06-07`,
