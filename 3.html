@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>3D 交互式 AI 数据球</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; /* 隐藏滚动条 */
+            background-color: #000000; /* 纯黑背景 */
+            font-family: sans-serif;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        /* 添加一个友好的提示 */
+        #hint {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="hint"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // 1. 初始化场景、相机和渲染器
+        const scene = new THREE.Scene();
+        // 调整相机视角以适应 16:9 或宽屏
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 55); 
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 适配高清屏 (4K)
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // 2. 添加鼠标轨道控制器 (实现拖拽旋转)
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; // 增加拖拽时的平滑惯性
+        controls.dampingFactor = 0.05;
+        controls.enablePan = false; // 禁用平移，保持球体在中心
+
+        // 3. 生成 0 和 1 的发光纹理 (利用 Canvas)
+        function createCharTexture(char) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; 
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            
+            // 绘制白色文字，稍后通过 WebGL 顶点着色
+            ctx.fillStyle = '#ffffff'; 
+            ctx.font = 'bold 42px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 添加发光效果
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 10;
+            ctx.fillText(char, 32, 32);
+            
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const tex0 = createCharTexture('0');
+        const tex1 = createCharTexture('1');
+        const spheres = [];
+
+        // 4. 构建数据球体的函数
+        function createDataSphere(radius, colorHexA, colorHexB, position, detail, particleSize) {
+            // 使用二十面体几何生成均匀分布的顶点
+            const geometry = new THREE.IcosahedronGeometry(radius, detail);
+            const positions = geometry.attributes.position.array;
+
+            const pos0 = [], color0 = [];
+            const pos1 = [], color1 = [];
+
+            const colorA = new THREE.Color(colorHexA); // 亮部颜色 (核心)
+            const colorB = new THREE.Color(colorHexB); // 暗部颜色 (边缘)
+
+            for (let i = 0; i < positions.length; i += 3) {
+                let x = positions[i];
+                let y = positions[i+1];
+                let z = positions[i+2];
+
+                // 添加微小的随机扰动，让排列看起来更有数字流动感
+                const noise = 1 + (Math.random() - 0.5) * 0.02;
+                x *= noise; y *= noise; z *= noise;
+
+                // 模拟光照渐变：根据顶点位置混合颜色
+                // 假设光源在左前上方
+                const factor = Math.max(0, Math.min(1, (x / radius + z / radius + 1.5) / 3)); 
+                const vColor = new THREE.Color().lerpColors(colorB, colorA, factor);
+
+                // 随机分配为 0 或 1
+                if (Math.random() > 0.5) {
+                    pos0.push(x, y, z);
+                    color0.push(vColor.r, vColor.g, vColor.b);
+                } else {
+                    pos1.push(x, y, z);
+                    color1.push(vColor.r, vColor.g, vColor.b);
+                }
+            }
+
+            // 创建两个独立的粒子系统，一个全是0，一个全是1
+            const createPoints = (posArray, colorArray, texture) => {
+                const geo = new THREE.BufferGeometry();
+                geo.setAttribute('position', new THREE.Float32BufferAttribute(posArray, 3));
+                geo.setAttribute('color', new THREE.Float32BufferAttribute(colorArray, 3));
+                
+                const mat = new THREE.PointsMaterial({
+                    size: particleSize,
+                    map: texture,
+                    transparent: true,
+                    opacity: 0.85,
+                    depthWrite: false, // 允许粒子互相叠加发光
+                    blending: THREE.AdditiveBlending, // 核心发光算法
+                    vertexColors: true // 启用渐变色
+                });
+                return new THREE.Points(geo, mat);
+            };
+
+            const group = new THREE.Group();
+            group.add(createPoints(pos0, color0, tex0));
+            group.add(createPoints(pos1, color1, tex1));
+            
+            group.position.copy(position);
+            
+            // 初始随机角度
+            group.rotation.x = Math.random() * Math.PI;
+            group.rotation.y = Math.random() * Math.PI;
+
+            scene.add(group);
+            
+            // 记录下球体，用于动画自旋，每个球的速度略有不同
+            spheres.push({ 
+                mesh: group, 
+                speedY: (Math.random() * 0.0015 + 0.001), 
+                speedX: (Math.random() * 0.0005 + 0.0002) 
+            });
+        }
+
+        // 5. 按照截图的布局和色调生成 3 个球体
+        
+        // 左侧：巨大的暖色/金色数据球
+        // 参数：半径, 亮部颜色, 暗部颜色, 位置, 顶点密度, 粒子大小
+        createDataSphere(18, 0xffdd66, 0x661100, new THREE.Vector3(-22, 0, 0), 24, 0.55);
+
+        // 右侧：中等的冷色/蓝色数据球
+        createDataSphere(12, 0x44eeff, 0x002266, new THREE.Vector3(15, -3, -5), 18, 0.45);
+
+        // 右上角：极小的暗紫色数据球 (第三个球，现在你绝对能看清了)
+        createDataSphere(3.5, 0x8866aa, 0x111122, new THREE.Vector3(25, 12, -15), 10, 0.3);
+
+
+        // 6. 动画循环 (渲染每一帧)
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // 实现球体的自动自旋
+            spheres.forEach(s => {
+                s.mesh.rotation.y -= s.speedY;
+                s.mesh.rotation.x -= s.speedX;
+            });
+
+            // 更新控制器 (惯性滑动)
+            controls.update();
+            
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 7. 响应窗口大小变化 (始终保持全屏和比例)
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
