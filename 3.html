@@ -60,7 +60,7 @@
         controls.dampingFactor = 0.05;
         controls.enablePan = false; // 禁用平移，保持球体在中心
 
-        // 3. 生成 0 和 1 的发光纹理 (利用 Canvas)
+        // 3. 生成 “5.6” 三个字符的发光纹理 (利用 Canvas)
         function createCharTexture(char) {
             const canvas = document.createElement('canvas');
             canvas.width = 64; 
@@ -69,20 +69,21 @@
             
             // 绘制白色文字，稍后通过 WebGL 顶点着色
             ctx.fillStyle = '#ffffff'; 
-            ctx.font = 'bold 42px monospace';
+            ctx.font = char === '.' ? 'bold 56px monospace' : 'bold 42px monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
             // 添加发光效果
             ctx.shadowColor = '#ffffff';
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = char === '.' ? 14 : 10;
             ctx.fillText(char, 32, 32);
             
             return new THREE.CanvasTexture(canvas);
         }
 
-        const tex0 = createCharTexture('0');
-        const tex1 = createCharTexture('1');
+        const tex5 = createCharTexture('5');
+        const texDot = createCharTexture('.');
+        const tex6 = createCharTexture('6');
         const spheres = [];
 
         // 4. 构建数据球体的函数
@@ -91,8 +92,11 @@
             const geometry = new THREE.IcosahedronGeometry(radius, detail);
             const positions = geometry.attributes.position.array;
 
-            const pos0 = [], color0 = [];
-            const pos1 = [], color1 = [];
+            const charBuckets = [
+                { positions: [], colors: [], texture: tex5 },
+                { positions: [], colors: [], texture: texDot },
+                { positions: [], colors: [], texture: tex6 }
+            ];
 
             const colorA = new THREE.Color(colorHexA); // 亮部颜色 (核心)
             const colorB = new THREE.Color(colorHexB); // 暗部颜色 (边缘)
@@ -111,17 +115,13 @@
                 const factor = Math.max(0, Math.min(1, (x / radius + z / radius + 1.5) / 3)); 
                 const vColor = new THREE.Color().lerpColors(colorB, colorA, factor);
 
-                // 随机分配为 0 或 1
-                if (Math.random() > 0.5) {
-                    pos0.push(x, y, z);
-                    color0.push(vColor.r, vColor.g, vColor.b);
-                } else {
-                    pos1.push(x, y, z);
-                    color1.push(vColor.r, vColor.g, vColor.b);
-                }
+                // 循环分配为 “5 . 6”，让整个球由 5.6 三个字符组成
+                const bucket = charBuckets[(i / 3) % charBuckets.length];
+                bucket.positions.push(x, y, z);
+                bucket.colors.push(vColor.r, vColor.g, vColor.b);
             }
 
-            // 创建两个独立的粒子系统，一个全是0，一个全是1
+            // 创建三个独立的粒子系统，分别显示 5、.、6
             const createPoints = (posArray, colorArray, texture) => {
                 const geo = new THREE.BufferGeometry();
                 geo.setAttribute('position', new THREE.Float32BufferAttribute(posArray, 3));
@@ -140,8 +140,9 @@
             };
 
             const group = new THREE.Group();
-            group.add(createPoints(pos0, color0, tex0));
-            group.add(createPoints(pos1, color1, tex1));
+            charBuckets.forEach(bucket => {
+                group.add(createPoints(bucket.positions, bucket.colors, bucket.texture));
+            });
             
             group.position.copy(position);
             
