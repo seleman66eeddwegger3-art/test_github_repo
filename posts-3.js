@@ -1,6 +1,194 @@
-// Hermes Agent 笔记 — 第 3 页 (共 8 条)
+// Hermes Agent 笔记 — 第 3 页 (共 9 条)
 // 加载方式: <script src="posts-3.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_3 = [
+  {
+    id: `hermes-dashboard-boot-autostart-mac-ubuntu-2026-06-07`,
+    date: `2026-06-07`,
+    time: `13:00`,
+    title: `Hermes Dashboard 开机自启：Mac + Ubuntu 双方案`,
+    tags: [
+      `hermes-desktop`,
+      `remote-backend`,
+      `autostart`,
+      `launchd`,
+      `systemd`,
+    ],
+    summary: `Mac 端 1 个 LaunchAgent plist，Ubuntu 端 1 个 systemd-user service + Linger=yes。两条 OS 都能开机/重启后 dashboard 自动监听 0.0.0.0:9119，Desktop 端 http://<host>:9119 即用。`,
+    body: `# 目标
+
+让 hermes agent 按 SOP 完成 **Mac + Ubuntu 双 OS 环境下，Hermes dashboard 开机自启**——重启后 dashboard 仍监听 0.0.0.0:9119，Desktop 端 \`http://<host>:9119\` 即用。
+
+# 前提
+
+- Mac 端：hermes-agent 0.16+（dashboard 服务端，venv 装在 \`~/.hermes/hermes-agent/venv\`）
+- Ubuntu 端：hermes-agent 0.16+（用户已 systemd-user 装）
+- 同一 LAN（用户实配：Mac 192.168.2.175 + Ubuntu 192.168.2.233）
+- **\`.env\` BASIC_AUTH 三件套已配**（见 \`hermes-desktop-remote-lan-sop-2026-06-07\` 步骤 A.2）
+- **\`config.yaml\` 的 \`plugins.enabled\` 含 basic 显式 opt-in**（同上步骤 A.3，保险）
+
+# 步骤 A — Mac 端（LaunchAgent plist）
+
+## 1. 写 plist
+
+**关键**：**不带** \`--insecure\`（escape hatch，gate 永远不开）。
+
+路径：\`~/Library/LaunchAgents/ai.hermes.dashboard.plist\`
+
+\`\`\`xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>ai.hermes.dashboard</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/eight/.hermes/hermes-agent/venv/bin/python</string>
+        <string>-m</string>
+        <string>hermes_cli.main</string>
+        <string>dashboard</string>
+        <string>--no-open</string>
+        <string>--host</string>
+        <string>0.0.0.0</string>
+        <string>--port</string>
+        <string>9119</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/eight/.hermes</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/eight/.hermes/hermes-agent/venv/bin:/Users/eight/.hermes/hermes-agent/node_modules/.bin:/Users/eight/.hermes/node/bin:/Users/eight/Library/Python/3.9/bin:/Users/eight/.local/bin:/Library/Frameworks/Python.framework/Versions/3.14/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pkg/env/active/bin:/opt/pmk/env/global/bin</string>
+        <key>VIRTUAL_ENV</key>
+        <string>/Users/eight/.hermes/hermes-agent/venv</string>
+        <key>HERMES_HOME</key>
+        <string>/Users/eight/.hermes</string>
+    </dict>
+
+    <key>LimitLoadToSessionType</key>
+    <array>
+        <string>Aqua</string>
+        <string>Background</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/eight/.hermes/logs/dashboard.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/eight/.hermes/logs/dashboard.error.log</string>
+</dict>
+</plist>
+\`\`\`
+
+## 2. 加载 + 验证
+
+\`\`\`bash
+plutil -lint ~/Library/LaunchAgents/ai.hermes.dashboard.plist
+launchctl bootstrap gui/\$(id -u) ~/Library/LaunchAgents/ai.hermes.dashboard.plist
+sleep 5
+lsof -nP -iTCP:9119 -sTCP:LISTEN
+curl -s http://127.0.0.1:9119/api/status | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["auth_required"]); print(d["auth_providers"])'
+\`\`\`
+
+**期望**：
+- plutil: \`OK\`
+- lsof: \`python3.x PID xxx ... TCP *:9119 (LISTEN)\` ← \`*\` = 绑 0.0.0.0
+- curl: \`True / ['basic']\`
+
+## 3. 开机自启行为
+
+- \`RunAtLoad: true\` → 登录 / 开机时 launchd 拉起
+- \`KeepAlive: true\` → 进程死了 launchd 立刻重启（systemd 的 \`Restart=always\` 等价）
+- \`LimitLoadToSessionType: [Aqua, Background]\` → 用户登录 GUI 或 Background session 时加载（**不是** SSH-only headless 模式）
+
+# 步骤 B — Ubuntu 端（systemd-user service）
+
+> 用户实配版本（v0.16, X230i, user-level service）：
+
+## 1. Unit 文件
+
+路径：\`/home/ubuntu/.config/systemd/user/hermes-dashboard.service\`
+
+\`\`\`ini
+[Unit]
+Description=Hermes Dashboard (user service)
+After=network.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+WorkingDirectory=/home/ubuntu/.hermes
+Environment="HERMES_HOME=/home/ubuntu/.hermes"
+ExecStart=/home/ubuntu/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main dashboard --no-open --host 0.0.0.0 --port 9119
+StandardOutput=append:/home/ubuntu/.hermes/logs/dashboard.log
+StandardError=append:/home/ubuntu/.hermes/logs/dashboard.error.log
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+\`\`\`
+
+## 2. enable + start
+
+\`\`\`bash
+# 必须 Linger=yes，user service 在登出/server 启动后才会跑
+loginctl enable-linger ubuntu
+loginctl show-user ubuntu | grep Linger   # 期望: Linger=yes
+
+systemctl --user enable --now hermes-dashboard.service
+systemctl --user status hermes-dashboard.service
+\`\`\`
+
+**期望**：
+- \`Linger=yes\`
+- \`status\` 显示 \`active (running)\` + PID 53409（实测）
+- 监听 0.0.0.0:9119，**无** \`--insecure\`
+
+## 3. 注意：gateway service 仍 disabled
+
+\`hermes gateway\` service 这次**没**启——**只** dashboard。**重启 X230i 后只会拉起 dashboard**，不拉起 messaging gateway（用户明确选择：desktop 端不需要 messaging gateway）。
+
+# 步骤 C — Desktop 端（不变）
+
+按 \`hermes-desktop-remote-lan-sop-2026-06-07\` 步骤 B：填 \`http://<host>:9119\` + Sign in。
+
+# 验证（双 OS 共用 + 关键：重启验证）
+
+| # | 命令 | 期望 |
+|---|---|---|
+| 1 | \`lsof -nP -iTCP:9119 -sTCP:LISTEN\`（macOS）/ \`ss -tlnp\`（Linux） | \`*:9119\` 或 \`0.0.0.0:9119\` |
+| 2 | \`curl http://<host>:9119/api/status\` 看 \`auth_required\` | \`true\` |
+| 3 | \`curl http://<host>:9119/api/status\` 看 \`auth_providers\` | \`['basic']\` |
+| 4 | **重启 host → 等待 30s → 重跑 1-3** | 仍 \`*:9119\` / \`True\` / \`['basic']\` |
+
+**步骤 4 是关键**——\`KeepAlive\` / \`RemainAfterExit\` 只能保证**进程**自动起来，不能保证**配置**对。重启后**必须**重跑 1-3。
+
+# 元教训
+
+1. **\`--insecure\` 任何时候都不出现在开机自启 plist/unit**——它是 escape hatch，永久 opt-out gate
+2. **\`KeepAlive=true\` (macOS) ≈ \`Restart=on-failure\` (systemd) + \`RemainAfterExit=yes\`**——三者组合保证进程死了重启 + service 状态正确
+3. **user service (systemd) 必须 \`Linger=yes\`**——否则 SSH 登出就停
+4. **不要假设 \`enable --now\` 后配置自动正确**——重启验证（步骤 4）才是真理
+
+# 沉淀
+
+- 关联 SOP: \`hermes-desktop-remote-lan-sop-2026-06-07\`（\`.env\` + \`config.yaml\` 配 + 启动命令）
+- 关联诊断: \`hermes-desktop-remote-basicauth-env-deleted-2026-06-07\`（4 步诊断树）
+- 关键文件：
+  - macOS: \`~/Library/LaunchAgents/ai.hermes.dashboard.plist\`（本次新增，2029 B，--insecure 0 次）
+  - Ubuntu: \`/home/ubuntu/.config/systemd/user/hermes-dashboard.service\`（用户自写，PID 53409）
+  - 验证证据：Mac plutil OK + 关键字段 grep（--insecure 0 次 / 0.0.0.0 1 次）；Ubuntu Linger=yes + PID 53409 + auth_required=True
+`,
+  },
   {
     id: `hermes-desktop-remote-lan-sop-2026-06-07`,
     date: `2026-06-07`,

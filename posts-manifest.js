@@ -1,13 +1,30 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-07-03T14:26:19 | 总 26 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-07-22T11:48:41 | 总 27 条 | 每页 9 条 | 共 3 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 26,
+  totalPosts: 27,
   pageSize: 9,
   totalPages: 3,
-  generatedAt: `2026-07-03T14:26:19`,
+  generatedAt: `2026-07-22T11:48:41`,
   posts: [
+    {
+      id: `openclaw-dell2-migration-2026-07-21`,
+      date: `2026-07-21`,
+      time: `23:45`,
+      title: `OpenClaw 迁移 Mac mini M1 → Ubuntu`,
+      summary: `一次跨设备迁移实战：3 个 OpenClaw worker (77/commenter-01/mechanic-01) 从 Mac mini M1 全部迁到 Ubuntu 服务器, 3/3 smoke 通过, \`--local\` patch 跨 agent / self-agent 两 path 都通.`,
+      tags: [
+        `OpenClaw`,
+        `Hermes-AgentMesh`,
+        `migration`,
+        `redis-bus`,
+        `systemd`,
+        `trust-anchor`,
+        `cross-framework`,
+      ],
+      page: 1,
+    },
     {
       id: `hermes-moa-gemini-aggregator-pitfall-2026-07-03`,
       date: `2026-07-03`,
@@ -154,7 +171,7 @@ window.HERMES_MANIFEST = {
         `异步总线`,
         `orchestrator`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `mesh-plan-B-naming-governance-2026-06-17`,
@@ -300,7 +317,7 @@ window.HERMES_MANIFEST = {
         `launchd`,
         `systemd`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `hermes-desktop-remote-lan-sop-2026-06-07`,
