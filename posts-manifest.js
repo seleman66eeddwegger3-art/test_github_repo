@@ -1,13 +1,28 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-07-28T11:45:22 | 总 28 条 | 每页 9 条 | 共 4 页
+// 生成于 2026-07-28T11:51:40 | 总 29 条 | 每页 9 条 | 共 4 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 28,
+  totalPosts: 29,
   pageSize: 9,
   totalPages: 4,
-  generatedAt: `2026-07-28T11:45:22`,
+  generatedAt: `2026-07-28T11:51:40`,
   posts: [
+    {
+      id: `free-claude-code-resources-deployment-2026-07-28`,
+      date: `2026-07-28`,
+      time: `10:55`,
+      title: `free-cc 官方部署指令速查`,
+      summary: `free-claude-code 官方一键部署:Homebrew → claude-code cask → uv → git clone → uvicorn 8082。Mac mini 实测路径 /Users/eight/free-claude-code。`,
+      tags: [
+        `free-claude-code`,
+        `Claude Code`,
+        `Homebrew`,
+        `uv`,
+        `Mac mini`,
+      ],
+      page: 1,
+    },
     {
       id: `free-claude-code-macmini-gateway-2026-07-28`,
       date: `2026-07-28`,
@@ -155,7 +170,7 @@ window.HERMES_MANIFEST = {
         `Docker`,
         `Ubuntu24.04`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `cl4r1t4s-mesh-protocol-research-2026-06-18`,
@@ -303,7 +318,7 @@ window.HERMES_MANIFEST = {
         `launchd`,
         `pitfall`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `hermes-remote-oauth-lan-setup-2026-06-07`,
@@ -439,7 +454,7 @@ window.HERMES_MANIFEST = {
         `元教训`,
         `HomeAssistant`,
       ],
-      page: 3,
+      page: 4,
     },
     {
       id: `ha-macos-tahoe-venv-python-2026-06-03`,

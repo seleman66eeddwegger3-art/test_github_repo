@@ -4296,6 +4296,97 @@ lsof -i :8082                                       # 检查端口是否在监�
 适用于任何想要本地化、低成本跑 Claude Code 的用户。
 `,
   },
+  {
+    id: "free-claude-code-resources-deployment-2026-07-28",
+    date: "2026-07-28",
+    time: "10:55",
+    title: "free-cc \u5b98\u65b9\u90e8\u7f72\u6307\u4ee4\u901f\u67e5",
+    tags: ["free-claude-code", "Claude Code", "Homebrew", "uv", "Mac mini"],
+    summary: 'free-claude-code 官方一键部署:Homebrew → claude-code cask → uv → git clone → uvicorn 8082。Mac mini 实测路径 /Users/eight/free-claude-code。',
+    body: `## 概述
+
+本笔记是 free-claude-code 的**官方部署指令速查**,整理自 resources.html。Mac mini M4 上实测可跑通的最小路径。
+
+**与兄弟笔记《Mac mini 私有化部署 free-cc 网关》的关系**:
+- 兄弟笔记: **planner 视角**,讲架构 / 守护进程化 / 环境变量穿透 / Telegram / GitHub Token / Vercel 部署全链路
+- 本笔记: **operator 视角**,纯终端指令,5 步从 0 跑到 free-cc 网关监听 8082
+
+两篇互补,先看兄弟建立心智模型,再按本笔记的命令一键部署。
+
+## 演示网站
+
+- [猫咪照片网页 test-github-repo.vercel.app/cat-showcase.html](https://test-github-repo.vercel.app/cat-showcase.html)
+- [树生长的动态网页 test-github-repo.vercel.app/growing_tree.html](https://test-github-repo.vercel.app/growing_tree.html)
+- [夜晚烟花动态网页 test-github-repo.vercel.app/firework.html](https://test-github-repo.vercel.app/firework.html)
+- [YouTube 近期视频自动更新主页 wow-site-steel.vercel.app](https://wow-site-steel.vercel.app/)
+
+## 必备工具官方链接
+
+- [Claude-code 官方 GitHub github.com/anthropics/claude-code](https://github.com/anthropics/claude-code)
+- [Free-claude-code GitHub github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code)
+- [NVIDIA 免费 API 申请 build.nvidia.com](https://build.nvidia.com/)
+
+## 终端指令代码
+
+### 1. 安装 Homebrew(首次安装完成后需运行提示的两条命令)
+
+\`\`\`bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+\`\`\`
+
+### 2. 安装 Claude Code
+
+\`\`\`bash
+brew install --cask claude-code
+\`\`\`
+
+### 3. 安装 uv 工具链 & Python 3.14
+
+\`\`\`bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv self update
+uv python install 3.14
+\`\`\`
+
+### 4. 克隆并配置 free-claude-code
+
+\`\`\`bash
+git clone https://github.com/Alishahryar1/free-claude-code.git
+cd free-claude-code
+cp .env.example .env
+sudo nano .env
+\`\`\`
+
+### 5. 启动本地代理服务(在终端 A 中运行)
+
+\`\`\`bash
+cd /Users/eight/free-claude-code
+uv run uvicorn server:app --host 0.0.0.0 --port 8082
+\`\`\`
+
+### 6. 启动免配置版 Claude Code(在终端 B 中运行)
+
+\`\`\`bash
+ANTHROPIC_AUTH_TOKEN="freecc" ANTHROPIC_BASE_URL="http://localhost:8082" claude
+\`\`\`
+
+## 沉淀
+
+5 步从 0 跑通 free-claude-code 网关监听 8082 + Claude Code 走本地代理:
+
+1. **Homebrew** — Apple Silicon Mac 包管理
+2. **claude-code cask** — 官方 Claude Code CLI
+3. **uv + Python 3.14** — 极速 Python 工具链(uv run 是关键,不用单独建 venv)
+4. **git clone + .env** — 配 free-cc 仓库 + 填密钥
+5. **uvicorn + claude** — 两个终端,A 跑网关,B 跑 Claude Code
+
+## 相关
+
+- [Mac mini 私有化部署 free-cc 网关 (planner 视角全链路)](detail.html?id=free-claude-code-macmini-gateway-2026-07-28) — 兄弟笔记,讲架构 / 守护进程化 / 环境变量穿透 / Telegram / GitHub Token / Vercel 部署
+`,
+  },
 
 ];
 

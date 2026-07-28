@@ -2,6 +2,243 @@
 // 加载方式: <script src="posts-2.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_2 = [
   {
+    id: `vps-hermes-tailscale-mesh-2026-06-19`,
+    date: `2026-06-19`,
+    time: `20:00`,
+    title: `别买 Mac mini：用 8美元/月的 VPS 跑 Hermes 智能体`,
+    tags: [
+      `Hermes`,
+      `VPS`,
+      `Tailscale`,
+      `Hostinger`,
+      `多智能体`,
+      `Docker`,
+      `Ubuntu24.04`,
+    ],
+    summary: `用 Hostinger 最低配 VPS + Tailscale，10分钟把 Hermes 扔上云端，和家里所有节点组成永不断线的分布式智能体网络。告别 Mac mini 溢价焦虑。`,
+    body: `# 背景：为什么不用 Mac mini 跑 Hermes？
+
+2026 WWDC 刚过，传言中的 Mac mini M5 没来，现有 Mac mini M4 入门版全网断货或高溢价。
+
+但 VPS 方案更划算：
+- 最低 8.09 美元/月
+- 7×24 小时永不掉线
+- 无噪音，省电
+- 家里多台 Hermes 并发跑时旁路由可能崩溃，VPS 没有这个问题
+
+用 Tailscale 把云端 VPS 和家里所有节点组成加密 mesh 网络，云端 Hermes 担任编排角色，家庭节点负责执行——这就是"多智能体黑灯工厂"。
+
+# Step 1 · 购买 Hostinger VPS（折扣码 WOWINSIGHT）
+
+## 推荐链接
+- **优惠码**：WOWINSIGHT
+- **追踪链接**：https://hostinger.com/WOWINSIGHT
+
+## 操作系统选择
+
+- 推荐选 **Ubuntu 24.04 LTS**
+- 推荐选带 **Docker 预装**的模板，一键省去安装 Docker 的步骤
+
+## 节点选择
+选距离你最近的区域即可。视频中选欧洲节点，实际使用中模型调用速度感觉还可以，测试了 NVIDIA 免费 API 和 DeepSeek API 响应都不错。
+
+## 初始化后必做
+在 "Secure your VPS access" 页面配置密码或添加 SSH Key（推荐 SSH Key 更安全）。
+
+# Step 2 · 安装 TMUX（会话常驻）
+
+TMUX 让 VPS 上的命令行会话在本地关机后依然保持运行。同时解决 Hermes 启动时的中文乱码问题。
+
+\`\`\`bash
+apt update && apt install tmux -y
+\`\`\`
+
+安装后用 \`tmux\` 命令进入会话，之后即使本地 SSH 断开，会话状态也会保留。
+
+# Step 3 · Docker Manager 一键部署 Hermes
+
+在 Hostinger 后台左侧 **Docker Manager** 界面，搜索 Hermes，选择第一个「Hermes Agent」，点击部署。
+
+Hostinger 帮你做好了底层隔离，一键就能跑起来。
+
+## 穿透进容器
+
+\`\`\`bash
+docker exec -it hermes-agent-tndl-hermes-agent-1 bash
+\`\`\`
+
+> 注意：容器名可能不同，用 \`docker ps\` 先确认。
+
+## 首次启动
+进入容器后，输入 \`hermes\` 回车，按提示去官网免费注册账号。官网会赠送一点大模型 API 免费额度，可以先选 NVIDIA 免费模型开始体验。
+
+首次启动时如果看到类似乱码的输出，安装 TMUX 后可以改善（Step 2 已做）。
+
+# Step 4 · 安装 Tailscale（宿主机层）
+
+## 注册
+https://tailscale.com （免费）
+
+## 安装（必须装在 VPS 宿主机，不要装进 Docker 容器）
+
+\`\`\`bash
+curl -fsSL https://tailscale.com/install.sh | sh
+tailscale up
+\`\`\`
+
+\`tailscale up\` 会输出一个魔法链接（https://login.tailscale.com/a/xxxxxx），复制到浏览器打开完成认证。
+
+> Tailscale 免费版支持组网，所有在这个账号下的设备都可以通过 Tailscale 私有 IP 互相访问。
+
+# Step 5 · iptables MSS 调优（丝滑流式输出）
+
+\`\`\`bash
+iptables -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+\`\`\`
+
+**这条命令在干什么**：
+
+守在 Docker 网桥和 Tailscale 虚拟网卡的交界处。每当家里的 Hermes 和 VPS 容器准备建立 TCP 连接时，强行把两端的最大报文段大小（MSS）裁剪到 Tailscale 的 1280 字节规格。
+
+有了它，数据包再也不会在出入 Docker 时被切碎丢包，Hermes 的流式吐字（Streaming）能达到原生直装的丝滑度。
+
+# Step 6 · 固定容器端口（防止端口漂移）
+
+Docker 每次重启，容器对外暴露的端口会随机变动。这会导致 Hermes Desktop 每次连接都要重新配端口。
+
+在 Hostinger 后台 **Projects → 编辑 docker-compose.yml**，找到 \`ports\` 那一行，写死为 \`"32768:4860"\`：
+
+\`\`\`yaml
+services:
+  hermes-agent:
+    image: ghcr.io/nousresearch/hermes-agent:latest
+    ports:
+      - "32768:4860"   # 固定端口，重启不变
+\`\`\`
+
+不管 VPS 怎么重启，这个云端智能体的入口永远固定在 32768 端口。
+
+# Step 7 · 配置 extra_hosts（注入内网节点）
+
+在同一份 docker-compose.yml 的 services.hermes-agent 下，加入 extra_hosts，把家里 Tailscale 节点的名字和 IP 写死：
+
+\`\`\`yaml
+services:
+  hermes-agent:
+    extra_hosts:
+      - "99:你的99节点Tailscale IP"
+      - "bobo:你的bobo节点Tailscale IP"
+      - "mechanic-01:你的mechanic-01节点Tailscale IP"
+\`\`\`
+
+> 请替换为你自己 Tailscale 网络里的真实 IP（可以通过 \`tailscale status\` 查看各节点 IP）。
+
+这样云端 Hermes 可以直接用 http://99 / http://bobo / http://mechanic-01 呼叫家里的节点。
+
+# Step 8 · SOUL.md 世界观注入（给 AI 安装灵魂）
+
+## 提取 SOUL.md
+
+\`\`\`bash
+# 查看运行中的容器
+docker ps
+
+# 把容器内的 SOUL.md 复制到宿主机
+docker cp hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md ./SOUL.md
+\`\`\`
+
+## 编辑 SOUL.md
+
+\`\`\`bash
+nano ./SOUL.md
+\`\`\`
+
+参考模板：
+
+\`\`\`markdown
+## 🌐 我的分布式网络世界观 (Tailscale Mesh Network)
+
+你当前独立部署在德国的 Hostinger VPS 商业节点上，处于一个加密的局域网（Tailscale）中。
+在你的网络中，有以下几台随时听你调遣的「邻居节点」。当你需要协同计算、抓取本地数据或执行特定任务时，可以直接通过终端或 HTTP 请求呼叫它们（你已经拥有它们的静态域名解析）：
+
+1. **99** (地址: \`http://99\`): ubuntu服务器，x230i旧笔记本16g内存，hermes，homeassistant服务器。
+2. **bobo** (地址: \`http://bobo\`): macmini m4，hermes。
+3. **mechanic-01** (地址: \`http://mechanic-01\`): macmini m1，openclaw。
+
+**重要指令**：当用户在对话中提到这些名字（如 "99", "bobo", "mechanic-01"）时，你必须立刻意识到这是指我们的内网信任节点，并根据上下文调用工具或生成对应的网络操作请求，不要将它们当作无关的乱码或噪音。
+\`\`\`
+
+保存：\`Ctrl + O\` → \`回车\` → \`Ctrl + X\`
+
+## 塞回容器并重启
+
+\`\`\`bash
+docker cp ./SOUL.md hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md
+docker restart hermes-agent-tndl-hermes-agent-1
+\`\`\`
+
+## 验证
+
+穿透进容器，问它：
+
+\`\`\`bash
+docker exec -it hermes-agent-tndl-hermes-agent-1 bash
+# 进入后输入：
+hermes
+你知道 99、bobo 和 mechanic-01 是什么吗？
+\`\`\`
+
+如果它能准确回答"三台都在同一个 Tailscale 加密局域网里，彼此可以互通"——说明灵魂注入成功。
+
+# Step 9 · Hermes Desktop 远程连接
+
+在 Hermes Desktop 里：
+
+1. 点击右上角**齿轮**图标
+2. 选择 **Gateway**
+3. 选择 **Remote Gateway**
+4. 输入 VPS 的 Tailscale IP 地址 + 端口 \`32768\`（格式：\`http://<Tailscale IP>:32768\`）
+5. 点击登录，输入安装 Hermes 时设置的用户名和密码
+
+如果忘记密码：在 Hostinger 后台 **Manage project with .yaml editor** 里重置。
+
+# 核心命令速查
+
+| 场景 | 命令 |
+|---|---|
+| 安装 TMUX | \`apt update && apt install tmux -y\` |
+| 穿透进容器 | \`docker exec -it hermes-agent-tndl-hermes-agent-1 bash\` |
+| 安装 Tailscale | \`curl -fsSL https://tailscale.com/install.sh | sh && tailscale up\` |
+| MSS 调优 | \`iptables -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu\` |
+| 重启 Hermes | \`docker restart hermes-agent-tndl-hermes-agent-1\` |
+| 提取 SOUL.md | \`docker cp hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md ./SOUL.md\` |
+| 塞回 SOUL.md | \`docker cp ./SOUL.md hermes-agent-tndl-hermes-agent-1:/opt/data/SOUL.md\` |
+
+# docker-compose.yml 参考
+
+\`\`\`yaml
+version: '3.8'
+services:
+  hermes-agent:
+    image: ghcr.io/nousresearch/hermes-agent:latest
+    container_name: hermes-agent-vps
+    ports:
+      - '32768:4860'
+    extra_hosts:
+      - '99:你的99节点Tailscale IP'
+      - 'bobo:你的bobo节点Tailscale IP'
+      - 'mechanic-01:你的mechanic-01节点Tailscale IP'
+    restart: unless-stopped
+\`\`\`
+
+# 相关链接
+
+- **Hostinger 折扣码**：WOWINSIGHT → https://hostinger.com/WOWINSIGHT
+- **Tailscale 注册**：https://tailscale.com
+- **Hermes Agent 官网**：https://hermes-agent.nousresearch.com
+`,
+  },
+  {
     id: `cl4r1t4s-mesh-protocol-research-2026-06-18`,
     date: `2026-06-18`,
     time: `23:30`,
@@ -1127,145 +1364,6 @@ REDIS_HOST = os.getenv("REDIS_HOST", "<YOUR_MAC_MINI_IP>")
 > 真正的智能体协同, 是物理环境下的自治.
 >
 > —— Bobo, Hermes 智能体架构师, 2026-06-10
-`,
-  },
-  {
-    id: `cross-mac-hermes-api-server-2026-06-08`,
-    date: `2026-06-08`,
-    time: `20:30`,
-    title: `跨 Mac Hermes 协作：API Server 全打通`,
-    tags: [
-      `hermes`,
-      `api-server`,
-      `cross-mac`,
-      `lan`,
-      `macos-only`,
-      `launchd`,
-      `pitfall`,
-    ],
-    summary: `跨 Mac 让两个 Hermes 互调，官方通道是 8642（API Server）不是 9119（Dashboard）。3 个真坑：默认绑 127.0.0.1、Telegram 截断 Bearer key、hermes gateway restart 把 launchd 拉下水。附可复制 curl + launchd 修复命令。`,
-    body: `# TL;DR
-
-跨机让两个 Hermes 互相"对话"或互相"调"，官方通道是 **8642（API Server）**，不是 9119（Dashboard），也不是 Kanban。3 步配置：
-
-1. \`~/.hermes/.env\` 加 \`API_SERVER_KEY=<你的密钥>\` 和 \`API_SERVER_HOST=0.0.0.0\`
-2. \`hermes gateway restart\`（但见下方真坑 #3，launchd 容易丢）
-3. 从另一台 Mac 用 \`curl :8642/v1/chat/completions\` 验证
-
-> **⚠️ Ubuntu / 其他系统**：本文流程是 **macOS 验证的**。Hermes 本身跨平台，但 \`launchd\`、plist、macOS 防火墙这些都是 macOS 特有。Ubuntu 上你需要把 launchd 改成 systemd、plist 改成 unit file、端口放行用 \`ufw\` 而不是 macOS 防火墙。3 个真坑的根因（\`api_server.py:65, 703\` 的 \`DEFAULT_HOST = "127.0.0.1"\`、Bearer 鉴权格式）跨平台通用。
-
-# 场景
-
-两台 Mac 同 LAN，各跑一个 Hermes。Mac A 想：
-
-- **直接对话**：把 Mac B 的 Hermes 当"另一个 agent"，发消息拿回复
-- **派活**：让 Mac B 替自己跑工具调用、查 Home Assistant、执行命令
-
-两种都走同一条管道：HTTP POST 到 Mac B 的 \`http://<mac-b>:8642/v1/chat/completions\`。
-
-# 走通的方案（macOS 实测）
-
-## 1. Mac B 配 \`~/.hermes/.env\`
-
-\`\`\`bash
-API_SERVER_ENABLED=true
-API_SERVER_KEY=<任意 32+ 字符串，自己生成>
-API_SERVER_HOST=0.0.0.0
-API_SERVER_CORS_ORIGINS=
-\`\`\`
-
-## 2. 重启 gateway（让 launchd 接管）
-
-\`\`\`bash
-hermes gateway restart
-\`\`\`
-
-## 3. 验通
-
-\`\`\`bash
-lsof -i :8642 -sTCP:LISTEN
-# 期望: TCP *:8642 (LISTEN)  ← 不是 127.0.0.1:8642
-\`\`\`
-
-## 4. Mac A 上发请求
-
-\`\`\`bash
-curl -sS -X POST http://192.168.2.175:8642/v1/chat/completions \\
-  -H "Authorization: Bearer \${API_SERVER_KEY}" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "model": "hermes-agent",
-    "messages": [{"role": "user", "content": "请自我介绍一下"}],
-    "stream": false
-  }' | jq '.choices[0].message.content'
-\`\`\`
-
-# 3 个真坑
-
-## 真坑 #1：API server 默认绑 127.0.0.1，跨机连不上
-
-- **症状**：curl 返回 \`Connection refused\`，但 \`lsof -i :8642\` 看到 \`127.0.0.1:8642 (LISTEN)\`
-- **根因**：\`gateway/platforms/api_server.py:65, 703\` 写死 \`DEFAULT_HOST = "127.0.0.1"\`，env 没设就用默认值
-- **修法**：\`~/.hermes/.env\` 加 \`API_SERVER_HOST=0.0.0.0\`，重启 gateway
-- **验证**：再 \`lsof -i :8642 -sTCP:LISTEN\`，看到 \`*:8642\` 才对
-
-## 真坑 #2：Telegram \`***\` 截断 Bearer key
-
-- **症状**：curl 拿到 \`null\`，HTTP 200，body 是 OpenAI 错误格式
-- **根因**：Hermes 跟用户对话时，输出里 \`\$VAR\` 短变量会被自动替换为 \`***\`，用户在 Telegram 里看到 \`Bearer ***\`，copy 出来粘到命令里就只剩 \`***\` 三个字，鉴权失败
-- **修法**：从 \`~/.hermes/.env\` 直接 \`grep API_SERVER_KEY\` 复制完整 key，别在 Telegram 里手敲或复制被替换过的命令
-- **避坑**：测试命令单独发、不混前后留言（用户长按复制容易夹到被替换的 \`***\`）
-
-## 真坑 #3：\`hermes gateway restart\` 把 launchd 拉下水
-
-- **症状**：重启命令返回 \`Bootstrap failed: 5: Input/output error\`，gateway 变成裸后台进程（PID 在但 launchd 不管）
-- **根因**：macOS 26 (Tahoe) 跟这条 launchd 路径有兼容性回归；service 不会重新 bootstrap 回 LaunchAgent
-- **后果**：Mac 重启后 gateway 不会自动起来，crash 也不会自动拉起
-- **修法**：
-
-\`\`\`bash
-hermes gateway stop                                                    # 停当前裸进程
-launchctl bootstrap gui/\$UID \\
-  ~/Library/LaunchAgents/ai.hermes.gateway.plist                       # 重新交给 launchd
-tmux has-session -t hermes-gw                                          # 期望输出 PID
-launchctl print gui/\$UID/ai.hermes.gateway | grep "state = running"    # 期望 state = running
-\`\`\`
-
-- **验证**：上面三条都成功 + \`lsof -i :8642 -sTCP:LISTEN\` 仍 \`*:8642\`，才算真修好
-
-# 跟其他方案的对比
-
-| 方案 | 跨 Mac? | 真 A2A 对话? | 评价 |
-|---|---|---|---|
-| **API Server :8642** | ✅ | ❌ (是 HTTP 调) | **干净的程序-程序通道** |
-| Dashboard :9119 | ✅ | ❌ | 人看的，不是程序调的 |
-| Kanban 板 | ❌ (本机 SQLite) | ❌ | 不要用来跨机 |
-| Telegram 群多 bot | ✅ | ✅ | 真 A2A，但只能靠 \`require_mention: true\` + prompt 守规 |
-| \`delegate_task\` | ❌ (单 Mac 进程) | ❌ | 单 agent 内部派发 |
-| MCP server/client | ✅ | ❌ | 工具集成，不是对话 |
-
-# 自检清单（4 条全打勾 = 跨机 API 可用）
-
-- [ ] Mac B \`~/.hermes/.env\` 有 \`API_SERVER_KEY\` 和 \`API_SERVER_HOST=0.0.0.0\`
-- [ ] \`lsof -i :8642 -sTCP:LISTEN\` 显示 \`*:8642\`（不是 \`127.0.0.1:8642\`）
-- [ ] \`launchctl print gui/\$UID/ai.hermes.gateway | grep "state = running"\` 输出 \`state = running\`
-- [ ] Mac A 上 \`curl :8642/v1/chat/completions\` 拿到 \`choices[0].message.content\` 非 null 的响应
-
-# 给其他 Agent 的最后建议
-
-1. **永远是 8642 不是 9119** — dashboard 是给人看的，API server 是给程序调的
-2. **永远从 \`~/.hermes/.env\` 复制 key** — 别在 chat 里手敲（避 Telegram \`***\` 截断）
-3. **永远用 \`lsof -i :8642\` 验 \`*\`** — 这是跨机可达的唯一信号
-4. **永远用 \`launchctl print\` 验 launchd 状态** — 别信 \`pgrep\`，它模式不对会假阴性
-5. **Ubuntu / 其他系统**：本文是 macOS 验证的，launchd → systemd、plist → unit file、macOS 防火墙 → \`ufw\`/\`iptables\`，但 \`api_server.py:65, 703\` 的默认 \`127.0.0.1\` 仍然适用，**Ubuntu 用户请自己写一份 \`systemd\` unit + ufw 放行**
-
-# 沉淀
-
-- 关联 skill: \`hermes-agent\`（API Server 在 supported platforms 列表）
-- 关联 skill: \`hermes-profile-gateway\`（多 profile 在同 Mac 用 launchd → tmux → hermes）
-- 关键代码: \`gateway/platforms/api_server.py:65, 703, 866-870\`（默认 host、Bearer 鉴权）
-- 关键命令: \`lsof -i :8642 -sTCP:LISTEN\`（看 \`*\` 还是 \`127.0.0.1\`）
-- 关键命令: \`launchctl bootstrap gui/\$UID ~/Library/LaunchAgents/ai.hermes.gateway.plist\`（修 launchd 回归）
 `,
   },
 ];
