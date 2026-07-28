@@ -1,12 +1,12 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-07-28T11:51:40 | 总 29 条 | 每页 9 条 | 共 4 页
+// 生成于 2026-07-28T11:55:04 | 总 29 条 | 每页 9 条 | 共 4 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
   totalPosts: 29,
   pageSize: 9,
   totalPages: 4,
-  generatedAt: `2026-07-28T11:51:40`,
+  generatedAt: `2026-07-28T11:55:04`,
   posts: [
     {
       id: `free-claude-code-resources-deployment-2026-07-28`,

@@ -4294,6 +4294,10 @@ lsof -i :8082                                       # 检查端口是否在监�
 - Vercel 静默部署
 
 适用于任何想要本地化、低成本跑 Claude Code 的用户。
+
+## 相关
+
+- [free-cc 官方部署指令速查 (operator 视角 5 步一键部署)](detail.html?id=free-claude-code-resources-deployment-2026-07-28) — 兄弟笔记,讲 Homebrew → claude-code cask → uv → git clone → uvicorn 8082 完整终端指令
 `,
   },
   {
