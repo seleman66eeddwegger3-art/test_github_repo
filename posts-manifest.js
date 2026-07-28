@@ -1,13 +1,29 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-07-22T11:48:41 | 总 27 条 | 每页 9 条 | 共 3 页
+// 生成于 2026-07-28T11:45:22 | 总 28 条 | 每页 9 条 | 共 4 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 27,
+  totalPosts: 28,
   pageSize: 9,
-  totalPages: 3,
-  generatedAt: `2026-07-22T11:48:41`,
+  totalPages: 4,
+  generatedAt: `2026-07-28T11:45:22`,
   posts: [
+    {
+      id: `free-claude-code-macmini-gateway-2026-07-28`,
+      date: `2026-07-28`,
+      time: `10:35`,
+      title: `Mac mini 私有化部署 free-cc 网关`,
+      summary: `Mac mini M4 全链路私有化:Hermes + Claude Code + free-cc 网关跑通本地 LLM 算力劫持,Telegram 指挥 + GitHub 自动部署。`,
+      tags: [
+        `Hermes Agent`,
+        `free-claude-code`,
+        `Claude Code`,
+        `Mac mini`,
+        `私有化部署`,
+        `算力劫持`,
+      ],
+      page: 1,
+    },
     {
       id: `openclaw-dell2-migration-2026-07-21`,
       date: `2026-07-21`,
@@ -155,7 +171,7 @@ window.HERMES_MANIFEST = {
         `mesh-collab-sop`,
         `EVIDENCE-FIRST`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `unmanned-factory-germany-orch-2026-06-18`,
@@ -302,7 +318,7 @@ window.HERMES_MANIFEST = {
         `remote-backend`,
         `lan`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `hermes-dashboard-boot-autostart-mac-ubuntu-2026-06-07`,
@@ -437,7 +453,7 @@ window.HERMES_MANIFEST = {
         `网络`,
         `根因分析`,
       ],
-      page: 3,
+      page: 4,
     },
   ],
 };

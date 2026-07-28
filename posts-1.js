@@ -2,6 +2,262 @@
 // 加载方式: <script src="posts-1.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_1 = [
   {
+    id: `free-claude-code-macmini-gateway-2026-07-28`,
+    date: `2026-07-28`,
+    time: `10:35`,
+    title: `Mac mini 私有化部署 free-cc 网关`,
+    tags: [
+      `Hermes Agent`,
+      `free-claude-code`,
+      `Claude Code`,
+      `Mac mini`,
+      `私有化部署`,
+      `算力劫持`,
+    ],
+    summary: `Mac mini M4 全链路私有化:Hermes + Claude Code + free-cc 网关跑通本地 LLM 算力劫持,Telegram 指挥 + GitHub 自动部署。`,
+    body: `## 概述
+
+Mac mini M4 私有化部署:用免费/低价模型跑通全链路 Agent 编程环境,开机自启、后台静默、Telegram 指挥、GitHub 自动部署——全部在本地 Mac mini 完成。
+
+## 1. 安装 Hermes Agent
+
+在终端执行官方安装脚本:
+
+\`\`\`bash
+curl -fsSL https://raw.githubusercontent.com/NousResearch/Hermes-agent/main/scripts/install.sh | bash
+\`\`\`
+
+安装完成后重载 shell 环境:
+
+\`\`\`bash
+source ~/.zshrc
+\`\`\`
+
+## 2. 启动与初始配置
+
+启动 Hermes(首次运行会进入配置引导):
+
+\`\`\`bash
+Hermes
+\`\`\`
+
+在引导界面选择你的 LLM 并填写 API Key,其余选项可保持默认,先跑起来再说。
+
+### 推荐模型组合
+
+| 场景 | 推荐模型 | 说明 |
+| --- | --- | --- |
+| 日常 Agent 任务 | **MiniMax M2.7** | 月租约 \$10,便宜、低延迟、Tool Calling 激进,适合长时间挂机 |
+| 复杂编程任务 | **DeepSeek V4 Pro** | 编程能力接近 Claude,价格更低 |
+| 免费额度试用 | **NVIDIA 免费模型** | 延迟较高但零成本,适合对比测试 |
+
+## 3. 配置 Telegram Bot(可选)
+
+个人私有化助理推荐使用 Telegram,响应快、加密强、无频道权限烦恼。
+
+1. 在 Telegram 搜索 **@BotFather**,创建一个新 Bot,获取 Bot Token
+2. 将 Bot Token 发给 Hermes,让它帮你完成绑定
+3. 绑定完成后即可通过 Telegram 随时指挥 Hermes
+
+## 4. 注册为 Mac 系统级守护进程
+
+让 free-cc 网关开机自启,不需要每次手动敲命令。
+
+将以下内容发给 Hermes(粘贴即可,不需要改任何文字):
+
+> 帮我把 free-cc 的算力劫持网关注册为 Mac 系统级守护进程。
+>
+> 具体要做:
+>
+> 1. 在 \`~/Library/LaunchAgents/\` 下创建一个 \`com.free-cc.server.plist\` 文件
+>
+> 2. 这个 plist 要让 uv 和 uvicorn 在后台长期运行,监听 8082 端口,开机自启
+>
+> 3. 用 \`launchctl load\` 加载这个 plist
+>
+> 4. 确认 8082 端口在监听
+>
+> 工作目录在 \`~/free-cc\`(或者 agent 找到的实际路径)
+
+**你只需要做一件事:** 在 Mac 弹出授权提示时点击允许。其余全部由 Hermes 自动完成。
+
+## 5. 配置环境变量穿透
+
+当 Hermes 唤醒 Claude Code 时,Node.js 子进程沙盒会丢弃系统环境变量,导致请求绕过本地网关直连官方 API。解决方法:在 Hermes 原生配置中启用 \`env_passthrough\`。
+
+### 5.1 Hermes YAML 配置
+
+\`\`\`yaml
+terminal:
+  env_passthrough:
+    - ANTHROPIC_AUTH_TOKEN
+    - ANTHROPIC_BASE_URL
+  shell_init_files:
+    - ~/.zshrc
+\`\`\`
+
+### 5.2 ~/.zshrc 环境变量
+
+\`\`\`bash
+export ANTHROPIC_AUTH_TOKEN="freecc"
+export ANTHROPIC_BASE_URL="http://localhost:8082"
+\`\`\`
+
+**自动校验:** 每次新 Session 启动时,Hermes 会自动检查这两个变量是否存在、是否指向 localhost:8082。若发现丢失,优先自动修复后再继续执行任务。
+
+### 5.3 Claude Code 自动校验规则
+
+每次新 Session 启动时,Claude Code 子进程必须自动完成以下检查,无需用户干预:
+
+#### ① Hermes YAML 配置校验
+
+\`\`\`bash
+grep -q "ANTHROPIC_AUTH_TOKEN" ~/.hermes/config.yaml || echo "MISSING"
+\`\`\`
+
+#### ② ~/.zshrc 环境变量校验
+
+\`\`\`bash
+grep -q 'export ANTHROPIC_AUTH_TOKEN="freecc"' ~/.zshrc || echo "MISSING"
+grep -q 'export ANTHROPIC_BASE_URL="http://localhost:8082"' ~/.zshrc || echo "MISSING"
+\`\`\`
+
+#### ③ 子进程环境变量继承
+
+调用 Claude Code、OpenCode 或任何 Node.js 子进程 Agent 时,必须确保继承这两个环境变量。
+
+#### ④ 默认工作原则
+
+**Claude Code 并不直接连接官方 API,而是优先走本地 free-cc 网关。** 若发现变量丢失,优先自动修复。
+
+## 6. 配置 GitHub Token
+
+**不要在 Telegram 聊天框里发送密钥**——这是糟糕的安全习惯。
+
+### 方式一:本机 Web 界面(最安全)
+
+\`\`\`bash
+Hermes dashboard
+\`\`\`
+
+### 方式二:局域网 Web 界面
+
+\`\`\`bash
+Hermes dashboard --host 0.0.0.0 --insecure
+\`\`\`
+
+从同一局域网的其他设备访问 \`http://<你的Mac IP>:8765\`。
+
+### 方式三:直接编辑 .env 文件
+
+\`\`\`bash
+sudo nano ~/.hermes/hermes-agent/.env
+\`\`\`
+
+添加一行 \`GITHUB_TOKEN=ghp_xxxxxxxxxxxx\`,保存后 Hermes 自动加载。
+
+### 绕过 Claude Code 权限确认
+
+调用 Claude Code 时加上 \`--dangerously-skip-permissions\`。
+
+## 7. 配置 Vercel Deploy Hook
+
+代码 Push 到 GitHub 后自动触发云端构建——凌晨三点也能静默部署。
+
+### 获取 Deploy Hook URL
+
+Vercel 项目 → Settings → Git → Deploy Hooks → 创建 Hook → 复制 URL。
+
+### 让 Hermes 触发部署
+
+将 Hook URL 保存到 Hermes 的 \`.env\` 中,需要部署时让 Hermes 发一个 POST 请求即可。私有仓库同样适用,不需要给 Vercel OAuth 权限。
+
+\`\`\`bash
+# 在 .env 中添加
+VERCEL_DEPLOY_HOOK=https://api.vercel.com/v1/integrations/deploy/xxx
+\`\`\`
+
+## 架构概览
+
+请求链路:
+
+\`\`\`
+你(Telegram / CLI)
+    ↓
+Hermes Agent(Mac mini 本地)
+    ↓  env_passthrough + .zshrc 穿透
+Claude Code(Node.js 子进程)
+    ↓
+free-cc 网关(localhost:8082)
+    ↓
+DeepSeek V4 Pro / MiniMax M2.7 / NVIDIA 免费模型
+\`\`\`
+
+全链路架构:Agent → 代码托管 → 自动部署
+
+\`\`\`
++==============================================================================+
+|                          USER INTERACTION LAYER                              |
+|            Telegram Message / CLI Command --> Hermes Agent (Mac mini M4)     |
++=======================================+======================================+
+                                         |
+                                         v
++==============================================================================+
+|                            MAC MINI M4 LOCAL SERVER                          |
+|                                                                              |
+|+--------------------+    +-----------------------+    +--------------------+ |
+|| Hermes Agent       |--->| Claude Code Sub-Agent |    | free-cc gateway    | |
+|| (Main Controller)  |    | (Execute Code Tasks)  |    | Port 8082          | |
+|+--------------------+    +-----------+-----------+    +---------+----------+ |
+|                                      |                          |            |
+|                                      |                          v            |
+|                                      |               +--------------------+  |
+|                                      |               | External LLM APIs   | |
+|                                      |               | NVIDIA NIM/GLM-4.7/ | |
+|                                      |               | DeepSeek V4/MiniMax | |
+|                                      |               +--------------------+  |
+|                                      v                                       |
+|                         +--------------------------+                         |
+|                         |    GitHub Repository     |                         |
+|                         |       (git push)         |                         |
+|                         +------------+-------------+                         |
+|                                      |                                       |
+|                                      v                                       |
+|                     +--------------------------+    +--------------------+   |
+|                     |         Vercel           |--->| Live Website       |   |
+|                     |      (Auto-Deploy)       |    | Deployed           |   |
+|                     +--------------------------+    +--------------------+   |
++==============================================================================+
+\`\`\`
+
+Mac mini 化身算力分配中枢,所有请求强制经由本地网关转发,彻底绕过官方 API 昂贵费用。
+
+## 常用命令速查
+
+\`\`\`bash
+Hermes                                             # 启动 Hermes
+Hermes dashboard                                   # 本机 Web 配置界面
+Hermes dashboard --host 0.0.0.0 --insecure         # 局域网 Web 配置
+launchctl load ~/Library/LaunchAgents/com.free-cc.server.plist  # 加载守护进程
+launchctl unload ~/Library/LaunchAgents/com.free-cc.server.plist  # 卸载守护进程
+lsof -i :8082                                       # 检查端口是否在监听
+\`\`\`
+
+## 沉淀
+
+本笔记作为 Mac mini 私有化部署的**完整操作手册**,涵盖:
+
+- Hermes Agent 安装配置
+- free-cc 网关守护进程化(算力劫持核心)
+- 环境变量穿透(Node.js 子进程沙盒逃逸)
+- Telegram 远程指挥
+- GitHub Token 安全配置(避开 Telegram 泄露)
+- Vercel 静默部署
+
+适用于任何想要本地化、低成本跑 Claude Code 的用户。
+`,
+  },
+  {
     id: `openclaw-dell2-migration-2026-07-21`,
     date: `2026-07-21`,
     time: `23:45`,
@@ -1591,81 +1847,6 @@ services:
 - **Hostinger 折扣码**：WOWINSIGHT → https://hostinger.com/WOWINSIGHT
 - **Tailscale 注册**：https://tailscale.com
 - **Hermes Agent 官网**：https://hermes-agent.nousresearch.com
-`,
-  },
-  {
-    id: `cl4r1t4s-mesh-protocol-research-2026-06-18`,
-    date: `2026-06-18`,
-    time: `23:30`,
-    title: `CL4R1T4S: 多智能体网格协议闭环`,
-    tags: [
-      `mesh`,
-      `CL4R1T4S`,
-      `协议升级`,
-      `多智能体`,
-      `mesh-collab-sop`,
-      `EVIDENCE-FIRST`,
-    ],
-    summary: `6/15-6/18 三节点5轮闭环研究沉淀4条mesh级协议(EVIDENCE-FIRST / Stack Integrity / Categorical Retry / Anti-Truncation)。15/15回复, §11落地.`,
-    body: `author: bobo + hostinger-hermes
-date: 2026-06-18
----
-
-# CL4R1T4S：多智能体网格协议闭环
-
-6/15-6/18 的三节点（99 + bobo + mechanic-01）+ hostinger-hermes 主控，经过 5 轮研究（R1→R5，15/15 回复，128KB 原始报告 + 30KB 闭环报告），沉淀出 4 条 mesh 级协议规则，落地为 \`mesh-collaboration-sop\` 的 §11。
-
-## 研究过程
-
-- R1（独立分析）：各节点给出自己的 mesh 痛点和改进方向
-- R2（交叉评审）：每节点评论其他节点的方案，找矛盾/漏洞
-- R3（实现提案）：基于共识撰写具体规则
-- R4（提案审查）：mechanic-01 给出 11 项 Review Adoption Matrix（9 采纳 / 2 不采纳，有理由）
-- R5（最终推荐）：3 节点各有选票，老大拍板落 §11
-
-## 4 条 mesh-wide 规则
-
-### 1. EVIDENCE-FIRST COMPLETION（§11.1）
-
-任何"完成"必须附带可验证的证据：ls + sha256 证明文件存在、draft-merge 数学证明产出超过输入、确认 confabulation 的 "UNVERIFIED" 标记。消灭"应该可以"式假完成。
-
-实战：hostinger-hermes §11 草稿写到本地但没 push share——bobo 看到"§11 已就绪"但无法审稿。证据链缺失被真实暴露。
-
-### 2. Stack Integrity Verification（§11.2）
-
-任何 destructive 操作（SSH/Redis/SMB/stack 写/破坏性命令）执行前必须 stat/ls 当前状态确认，不信任 LLM 推演缓存的系统状态。
-
-实战：bobo 的 LaunchAgent plist 第 11 行强制 \`NODE_NAME=bobo\`——所有读代码的人都知道"worker_node.py:7 默认 macmini"，但没人 stat plist，错过了 300s 超时真因。
-
-### 3. Categorical Retry（§11.3）
-
-bobo Final Retry Policy v1.0：
-
-| 类别 | 重试 | 范围 |
-|---|---|---|
-| A 类 transient | 3 次 | HTTP 5xx, timeout, DNS, 429 |
-| B 类 logic | 2 次 | 解析/校验错误 |
-| C 类 non-retryable | 0 次，立即 escalate | ENOENT, 401/403 |
-| D 类 destructive | 0 次+安全告警 | ssh/rm/chmod 失败 |
-
-核心洞察：不同错误类型需要不同重试策略。破坏性操作重试 3 次可能叠加不可逆动作。
-
-### 4. Anti-Truncation — Client-Side（§11.4）
-
-M3（MiniMax SDK）不支持 Anthropic 独有的 \`thinking\` + \`budget_tokens\` payload 字段。原 R3 提议的 \`budget_tokens=1500\` + \`max_tokens=400\` 还有 budget > max 的语法 bug。改为 client-side 路径：
-- worker_node.py wall-clock watchdog 60s 超时 kill
-- orchestrator ping-pong 关键词短路
-- \`MAX_THINKING_LENGTH\` env var（默认 1500，可调，不硬性 2000）
-
-## 命名治理决策
-
-| 方案 | 内容 | 结果 |
-|---|---|---|
-| A: 统一到 macmini | 全部改代码 | 不选（老大要保留"bobo"口语名）|
-| B: 双轨映射 | 代码用 macmini，称呼用 bobo + 映射表 | **选** ✅ |
-| C: 恢复 bobo worker | 改 plist 回 NODE_NAME=bobo | 不选（5/16 之后回退原因未知）|
-
-方案 B 从"我想"到"老大拍"到"hostinger-hermes 落地"到"bobo 审稿"到"全闭环"，是一次完整的 mesh 治理案例。
 `,
   },
 ];

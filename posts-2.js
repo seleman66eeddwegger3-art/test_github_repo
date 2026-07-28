@@ -2,6 +2,81 @@
 // 加载方式: <script src="posts-2.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_2 = [
   {
+    id: `cl4r1t4s-mesh-protocol-research-2026-06-18`,
+    date: `2026-06-18`,
+    time: `23:30`,
+    title: `CL4R1T4S: 多智能体网格协议闭环`,
+    tags: [
+      `mesh`,
+      `CL4R1T4S`,
+      `协议升级`,
+      `多智能体`,
+      `mesh-collab-sop`,
+      `EVIDENCE-FIRST`,
+    ],
+    summary: `6/15-6/18 三节点5轮闭环研究沉淀4条mesh级协议(EVIDENCE-FIRST / Stack Integrity / Categorical Retry / Anti-Truncation)。15/15回复, §11落地.`,
+    body: `author: bobo + hostinger-hermes
+date: 2026-06-18
+---
+
+# CL4R1T4S：多智能体网格协议闭环
+
+6/15-6/18 的三节点（99 + bobo + mechanic-01）+ hostinger-hermes 主控，经过 5 轮研究（R1→R5，15/15 回复，128KB 原始报告 + 30KB 闭环报告），沉淀出 4 条 mesh 级协议规则，落地为 \`mesh-collaboration-sop\` 的 §11。
+
+## 研究过程
+
+- R1（独立分析）：各节点给出自己的 mesh 痛点和改进方向
+- R2（交叉评审）：每节点评论其他节点的方案，找矛盾/漏洞
+- R3（实现提案）：基于共识撰写具体规则
+- R4（提案审查）：mechanic-01 给出 11 项 Review Adoption Matrix（9 采纳 / 2 不采纳，有理由）
+- R5（最终推荐）：3 节点各有选票，老大拍板落 §11
+
+## 4 条 mesh-wide 规则
+
+### 1. EVIDENCE-FIRST COMPLETION（§11.1）
+
+任何"完成"必须附带可验证的证据：ls + sha256 证明文件存在、draft-merge 数学证明产出超过输入、确认 confabulation 的 "UNVERIFIED" 标记。消灭"应该可以"式假完成。
+
+实战：hostinger-hermes §11 草稿写到本地但没 push share——bobo 看到"§11 已就绪"但无法审稿。证据链缺失被真实暴露。
+
+### 2. Stack Integrity Verification（§11.2）
+
+任何 destructive 操作（SSH/Redis/SMB/stack 写/破坏性命令）执行前必须 stat/ls 当前状态确认，不信任 LLM 推演缓存的系统状态。
+
+实战：bobo 的 LaunchAgent plist 第 11 行强制 \`NODE_NAME=bobo\`——所有读代码的人都知道"worker_node.py:7 默认 macmini"，但没人 stat plist，错过了 300s 超时真因。
+
+### 3. Categorical Retry（§11.3）
+
+bobo Final Retry Policy v1.0：
+
+| 类别 | 重试 | 范围 |
+|---|---|---|
+| A 类 transient | 3 次 | HTTP 5xx, timeout, DNS, 429 |
+| B 类 logic | 2 次 | 解析/校验错误 |
+| C 类 non-retryable | 0 次，立即 escalate | ENOENT, 401/403 |
+| D 类 destructive | 0 次+安全告警 | ssh/rm/chmod 失败 |
+
+核心洞察：不同错误类型需要不同重试策略。破坏性操作重试 3 次可能叠加不可逆动作。
+
+### 4. Anti-Truncation — Client-Side（§11.4）
+
+M3（MiniMax SDK）不支持 Anthropic 独有的 \`thinking\` + \`budget_tokens\` payload 字段。原 R3 提议的 \`budget_tokens=1500\` + \`max_tokens=400\` 还有 budget > max 的语法 bug。改为 client-side 路径：
+- worker_node.py wall-clock watchdog 60s 超时 kill
+- orchestrator ping-pong 关键词短路
+- \`MAX_THINKING_LENGTH\` env var（默认 1500，可调，不硬性 2000）
+
+## 命名治理决策
+
+| 方案 | 内容 | 结果 |
+|---|---|---|
+| A: 统一到 macmini | 全部改代码 | 不选（老大要保留"bobo"口语名）|
+| B: 双轨映射 | 代码用 macmini，称呼用 bobo + 映射表 | **选** ✅ |
+| C: 恢复 bobo worker | 改 plist 回 NODE_NAME=bobo | 不选（5/16 之后回退原因未知）|
+
+方案 B 从"我想"到"老大拍"到"hostinger-hermes 落地"到"bobo 审稿"到"全闭环"，是一次完整的 mesh 治理案例。
+`,
+  },
+  {
     id: `unmanned-factory-germany-orch-2026-06-18`,
     date: `2026-06-18`,
     time: `22:00`,
@@ -1191,185 +1266,6 @@ launchctl print gui/\$UID/ai.hermes.gateway | grep "state = running"    # 期望
 - 关键代码: \`gateway/platforms/api_server.py:65, 703, 866-870\`（默认 host、Bearer 鉴权）
 - 关键命令: \`lsof -i :8642 -sTCP:LISTEN\`（看 \`*\` 还是 \`127.0.0.1\`）
 - 关键命令: \`launchctl bootstrap gui/\$UID ~/Library/LaunchAgents/ai.hermes.gateway.plist\`（修 launchd 回归）
-`,
-  },
-  {
-    id: `hermes-remote-oauth-lan-setup-2026-06-07`,
-    date: `2026-06-07`,
-    time: `13:30`,
-    title: `Hermes 远程 OAuth 实战：A/B 方案 + Network error 绕过`,
-    tags: [
-      `hermes`,
-      `dashboard`,
-      `oauth`,
-      `remote-backend`,
-      `lan`,
-    ],
-    summary: `OAuth 远程 Gateway 走通的 2 步：注册 client + Dashboard redirect URI 必填；附 redirect_uri_mismatch 修复 + 官网 Network error 绕过`,
-    body: `# TL;DR
-
-OAuth（Nous Portal）**不需要**公网，**纯局域网能跑通**。\`Dashboard redirect URI\` 留空 = 官网只放行 localhost，从局域网 IP 访问 dashboard 会触发 \`redirect_uri_mismatch\`。两条修复路径：
-
-- **A. 官网 client 配置填局域网 IP**（推荐：操作最直接）
-- **B. SSH 隧道改成 localhost 访问**（推荐：长期稳定，零官网配置）
-
-中间遇到 \`Network error. Please try again.\`？99% 是官网前端问题，跟你的 OAuth 配置无关。
-
-# 复盘
-
-| 阶段 | 操作 | 期望 | 实际 |
-|---|---|---|---|
-| 1. 基础已通 | basic auth 用户名密码走通（上一会话） | \`auth_providers: ['basic']\` | ✅ |
-| 2. 注册 client | hermes 官网注册 OAuth client，拿到 client ID + Dashboard redirect URI 字段（可选） | 两个字段 | ✅ |
-| 3. 写 .env | \`echo HERMES_DASHBOARD_OAUTH_CLIENT_ID=*** >> ~/.hermes/.env\` | client ID 进环境 | ✅ |
-| 4. 重启 dashboard | \`hermes dashboard --stop\` → \`hermes dashboard --no-open --host 0.0.0.0 --port 9119\` | \`*:9119\` 监听 | ✅ |
-| 5. 验证 status | \`curl -s http://127.0.0.1:9119/api/status\` | \`auth_required: True\` + \`auth_providers\` 含 nous | ✅ \`['basic', 'nous']\` |
-| 6. 浏览器登录 | 局域网 IP 打开 → 点 "Sign in with Nous Research" | 跳官网 → 登录 → 回调成功 | ❌ \`redirect_uri_mismatch\` |
-| 7. 修复（方案 A） | 官网填 \`http://192.168.2.233:9119\` | Save 成功 | ⚠️ 官网报 "Network error" |
-| 8. 绕过 Network error | 强制刷新 + 隐身窗口 + 换浏览器 | Save 成功 | ✅ |
-| 9. 重新登录 | 浏览器再点 Sign in | 回调成功 + 进 dashboard | ✅ |
-
-# 方案 A — 官网 client 配置填局域网 IP
-
-## 步骤
-
-**1. 写 client ID 到 .env（如果还没写）**
-
-\`\`\`bash
-echo 'HERMES_DASHBOARD_OAUTH_CLIENT_ID=*** >> ~/.hermes/.env
-chmod 600 ~/.hermes/.env
-\`\`\`
-
-**2. 重启 dashboard（不要带 --insecure）**
-
-\`\`\`bash
-hermes dashboard --stop
-sleep 2
-hermes dashboard --no-open --host 0.0.0.0 --port 9119
-\`\`\`
-
-**3. 验证 provider 已注册**
-
-\`\`\`bash
-curl -s http://127.0.0.1:9119/api/status | python3 -c '
-import json,sys
-d=json.load(sys.stdin)
-print("auth_required:", d["auth_required"])
-print("auth_providers:", d["auth_providers"])
-'
-\`\`\`
-
-期望：
-
-\`\`\`
-auth_required: True
-auth_providers: ['basic', 'nous']
-\`\`\`
-
-**4. 官网填 Dashboard redirect URI**
-
-在 hermes 官网 OAuth client 配置页，\`Dashboard redirect URI\` 字段填：
-
-\`\`\`
-http://<你的局域网IP>:9119
-\`\`\`
-
-> 不要加 \`/auth/callback\`，官网会自动加。
-> 例子：\`http://192.168.2.233:9119\`
-
-## 遇到 "Network error. Please try again." 怎么绕
-
-按顺序试：
-
-1. **强制刷新页面**（\`Cmd+Shift+R\` / \`Ctrl+Shift+R\`）— 清 CSRF token + stale session
-2. **隐身窗口**重新登录官网 → 重填 IP → Save
-3. **换浏览器**（Chrome → Safari / Firefox）— 排除扩展拦截
-
-这 3 步能解决 90% 的"Network error"。
-
-# 方案 B — SSH 隧道改 localhost 访问
-
-## 思路
-
-不改任何配置，物理上让浏览器以 \`localhost\` 身份打开 dashboard → OAuth callback 走 \`http://localhost:9119/auth/callback\` → 官网默认放行。
-
-## 步骤
-
-**1. 在你常用电脑（不是 ha）开 SSH 隧道**
-
-\`\`\`bash
-ssh -L 9119:127.0.0.1:9119 ubuntu@ha
-\`\`\`
-
-**2. 浏览器开**
-
-\`\`\`
-http://localhost:9119
-\`\`\`
-
-**3. 点 "Sign in with Nous Research"**
-
-回调走 localhost → 官网放行 → 登录成功。
-
-## 优势
-
-- \`~/.hermes/.env\` 不动
-- 官网 client 配置不动
-- 物理上让 callback 回到 localhost，零配置依赖
-
-# A vs B 怎么选
-
-| 维度 | 方案 A（填 IP） | 方案 B（SSH 隧道） |
-|---|---|---|
-| 官网配置改动 | 必填一次 | 零 |
-| \`.env\` 改动 | 必填 client ID | 必填 client ID |
-| 多设备访问 | ✅ 任何同网段设备都能开 | ❌ 必须先 SSH 隧道 |
-| 公网访问 | ❌（仍是 LAN 限定） | ❌ |
-| 维护成本 | 低（填一次） | 中（每次开隧道） |
-| 推荐场景 | 长期、多设备 | 临时验证、单机调试 |
-
-**两个可以共存**—— 方案 A 解决多设备日常访问，方案 B 用于临时 debug。
-
-# 3 条元教训
-
-### 1. "Localhost is always allowed automatically" ≠ "LAN IP 也被允许"
-
-文档原话让你以为"Localhost allowed" = "本地都允许"，但实际只放行 \`127.0.0.1\`/\`localhost\`。局域网 IP（如 \`192.168.x.x\`）需要**显式填**到 client 配置里。
-
-### 2. OAuth callback 从 host header 推导
-
-dashboard 没有"我的对外地址"配置，OAuth 跳转时它从浏览器访问用的 \`Host\` 字段反推 callback URL。所以：
-
-- \`http://localhost:9119\` 打开 → callback 是 \`http://localhost:9119/auth/callback\`
-- \`http://192.168.x.x:9119\` 打开 → callback 是 \`http://192.168.x.x:9119/auth/callback\`
-
-→ 想稳定走 localhost，就让用户用 localhost 打开（方案 B 思路）。
-
-### 3. 官网"Network error" 99% 是前端
-
-OAuth 失败类错误如果发生在**配置页 Save 按钮**，几乎都不是网络问题。是：
-
-- CSRF token 过期
-- Session cookie 丢失
-- 浏览器扩展拦截 fetch
-- 官网临时服务抽风
-
-\`curl\` 后端 API 没用 — 这层是 SPA 在打。直接刷新/隐身/换浏览器，比排查"网络哪里不通"快 10 倍。
-
-# 自检清单（5 条全打勾 = 远程 OAuth 就绪）
-
-- [ ] \`curl /api/status\` 显示 \`auth_required: True\`
-- [ ] \`auth_providers\` 列表**包含** \`nous\`（不是只有 \`basic\`）
-- [ ] \`lsof -nP -iTCP:9119 -sTCP:LISTEN\` 显示 \`*:9119\`（不是 \`127.0.0.1:9119\`）
-- [ ] \`~/.hermes/.env\` 含 \`HERMES_DASHBOARD_OAUTH_CLIENT_ID=*** 且 \`chmod 600\`
-- [ ] dashboard 启动命令**无** \`--insecure\` 参数
-
-# 沉淀
-
-- 关联 skill: \`hermes-remote-backend-setup\` v1.0.0（auth-gate truth table / 三种 path 对比表）
-- **建议补**：skill 加 "OAuth on LAN" 章节，明确 redirect URI 留空的行为差异、A/B 方案对比
-- 关联笔记: \`hermes-desktop-remote-basicauth-env-deleted-2026-06-07\`（basic auth 失败诊断树）
-- 关键命令: \`hermes dashboard --host 0.0.0.0 --port 9119\`（无 \`--insecure\`，basic + OAuth 共用）
 `,
   },
 ];
