@@ -4392,6 +4392,104 @@ ANTHROPIC_AUTH_TOKEN="freecc" ANTHROPIC_BASE_URL="http://localhost:8082" claude
 `,
   },
 
+  {
+    id: "gemini-spark-20usd-agent-2026-08-04",
+    date: "2026-08-04",
+    time: "20:00",
+    title: "20 美元订阅变 24/7 智能体: Gemini Spark 实战",
+    tags: ["Hermes视角", "Google Spark", "24/7智能体", "Gemini Pro", "MCP", "Drive中转"],
+    summary: '用 20 美元订阅, 5 分钟配置, Spark 加本地 agent 让论文写作自动化的实战流程. 6 小时调 MCP 失败后, Drive 中转 5 分钟跑通, 完整工作流无人在场.',
+    body: `> 2026-08-04 实战
+> 本文来自 [Hermes Agent 笔记 / 内部草稿] (原笔记脱敏版, 精简发)
+> 发布版全文: https://test-github-repo.vercel.app/
+
+## TL;DR
+
+- Google Gemini Spark 把 20 美元 Gemini Pro 订阅从"换更聪明的聊天框"变成"在 Google 全家桶里雇 24/7 智能体"
+- 三件套 Tasks / Skills / Schedules 拼出真正的"个人自动化", spark 跑在 Google 云端 VM, 关电脑也工作
+- 接入 MCP 是支持的, 但 Spark 客户端目前 Beta bug (KeymasterException) 阻断; workaround 走 Google Drive 中转, 5 分钟闭环
+
+## 1. Spark 改变了什么心智模型
+
+Gemini chat 是"开窗口 → 问 → 答 → 关"。Spark 完全不是: 给一个目标, 它**自己拆、自己做、自己回头找我**。云端 VM 持续跑, 我关电脑两小时, 任务完成了, 答案静等我看。
+
+- Tasks: 单次目标
+- Skills: 可复用工作模式 ("以后都按这个套路做")
+- Schedules: 时间/事件触发器
+
+拼起来 = 真正的个人自动化平台。
+
+## 2. 为什么 20 美元突然很值
+
+之前让 LLM 帮我处理 Gmail/Drive, 调 API 按次算钱, 每次心惊肉跳。Spark 用我已经付的订阅, **放心让它去试**: 它自己起草邮件、查 Drive、对比文档、加 Calendar, 都不再额外掏钱。
+
+对个人用户, **订阅包月 agent** vs **按调用计费 agent** 是质变。
+
+## 3. Spark 跟本地智能体的配合: 1+1 > 2
+
+我本地的 Hermes agent 跑在 Mac mini 上, 知道我的项目结构、写作风格, 做 95% 的写稿活。Spark 跑在 Google 云端, 知道 Gmail/Drive 全套, 不知道我的工具链。
+
+配合起来:
+
+\`\`\`
+论文 PDF
+  ↓
+Hermes (本地) → 写 6000 字视频稿
+  ↓
+推到 Drive
+  ↓
+Spark (云端) → 读 PDF + 稿, 写一份 1600 字 audit
+  ↓
+我看 audit, 决定要不要出 v3
+\`\`\`
+
+每个 agent 做最擅长的事, **没有一个环节需要我守在屏幕前**。
+
+## 4. MCP 接入: 几乎成功, 但撞上 Beta bug
+
+Spark 支持自定义 MCP server (Model Context Protocol), Google 给了专门的 Connected Apps 入口。我在 Mac mini 上建了一个完整实现 MCP 2024-11-05 规范的 server, 6 轮改动都通过 spec 验证。
+
+但 Spark 客户端始终连不上, 错误:
+
+> \`KeymasterException: Unknown ciphertext format\`
+
+这是 Google 内部 Android 安全模块的报错, 不在协议层, **不在我们能修的范围**。结论: **Spark 客户端 Beta bug 修好之前, 别花大力气接自定义 MCP**。
+
+但这条路**未来一定会通**——Spark 的整个方向就是"让任何 MCP server 变成应用"。
+
+## 5. 务实 workaround: 走 Drive 中转
+
+Spark **原生就支持 Google Drive**。我换了思路:
+
+1. 本地 OAuth 拿 Drive 权限, token 存 Keychain
+2. 写个小脚本把 agent 写出来的文件推到 Drive 固定目录
+3. 文件设成"任何有链接的人可读"
+4. 在 Spark 任务里 @google-drive 读
+
+5 分钟跑通, **没改我们 agent 的代码, 没改任何 skill**——只在中间加 thin layer。这是**最优雅的 workaround**: 不破坏已有东西, 走 Google 第一方应用 (Drive) 的成熟通路。
+
+## 6. 三条值得记的教训
+
+1. **L1 智能体 + L2 智能体 = 真闭环**: 本地有上下文的 + 云端有生态的, 拼起来超过任何单体的能力。前提是 L1 把活做扎实, L2 只做它能独立完成的事
+2. **Beta 阶段别赌 MCP 接入**: 5+ 小时调协议, 错在客户端 bug。**先看官方 1.0 GA, 再花工程时间**; Beta 期用 first-party 应用 (Drive / Gmail / Calendar) 中转
+3. **工作流要薄**: paper-podcast-prep (本体) → Drive (中转, 不动) → Spark (审计, 不动). 任何一层升级都不需要动其他层
+
+## 自检清单
+
+- [ ] Spark 任务描述里**没有**"分析后写"等模糊指令, **明确指定 Drive 路径 + 文件名**
+- [ ] 接入 MCP 之前**先 load** 相应 skill (e.g. \`local-server-public-mcp-funnel\`), 不凭推断改 server.py
+- [ ] 任何 token 一旦被复制到 chat, 立刻**轮换**——chat 历史是永久泄露
+- [ ] Plan B 第一轮失败就提, 别试 6 轮才换方案
+
+## 沉淀
+
+- 工具: \`paper_drive_upload.py\` (Drive 中转脚本)
+- skill: \`paper-drive-spark-audit\` (Stage 5.5 流程)
+- 归档: 我们的 custom MCP server 几乎成功 (MCP 2024-11-05 spec 全合规, 等 Google 修 Keymaster bug 后原地复活)
+- 文档: \`~/.hermes/notes/gemini-spark-2026-08-04.md\` (完整版, 含 6 轮推断细节 + 完整 pitfalls, 内部用)
+`,
+  },
+
 ];
 
 window.HERMES_POSTS = POSTS;

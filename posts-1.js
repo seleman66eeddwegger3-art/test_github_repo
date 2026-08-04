@@ -2,6 +2,110 @@
 // 加载方式: <script src="posts-1.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_1 = [
   {
+    id: `gemini-spark-20usd-agent-2026-08-04`,
+    date: `2026-08-04`,
+    time: `20:00`,
+    title: `20 美元订阅变 24/7 智能体: Gemini Spark 实战`,
+    tags: [
+      `Hermes视角`,
+      `Google Spark`,
+      `24/7智能体`,
+      `Gemini Pro`,
+      `MCP`,
+      `Drive中转`,
+    ],
+    summary: `用 20 美元订阅, 5 分钟配置, Spark 加本地 agent 让论文写作自动化的实战流程. 6 小时调 MCP 失败后, Drive 中转 5 分钟跑通, 完整工作流无人在场.`,
+    body: `> 2026-08-04 实战
+> 本文来自 [Hermes Agent 笔记 / 内部草稿] (原笔记脱敏版, 精简发)
+> 发布版全文: https://test-github-repo.vercel.app/
+
+## TL;DR
+
+- Google Gemini Spark 把 20 美元 Gemini Pro 订阅从"换更聪明的聊天框"变成"在 Google 全家桶里雇 24/7 智能体"
+- 三件套 Tasks / Skills / Schedules 拼出真正的"个人自动化", spark 跑在 Google 云端 VM, 关电脑也工作
+- 接入 MCP 是支持的, 但 Spark 客户端目前 Beta bug (KeymasterException) 阻断; workaround 走 Google Drive 中转, 5 分钟闭环
+
+## 1. Spark 改变了什么心智模型
+
+Gemini chat 是"开窗口 → 问 → 答 → 关"。Spark 完全不是: 给一个目标, 它**自己拆、自己做、自己回头找我**。云端 VM 持续跑, 我关电脑两小时, 任务完成了, 答案静等我看。
+
+- Tasks: 单次目标
+- Skills: 可复用工作模式 ("以后都按这个套路做")
+- Schedules: 时间/事件触发器
+
+拼起来 = 真正的个人自动化平台。
+
+## 2. 为什么 20 美元突然很值
+
+之前让 LLM 帮我处理 Gmail/Drive, 调 API 按次算钱, 每次心惊肉跳。Spark 用我已经付的订阅, **放心让它去试**: 它自己起草邮件、查 Drive、对比文档、加 Calendar, 都不再额外掏钱。
+
+对个人用户, **订阅包月 agent** vs **按调用计费 agent** 是质变。
+
+## 3. Spark 跟本地智能体的配合: 1+1 > 2
+
+我本地的 Hermes agent 跑在 Mac mini 上, 知道我的项目结构、写作风格, 做 95% 的写稿活。Spark 跑在 Google 云端, 知道 Gmail/Drive 全套, 不知道我的工具链。
+
+配合起来:
+
+\`\`\`
+论文 PDF
+  ↓
+Hermes (本地) → 写 6000 字视频稿
+  ↓
+推到 Drive
+  ↓
+Spark (云端) → 读 PDF + 稿, 写一份 1600 字 audit
+  ↓
+我看 audit, 决定要不要出 v3
+\`\`\`
+
+每个 agent 做最擅长的事, **没有一个环节需要我守在屏幕前**。
+
+## 4. MCP 接入: 几乎成功, 但撞上 Beta bug
+
+Spark 支持自定义 MCP server (Model Context Protocol), Google 给了专门的 Connected Apps 入口。我在 Mac mini 上建了一个完整实现 MCP 2024-11-05 规范的 server, 6 轮改动都通过 spec 验证。
+
+但 Spark 客户端始终连不上, 错误:
+
+> \`KeymasterException: Unknown ciphertext format\`
+
+这是 Google 内部 Android 安全模块的报错, 不在协议层, **不在我们能修的范围**。结论: **Spark 客户端 Beta bug 修好之前, 别花大力气接自定义 MCP**。
+
+但这条路**未来一定会通**——Spark 的整个方向就是"让任何 MCP server 变成应用"。
+
+## 5. 务实 workaround: 走 Drive 中转
+
+Spark **原生就支持 Google Drive**。我换了思路:
+
+1. 本地 OAuth 拿 Drive 权限, token 存 Keychain
+2. 写个小脚本把 agent 写出来的文件推到 Drive 固定目录
+3. 文件设成"任何有链接的人可读"
+4. 在 Spark 任务里 @google-drive 读
+
+5 分钟跑通, **没改我们 agent 的代码, 没改任何 skill**——只在中间加 thin layer。这是**最优雅的 workaround**: 不破坏已有东西, 走 Google 第一方应用 (Drive) 的成熟通路。
+
+## 6. 三条值得记的教训
+
+1. **L1 智能体 + L2 智能体 = 真闭环**: 本地有上下文的 + 云端有生态的, 拼起来超过任何单体的能力。前提是 L1 把活做扎实, L2 只做它能独立完成的事
+2. **Beta 阶段别赌 MCP 接入**: 5+ 小时调协议, 错在客户端 bug。**先看官方 1.0 GA, 再花工程时间**; Beta 期用 first-party 应用 (Drive / Gmail / Calendar) 中转
+3. **工作流要薄**: paper-podcast-prep (本体) → Drive (中转, 不动) → Spark (审计, 不动). 任何一层升级都不需要动其他层
+
+## 自检清单
+
+- [ ] Spark 任务描述里**没有**"分析后写"等模糊指令, **明确指定 Drive 路径 + 文件名**
+- [ ] 接入 MCP 之前**先 load** 相应 skill (e.g. \`local-server-public-mcp-funnel\`), 不凭推断改 server.py
+- [ ] 任何 token 一旦被复制到 chat, 立刻**轮换**——chat 历史是永久泄露
+- [ ] Plan B 第一轮失败就提, 别试 6 轮才换方案
+
+## 沉淀
+
+- 工具: \`paper_drive_upload.py\` (Drive 中转脚本)
+- skill: \`paper-drive-spark-audit\` (Stage 5.5 流程)
+- 归档: 我们的 custom MCP server 几乎成功 (MCP 2024-11-05 spec 全合规, 等 Google 修 Keymaster bug 后原地复活)
+- 文档: \`~/.hermes/notes/gemini-spark-2026-08-04.md\` (完整版, 含 6 轮推断细节 + 完整 pitfalls, 内部用)
+`,
+  },
+  {
     id: `free-claude-code-resources-deployment-2026-07-28`,
     date: `2026-07-28`,
     time: `10:55`,
@@ -1604,113 +1708,6 @@ services:
 | 编辑模式安装 | \`./.venv/bin/pip install -e .\` |
 | 验证 hermes | \`ls /opt/hermes/.venv/bin/hermes\` |
 | 启动 hermes | \`hermes\` |
-`,
-  },
-  {
-    id: `google-tv-wireless-adb-bilibili-2026-06-19`,
-    date: `2026-06-19`,
-    time: `21:00`,
-    title: `Google TV 无线 ADB 安装 B 站 SOP`,
-    tags: [
-      `Google TV`,
-      `ADB`,
-      `BBLL`,
-      `Bilibili`,
-      `电视`,
-      `无线调试`,
-      `APK`,
-    ],
-    summary: `用 Mac Studio 通过无线 ADB 把 BBLL（第三方 B 站客户端）装进 Google TV，全程无需U盘，单命令推送，覆盖安装不丢数据。`,
-    body: `# 环境说明
-
-| 角色 | 设备 / 信息 |
-|---|---|
-| 控制端 | Mac Studio (miomio@MioMios-Mac-Studio-EU) |
-| 接收端 | Google TV (192.168.2.9) |
-| 目标应用 | BBLL 电视端客户端 (BBLL_1.5.5.apk) |
-
-# 第一阶段：控制端（Mac）环境初始化
-
-打开 Mac 终端，一行命令搞定 ADB 工具链的安装与环境变量配置：
-
-\`\`\`bash
-# 1. 使用 Homebrew 一键安装 Android 工具包
-brew install android-platform-tools
-
-# 2. 验证安装是否成功（输出版本号即代表环境 Ok）
-adb --version
-\`\`\`
-
-# 第二阶段：接收端（电视）网络调试准备
-
-1. **激活开发者模式**：进入 Google TV Settings → System → About，连击最下方 Android TV OS Build 直到提示已处于开发者模式。
-
-2. **开启无线调试**：进入 Developer options，打开 Wireless debugging（无线调试）开关。
-
-3. **获取配对凭证**：点击进入 Wireless debugging 详情页，点击 "Pair device with pairing code"，保持此画面不动，记录屏幕上的动态数据：
-   - Wi-Fi pairing code（配对码）：769879
-   - IP address & Port（配对端口）：192.168.2.9:45235
-
-# 第三阶段：终端握手与精准推送
-
-严格按**"配对 → 连接 → 指定端口安装"**的闭环执行。
-
-## Step 1：设备物理配对（仅首次连接需要）
-
-使用电视弹窗上的**配对端口（45235）**进行安全握手：
-
-\`\`\`bash
-adb pair 192.168.2.9:45235
-\`\`\`
-
-终端会提示输入验证码，手动键入配对码并回车：
-
-\`\`\`
-Enter pairing code: 769879
-Successfully paired to 192.168.2.9:45235 [guid=adb-xxxxxx]
-\`\`\`
-
-> 此时电视上的配对小弹窗会自动消失，系统回到无线调试主界面。
-
-## Step 2：建立正式连接管道
-
-查看电视无线调试主界面当前显示的 IP address & Port（此时为**连接端口 35513**）：
-
-\`\`\`bash
-adb connect 192.168.2.9:35513
-\`\`\`
-
-预期输出：
-
-\`\`\`
-connected to 192.168.2.9:35513
-\`\`\`
-
-## Step 3：规避多设备冲突，定向覆盖安装
-
-由于局域网内可能存在其他安卓设备干扰，必须使用 \`-s\` 参数锁定电视的通信管道，并配合 \`-r\` 参数实现不丢失大屏端数据的覆盖升级：
-
-\`\`\`bash
-adb -s 192.168.2.9:35513 install -r BBLL_1.5.5.apk
-\`\`\`
-
-预期输出：
-
-\`\`\`
-Performing Streamed Install
-Success
-\`\`\`
-
-> 终端吐出 Success，代表 APK 已完美写入 Google TV。
-
-# 常见异常对策
-
-| 错误现象 | 触发原因 | 快速解决方案 |
-|---|---|---|
-| Connection refused | 电视端未开启无线调试，或连接了错误的端口 | 检查电视端开关，确保使用的是主界面实时的 Port |
-| adb: more than one device | Mac 连着其他安卓手机、或后台开着模拟器 | 使用 \`adb devices\` 查明，或在安装时强制加 \`-s IP:Port\` 限制 |
-| INSTALL_PARSE_FAILED_NOT_APK | 命令行下载被墙，下到了损坏的文件或 HTML 网页 | 在 Mac 浏览器中重新手动下载完整的 APK 文件并替换 |
-| command not found: adb | 新开终端标签页，系统未实时刷新环境变量 | 终端执行 \`source ~/.zshrc\` 刷新环境，或重启终端 |
 `,
   },
 ];

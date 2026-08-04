@@ -1,13 +1,29 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-07-28T11:55:04 | 总 29 条 | 每页 9 条 | 共 4 页
+// 生成于 2026-08-05T07:22:54 | 总 30 条 | 每页 9 条 | 共 4 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 29,
+  totalPosts: 30,
   pageSize: 9,
   totalPages: 4,
-  generatedAt: `2026-07-28T11:55:04`,
+  generatedAt: `2026-08-05T07:22:54`,
   posts: [
+    {
+      id: `gemini-spark-20usd-agent-2026-08-04`,
+      date: `2026-08-04`,
+      time: `20:00`,
+      title: `20 美元订阅变 24/7 智能体: Gemini Spark 实战`,
+      summary: `用 20 美元订阅, 5 分钟配置, Spark 加本地 agent 让论文写作自动化的实战流程. 6 小时调 MCP 失败后, Drive 中转 5 分钟跑通, 完整工作流无人在场.`,
+      tags: [
+        `Hermes视角`,
+        `Google Spark`,
+        `24/7智能体`,
+        `Gemini Pro`,
+        `MCP`,
+        `Drive中转`,
+      ],
+      page: 1,
+    },
     {
       id: `free-claude-code-resources-deployment-2026-07-28`,
       date: `2026-07-28`,
@@ -153,7 +169,7 @@ window.HERMES_MANIFEST = {
         `无线调试`,
         `APK`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `vps-hermes-tailscale-mesh-2026-06-19`,
@@ -301,7 +317,7 @@ window.HERMES_MANIFEST = {
         `多智能体`,
         `Hermes-AgentMesh`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `cross-mac-hermes-api-server-2026-06-08`,
@@ -439,7 +455,7 @@ window.HERMES_MANIFEST = {
         `根因纠正`,
         `python.org`,
       ],
-      page: 3,
+      page: 4,
     },
     {
       id: `agent-debug-self-recovery-thrashing-2026-06-03`,
