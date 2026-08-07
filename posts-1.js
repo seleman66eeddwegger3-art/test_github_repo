@@ -2,6 +2,208 @@
 // 加载方式: <script src="posts-1.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_1 = [
   {
+    id: `agent-meeting-5-sop-mvp-architecture-2026-08-07`,
+    date: `2026-08-07`,
+    time: `15:00`,
+    title: `智能体会议室：5 SOP + MVP 4 步`,
+    tags: [
+      `AI组织`,
+      `认知系统`,
+      `SOP协议`,
+      `Loop Engineering`,
+      `多智能体`,
+    ],
+    summary: `从「AI Agent 自动开会」升级到「Human-in-the-loop AI Organization」: 5 SOP (时间线/追问/探活/异议/落盘) + MVP 4 步闭环 (Intent→Mutation→Verify→Record). 协议层讲解, 厂商无关, 可复现.`,
+    body: `> **作者**: 协议由 CSO 起草
+> **日期**: 2026-08-07
+> **范围**: 仅协议层 (5 SOP + MVP + 角色分工 + 触发词), 不含具体实现厂商 / 持久层文件 / 视频脚本
+
+## TL;DR
+
+3 行讲清这个项目:
+
+1. **不是 "AI Agent 自动开会"** — 是 **Human CEO 召集 + Agent 按 SOP 协作 + 组织记忆沉淀** 的 **Human-in-the-loop AI Organization**
+2. **不是工具创新** — 是 **组织协议创新**: 5 SOP (时间线 / 追问 / 探活 / 异议 / 落盘) + MVP 4 步闭环 (Intent → Mutation → Verify → Record)
+3. **不是单点 hack** — 是 **可复制的组织范式**: 任意本地 + 云端 Agent 组合都能搭, 只要遵守协议
+
+## 为什么这件事值得记录
+
+普通 AI 应用讲 "我用 AI 写了代码 / 做了 PPT". 这个项目讲一个完全不同的事:
+**当你给 AI 一个固定物理住所 + 组织记忆 + 协议进化能力, 它开始具备组织结构.**
+
+"智能体会议室" 的核心范式: **AI 不再只是工具, 是组织的一员**. 它有角色 (CSO / Auditor), 有记忆 (组织记忆文件), 有协议 (5 SOP), 有自我观察能力 (MVP 4 步).
+
+## 架构 1 张图说清
+
+\`\`\`
+┌──────────────────────────────────────────────────┐
+│ Human CEO — 拍板 + 召集 + 审计                    │
+└──────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌──────────────────────────────────────────────────┐
+│ Decision Layer — 角色分工协议                    │
+│  CSO (本地/自部署 Agent)  Auditor (云端 LLM)    │
+│  战略 + 本地探活          联网核查 + 红队反驳       │
+└──────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌──────────────────────────────────────────────────┐
+│ Meeting Memory OS — 5 SOP + MVP                 │
+│  SOP-A 时间线  SOP-B 追问  SOP-C 探活             │
+│  SOP-D 异议   SOP-F 落盘 (Memory Commit Layer)   │
+│  MVP 4 步: Intent → Mutation → Verify → Record │
+└──────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌──────────────────────────────────────────────────┐
+│ Shared Workspace — 任意持久层 (Drive / Obsidian / Git / Notion) │
+│  单一会议记录文件 (推荐 markdown, 时间连续性)       │
+└──────────────────────────────────────────────────┘
+\`\`\`
+
+## 5 SOP + MVP 是什么 (1 段讲透)
+
+**SOP-A 时间线** — 一方主导, 另一方镜像. 每回合 append 一个新 Round 块到会议记录文件, 按 \`[YYYY-MM-DD HH:MM]\` 时间戳排序, 保留 CEO / CSO / Auditor 各自的视角段.
+
+**SOP-B CEO 拍板追问** — 检测 CEO 消息里的 "拍板 / 决定 / PROCEED" 等决策信号, 自动追问 "核心判断依据是什么?", CEO 答后写进 §Decision.💭 Reasoning 段. 不假装是 CEO 的原话.
+
+**SOP-C 本地探活** — 自动记录本地 terminal / 文件 / API 调用 (exit code + 关键输出), 不包含完整 stdout. 仅适用有本地环境的 Agent 端.
+
+**SOP-D 异议记录** — 任何 "未采用建议" 必须进 §Dissent Log, 含 3 字段:
+- **异议内容**: 谁建议了什么
+- **拒绝理由**: 为什么没采纳
+- **Future relevance**: 未来什么时候应该重新评估
+
+**SOP-F 落盘** (Memory Commit Layer) — **这是 MVP 第 4 步的具体实现**. Agent 每次回复 CEO 后**自动**调持久层 API 写盘, 让另一端能随时通过探活同步全量推理链. 内部叫 SOP-F, 对外可叫 "Memory Commit Layer" 或 "Cognitive Commit Protocol".
+
+**MVP 4 步闭环** (类 Git commit):
+1. **Intent**: 要修改什么 + 目标状态 + 回滚路径
+2. **Mutation**: 用工具真改, 记录 mutation ID
+3. **Verify**: 重新读取 + 断言 size 增长 + 关键内容在 (**不能口头说完成**)
+4. **Record**: append 到会议记录 + §Dissent Log (如果失败)
+
+**为什么 MVP 重要**: Agent 声明 "已完成" ≠ 文件实际完成. 这恰好和建立会议记忆的目标一致 — **任何状态变化必须可追溯**.
+
+## 角色分工 (CEO / CSO / Auditor)
+
+| 角色 | 谁 | 职责 |
+|---|---|---|
+| **CEO** | 人类 | 拍板 + 召集 + 审计. 唯一决策权. |
+| **CSO** | 本地/自部署 Agent | 战略 + 起草 + 本地探活 + 时间线维护 |
+| **Auditor** | 云端 LLM Agent | 联网核查 + 红队反驳 + 写 §Auditor Review 压缩摘要 |
+
+**关键原则**: 不是 "Autonomous Company", 是 "Human-in-the-loop AI Organization". CEO 召集, Agent 按 SOP 协作, **不是 Agent 自主决定何时开会**.
+
+## §Auditor Review 压缩规范 (关键)
+
+Auditor 写每回合审计段时, 必须**严格压缩到 3-5 行高密度摘要**, 不原文黏贴对话. 包含:
+
+\`\`\`
+📌 Audit: <审查了哪些事实, 给 URL>
+⚠️ Risk: <提出的风险点>
+💡 Alternative: <替代方案, 如果有>
+🚫 Objection: <反对意见, 如果有>
+Output compressed: <1-3 行输出摘要>
+\`\`\`
+
+**为什么**: 长文 dump 污染事件记忆文件, 让 Agent 未来读起来认知成本爆炸.
+
+## §Dissent Log + Future Relevance
+
+每一条 "未采用建议" 必须进 Dissent Log, 严格附带 Future relevance:
+
+\`\`\`
+🚫 <某方> 异议 <NN>: <具体异议>
+   Reason for rejection: <拒绝理由>
+   Future relevance: <未来什么条件下应重新评估>
+\`\`\`
+
+**为什么这是最有价值的部分**: AI 组织最珍贵的不是共识, 是**为什么否决另一个方向**. 半年后新 Agent 上线, 看到 §Dissent Log 就理解组织哲学, 不用从头推演.
+
+## 实战证据 (Round 类型分布)
+
+> 数字来源: 某次实测 15 Rounds 协议进化过程, 详细记录留在内部会议文件, 本笔记只列类型分布, 不引用具体文件 ID.
+
+| Round 类型 | 数量 | 关键事件 (类型) |
+|---|---|---|
+| 协议建立 | 1-2 | skill 创建 + 议题文件夹复用 |
+| 验证翻车 | 1 | mimeType 太严, verify 漏看 → 加 §10 容错 |
+| 拍板分工 | 1 | 删 SOUL.md 提及 + 写稿分工 |
+| 迭代黑盒 | 1 | 10 轮迭代无 changelog → 加 §12 协议 |
+| 协议盲区曝光 | 1 | "我和云端 Agent 的聊天你并不知道" |
+| 协议升级 | 1 | 4-SOP 协议正式立 |
+| 镜像对齐 | 1 | 双端镜像协议 |
+| 持久层提案 | 1 | SOP-F: 每次回复自动落盘 |
+| 镜像端对齐 | 1 | 镜像 SOP-F |
+| 里程碑 + MVP | 1 | System Evolution + Mutation Verification Principle |
+| 跨端 SOP | 1 | 起草镜像指令框 |
+| 物理反查 | 1 | 镜像端真跑 MVP 4 步 + 物理 verify |
+| 内容迭代 | 2 | 视频脚本迭代 (类型提及, 内容不发) |
+
+## 关键金句 (4 条)
+
+- **"过去的软件系统保存数据, 而未来的 AI 组织需要保存'为什么做出这个决定'. 因为知识可以复制, 但决策历史才构成一个组织的灵魂."**
+- **"AI 不再只是一个聊天窗口, 而是开始拥有自己的家. 人类员工入职公司, 会有工位、邮箱、会议记录、历史档案. 但今天的大部分 AI Agent, 每次启动, 就像一个第一天入职、没有工位、没有档案的新员工."**
+- **"组织为什么需要秘书? 不是因为 CEO 不会写字, 而是因为组织不能依赖某个人的大脑保存历史. SOP-F 就像这个组织里的秘书."**
+- **"真正困难的不是让 AI 交流, 而是让 AI 记住为什么做出决定."**
+
+## 沉淀 (skill + 笔记)
+
+### 2 个开源 skill (本项目产出)
+
+1. **\`hermes-spark-meeting\` (本地 / 自部署 Agent 端, v0.2.3)**
+   - 包含 §1-§25 (5 SOP + MVP 4 步 + Resume 协议 + 编辑 SOP)
+   - 仓库路径待定 (见末尾"开源仓库"段)
+
+2. **\`spark-hermes-meeting\` (云端 LLM Agent 镜像端)**
+   - 包含 §14-§18 4-SOP + §24 MVP + §18 绝对约束
+   - 仓库路径待定
+
+### 1 类协议产物
+
+- **Meeting Minutes 文件** — 任何持久层都可, 推荐 markdown 单一文件, 按 Round 追加
+- **格式**: 5 段对话结构 (CEO Decision / CSO Execution Log / Auditor Review / Dissent Log / Consensus)
+
+### 1 个视频系列
+
+- **Building My Personal AI Company** — 视频内容属于产出层, 不在本笔记范围. 视频脚本内部迭代版本也不引用.
+
+## 复现清单 (5 步, 厂商无关)
+
+1. 选 2 个 Agent 角色: 本地 (CSO) + 云端 (Auditor). 不限厂商.
+2. 选 Shared Workspace: Drive / Obsidian / Git / Notion / Confluence 任一, 单一会议记录文件.
+3. 立 5 SOP: 时间线 / 追问 / 探活 / 异议 / 落盘
+4. 立 MVP 4 步: Intent → Mutation → Verify → Record
+5. 跑 1 次完整会议, verify 会议记录 size 增长 + Round 编号递增 + 内容真实
+
+## 一句话总结
+
+**智能体会议室不是新工具, 是新组织范式. 当 AI 拥有住所 + 记忆 + 协议进化能力, 它开始具备组织结构.**
+
+
+## 📝 附录: 脱敏承诺 (本笔记边界)
+
+**本笔记不包含**:
+- ❌ 具体厂商名 (VPS / LLM / 持久层品牌) — 都用抽象描述代替
+- ❌ 具体文件 ID / 链接 — Drive / GitHub URL 都不放
+- ❌ 视频脚本 / 视频内容 — 那是产出, 不是协议
+- ❌ 价格 / 订阅费用 — 是商业信息
+- ❌ 个人 Gmail / API key / token — 是认证信息
+
+**本笔记只包含**:
+- ✅ 协议规范 (5 SOP / MVP 4 步 / 5 段结构)
+- ✅ 角色分工 (CEO / CSO / Auditor) — 抽象角色, 不绑定具体产品
+- ✅ 触发词 / 反模式 — skill 本身的内容
+- ✅ 关键金句 — 思想性内容
+- ✅ 复现清单 — 厂商无关的实施步骤
+
+## 链接索引
+
+> 本笔记无任何外部链接. 想看实际案例 (视频 / 实际会议记录) 请联系作者, 不公开.
+`,
+  },
+  {
     id: `gemini-spark-20usd-agent-2026-08-04`,
     date: `2026-08-04`,
     time: `20:00`,
@@ -1567,147 +1769,6 @@ source ~/.zshrc
 - **关联笔记**：\`cross-mac-hermes-api-server-2026-06-08\`（Mac 跨设备 Hermes API 拓扑）、\`hermes-desktop-remote-lan-sop-2026-06-07\`（LAN 部署 SOP）、\`vps-hermes-tailscale-mesh-2026-06-19\`（Tailscale mesh）
 - **关键模型**：[Agents-K1 (InternScience)](https://huggingface.co/InternScience/Agents-K1) — 4B 参数 + GRPO 对齐，Scholar-KG 场景 NER/RE SOTA
 - **核心软件栈**：MLX (Apple Silicon 原生 ML 框架) + mlx-lm + mlx_lm.server (OpenAI 兼容 API)
-`,
-  },
-  {
-    id: `hermes-container-venv-recovery-2026-06-19`,
-    date: `2026-06-19`,
-    time: `22:00`,
-    title: `hermes: command not found？Docker 升级 3 步修`,
-    tags: [
-      `Hermes`,
-      `Docker`,
-      `venv`,
-      `故障恢复`,
-      `升级翻车`,
-      `VPS`,
-      `SOP`,
-    ],
-    summary: `Hermes Desktop 触发容器升级后，Docker 内 /opt/hermes/.venv 被刷掉导致 hermes: command not found。3 步重建 venv 恢复，无需重启容器。`,
-    body: `# 故障现象
-
-Hermes Desktop 检测到新版本后点了升级，背后的 Docker 容器被静默拉新镜像，导致容器内 \`/opt/hermes/.venv\` 整个文件夹丢失。
-
-执行任何 \`hermes\` 命令都会报：
-
-\`\`\`
-hermes: not found or not executable
-\`\`\`
-
-容器本身还在运行（\`docker ps\` 能看到），但内部的 Python 虚拟环境已被刷掉。
-
-# 根因
-
-Docker 容器在静默升级时会触发镜像层重构。如果 venv 目录没有做持久化 bind mount，重构后容器内整个 \`/opt/hermes/.venv\` 都会被清理掉。
-
-这是 Docker 升级的标准行为，**不是 bug，无需惊慌**。
-
-# 适用场景
-
-- 容器处于运行状态（\`docker ps\` 能看到）
-- \`hermes\` 命令失效或报 not found
-- \`/opt/hermes/.venv/\` 目录不存在或被破坏
-
-# Step 1 · 登录宿主机并定位容器
-
-使用 SSH 密钥及自定义端口登录 Hostinger 宿主机：
-
-\`\`\`bash
-ssh root@你的服务器IP -p 自定义端口
-\`\`\`
-
-查找当前运行的 Hermes 容器 ID：
-
-\`\`\`bash
-docker ps
-\`\`\`
-
-在输出列表中记下对应的 \`CONTAINER ID\`（例如 \`f7b6a227d976\`）。
-
-# Step 2 · 潜入容器内部终端
-
-使用交互模式进入目标容器（把 \`[CONTAINER_ID]\` 替换为上一步查到的实际 ID）：
-
-\`\`\`bash
-docker exec -it [CONTAINER_ID] bash
-\`\`\`
-
-> 💡 如果容器精简了 bash，请用 \`sh\` 替代：
->
-> \`\`\`bash
-> docker exec -it [CONTAINER_ID] sh
-> \`\`\`
-
-# Step 3 · 重建 Python 虚拟环境
-
-进入项目根目录，重构 venv 并强制以可编辑模式拉起依赖：
-
-\`\`\`bash
-# 1. 切换至项目主目录
-cd /opt/hermes
-
-# 2. 重新初始化虚拟环境文件夹
-python3 -m venv .venv
-
-# 3. 强制以可编辑模式重新安装项目包（自动生成 bin/hermes）
-./.venv/bin/pip install -e .
-\`\`\`
-
-# Step 4 · 状态验证与启动
-
-## 4.1 验证核心可执行文件是否已生成
-
-\`\`\`bash
-ls -la /opt/hermes/.venv/bin/hermes
-\`\`\`
-
-预期输出：能看到 \`hermes\` 可执行文件存在（带绿色或白色权限位）。
-
-## 4.2 原地拉起 Hermes Agent
-
-\`\`\`bash
-hermes
-\`\`\`
-
-如果能正常进入交互界面，说明恢复成功。
-
-# 避坑提示
-
-## msal / cryptography 红字版本冲突可忽略
-
-执行 \`pip install -e .\` 期间如果提示类似：
-
-\`\`\`
-ERROR: pip's dependency resolver does not currently take into account all the packages that are installed.
-msal X.Y.Z requires cryptography>=A.B.C, but you have cryptography M.N.K which is incompatible.
-\`\`\`
-
-**直接忽略**。这是企业级 OAuth 依赖冲突（msal 用于 Microsoft 账户登录链路），不影响本地 Hermes Agent 的核心功能。
-
-# 防御机制（可选）
-
-如果想避免下次升级时再翻车，可以把 venv 目录 bind mount 到宿主机持久化：
-
-\`\`\`bash
-# 停掉现有容器后重新部署，docker-compose.yml 加：
-services:
-  hermes-agent:
-    volumes:
-      - /opt/hermes-venv:/opt/hermes/.venv
-\`\`\`
-
-这样 venv 升级后还能保留。但**绝大多数情况直接走 Step 3 重建即可**，没必要为此折腾持久化。
-
-# 速查命令
-
-| 场景 | 命令 |
-|---|---|
-| 找容器 ID | \`docker ps\` |
-| 潜入容器 | \`docker exec -it [ID] bash\` |
-| 重建 venv | \`python3 -m venv .venv\` |
-| 编辑模式安装 | \`./.venv/bin/pip install -e .\` |
-| 验证 hermes | \`ls /opt/hermes/.venv/bin/hermes\` |
-| 启动 hermes | \`hermes\` |
 `,
   },
 ];

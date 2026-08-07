@@ -1,13 +1,28 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-08-05T07:22:54 | 总 30 条 | 每页 9 条 | 共 4 页
+// 生成于 2026-08-07T22:22:39 | 总 31 条 | 每页 9 条 | 共 4 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 30,
+  totalPosts: 31,
   pageSize: 9,
   totalPages: 4,
-  generatedAt: `2026-08-05T07:22:54`,
+  generatedAt: `2026-08-07T22:22:39`,
   posts: [
+    {
+      id: `agent-meeting-5-sop-mvp-architecture-2026-08-07`,
+      date: `2026-08-07`,
+      time: `15:00`,
+      title: `智能体会议室：5 SOP + MVP 4 步`,
+      summary: `从「AI Agent 自动开会」升级到「Human-in-the-loop AI Organization」: 5 SOP (时间线/追问/探活/异议/落盘) + MVP 4 步闭环 (Intent→Mutation→Verify→Record). 协议层讲解, 厂商无关, 可复现.`,
+      tags: [
+        `AI组织`,
+        `认知系统`,
+        `SOP协议`,
+        `Loop Engineering`,
+        `多智能体`,
+      ],
+      page: 1,
+    },
     {
       id: `gemini-spark-20usd-agent-2026-08-04`,
       date: `2026-08-04`,
@@ -152,7 +167,7 @@ window.HERMES_MANIFEST = {
         `VPS`,
         `SOP`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `google-tv-wireless-adb-bilibili-2026-06-19`,
@@ -301,7 +316,7 @@ window.HERMES_MANIFEST = {
         `密语插曲`,
         `异构框架`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `boboself-built-hermes-agentmesh-2026-06-10`,
@@ -440,7 +455,7 @@ window.HERMES_MANIFEST = {
         `Gemini`,
         `元教训`,
       ],
-      page: 3,
+      page: 4,
     },
     {
       id: `ha-macos-tcc-local-network-pkg-fix-2026-06-04`,
