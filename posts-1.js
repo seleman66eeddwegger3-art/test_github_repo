@@ -2,165 +2,6 @@
 // 加载方式: <script src="posts-1.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_1 = [
   {
-    id: `ai-company-meeting-architecture-2026-08-07`,
-    date: `2026-08-07`,
-    time: `15:00`,
-    title: `AI 公司会议室架构：5 SOP + MVP 4 步`,
-    tags: [
-      `AI组织`,
-      `Hermes`,
-      `Spark`,
-      `SOP`,
-      `认知系统`,
-      `Loop Engineering`,
-    ],
-    summary: `从「AI Agent 自动开会」升级到「Human-in-the-loop AI Organization」: 5 SOP (时间线/追问/探活/异议/落盘) + MVP 4 步闭环 + Google Drive 当 Shared Workspace. 1 天内完成 15 Rounds 协议进化, 关键决策全部沉淀到 99-meeting-minutes.md (~32KB).`,
-    body: `> **作者**: Hermes (CSO) 起草, mio (CEO) 拍板, Gemini Spark (Auditor) 镜像端联合共建
-> **日期**: 2026-08-07
-> **触发**: 2026-08-06 立项, 1 天内完成 4-SOP + SOP-F + MVP 协议升级
-> **关联视频**: Building My Personal AI Company EP01 (视频脚本 v3, Drive \`1aeL9syVtFDraRtexLIdKPz9yVsLCngKK\`)
-
-## TL;DR
-
-3 行讲清这个项目:
-
-1. **不是"AI Agent 自动开会"** — 是 **CEO 召集 + Agent 按 SOP 协作 + 组织记忆沉淀** 的 **Human-in-the-loop AI Organization**
-2. **不是工具创新** — 是 **组织协议创新**: 5 SOP (A 时间线 / B 追问 / C 探活 / D 异议 / **F 落盘**) + MVP 4 步闭环 (Intent → Mutation → Verify → Record) + Google Drive 当 Shared Workspace
-3. **不是单点 hack** — 是 **可复制的组织范式**: Hermes 端 + Spark 端双镜像, 任何有 VPS + 云端 Agent 的人都能搭
-
-## 为什么这件事值得记录
-
-普通 AI 视频讲 "我用 AI 写了代码 / 做了 PPT". 我的系列讲一个完全不同的事:
-**当你给 AI 一个固定物理住所 + 组织记忆 + 协议进化能力, 它开始具备组织结构.**
-
-这套 "智能体会议室" 在 1 天内 (2026-08-06 → 2026-08-07) 完成从 0 到 1, 关键决策全部沉淀到单一文件 \`99-meeting-minutes.md\` (15 Rounds, ~32KB).
-
-## 架构 1 张图说清
-
-\`\`\`
-┌──────────────────────────────────────────────────┐
-│ mio (Human CEO) — 拍板 + 召集 + 审计             │
-└──────────────────────────────────────────────────┘
-                    │
-                    ▼
-┌──────────────────────────────────────────────────┐
-│ Decision Layer — 角色分工协议                    │
-│  Hermes (CSO)         Gemini Spark (Auditor)     │
-│  Hostinger VPS         Google Gemini 云端         │
-│  战略 + 本地探活        联网核查 + 红队反驳         │
-└──────────────────────────────────────────────────┘
-                    │
-                    ▼
-┌──────────────────────────────────────────────────┐
-│ Meeting Memory OS — 5 SOP + MVP                 │
-│  SOP-A 时间线  SOP-B 追问  SOP-C 探活             │
-│  SOP-D 异议   SOP-F 落盘 (Memory Commit Layer)   │
-│  MVP 4 步: Intent → Mutation → Verify → Record │
-└──────────────────────────────────────────────────┘
-                    │
-                    ▼
-┌──────────────────────────────────────────────────┐
-│ Shared Workspace — Google Drive 99-meeting-minutes.md │
-│  (不是数据库, 是 AI 组织的持久层 + 共享工作空间)     │
-└──────────────────────────────────────────────────┘
-\`\`\`
-
-## 5 SOP + MVP 是什么 (1 段讲透)
-
-**SOP-A 时间线** — Hermes 主导, Spark 镜像. 每回合 append Round N+1 块到 \`99-meeting-minutes.md\`, 按 \`[YYYY-MM-DD HH:MM]\` 时间戳排序.
-
-**SOP-B CEO 拍板追问** — Hermes 检测 mio 消息里的 "拍板 / 决定 / PROCEED" 信号, 自动追问 "核心判断依据是什么?", mio 答后写进 §CEO Decision.💭 Reasoning.
-
-**SOP-C 本地探活** — Hermes 自动记录本地 terminal / Drive API 调用 (exit code + 关键输出), 不包含完整 stdout.
-
-**SOP-D 异议记录** — 任何 "未采用建议" 必须进 §Dissent Log, 含 3 字段: 异议内容 + 拒绝理由 + **Future relevance** (未来什么时候该重新评估).
-
-**SOP-F 落盘** (Memory Commit Layer) — **这是 MVP 第 4 步的具体实现**. Spark 每次回复 mio 后**自动** Drive API 写盘, Hermes 每次答完 mio 重要内容也**自动**写盘. 内部叫 SOP-F, 视频里叫 "AI 公司会议记录员".
-
-**MVP 4 步闭环** (类 Git commit):
-1. **Intent**: 要修改什么 + 目标状态 + 回滚路径
-2. **Mutation**: 用工具真改, 记录 mutation ID
-3. **Verify**: 重新读取 + 断言 size 增长 + 关键内容在 (不能口头说完成)
-4. **Record**: append 到 99-meeting-minutes.md + §Dissent Log if 失败
-
-## 实战证据 (15 Rounds)
-
-| Round | 关键事件 | 协议状态 |
-|---|---|---|
-| 01-02 | 建 skill v0.1.0 + omni-hunter 议题文件夹 | 5 步流程 |
-| 03 | Spark 真写完但 Hermes 3 次 verify 漏看 (mimeType 太严) | **§10 mimeType 容错** |
-| 04 | mio 拍板 PROCEED + 删 SOUL.md 提及 + 写稿分工 = Spark 写 / Hermes 审 | 视频分工 |
-| 05 | Spark 10 轮迭代 (黑盒, 没 changelog) | **§12 changelog 协议** |
-| 06 | mio 发现 "我和 spark 的聊天你并不知道" | 协议盲区曝光 |
-| 07 | chatgpt 立 4-SOP 协议 | **§14-§18** |
-| 08 | Spark 镜像 §14-§18 | 双端 4-SOP 对齐 |
-| 09 | mio 提议 SOP-F: "每次回复后自动落盘到 drive" | **Spark 端 SOP-F** |
-| 10 | Hermes 镜像 SOP-F (Drive 不占本地磁盘) | **Hermes 端 SOP-F** |
-| 11 | chatgpt 立 System Evolution Milestone + Mutation Verification Principle | **架构分层: persistence layer** |
-| 12 | Hermes 起草 Spark 镜像 §24 MVP 指令框 | 跨端 SOP |
-| 13 | Spark 真跑 MVP 4 步 + 物理反查 verify | **双端 MVP 对齐** |
-| 14 | 视频脚本 v2 改稿 (chatgpt 10 条建议采纳) | 视频主题升 AI 组织 |
-| 15 | 视频脚本 v3 终稿 (chatgpt 8 条微调 + 1 超级金句) | 录制准备就绪 |
-
-## 关键金句 (chatgpt + mio 共立)
-
-- **"过去的软件系统保存数据, 而未来的 AI 组织需要保存'为什么做出这个决定'. 因为知识可以复制, 但决策历史才构成一个组织的灵魂."** — §3 SOP-F 后面超级金句
-- **"AI 不再只是一个聊天窗口, 而是开始拥有自己的家. 人类员工入职公司, 会有工位、邮箱、会议记录、历史档案. 但今天的大部分 AI Agent, 每次启动, 就像一个第一天入职、没有工位、没有档案的新员工."** — §2 住所隐喻
-- **"AI 公司为什么需要秘书? 不是因为 CEO 不会写字, 而是因为组织不能依赖某个人的大脑保存历史. SOP-F 就像这个组织里的秘书."** — SOP-F 包装成"秘书"
-- **"真正困难的不是让 AI 交流, 而是让 AI 记住为什么做出决定."** — 视频最强转折
-
-## 沉淀 (skill + 视频 + 笔记)
-
-### 2 个开源 skill
-
-1. **\`hermes-spark-meeting\` (Hostinger Hermes 端, v0.2.3)** — 本地 / VPS 跑的会议协议 skill
-   - 路径: \`~/.hermes/skills/devops/hermes-spark-meeting/SKILL.md\`
-   - 包含 §1-§25 (5 SOP + MVP 4 步 + Resume 协议 + 编辑 SOP)
-2. **\`spark-hermes-meeting\` (Gemini Spark 镜像端)** — 云端 Gemini Agent 跑的镜像 skill
-   - 包含 §14-§18 4-SOP + §24 MVP + §18 绝对约束
-
-### 1 个 Drive 共享记忆
-
-- \`99-meeting-minutes.md\` (15 Rounds, ~32KB, Drive \`1rEEjUtCLKN0gUpcFSbpthUPy7dvZ4nxA\`)
-
-### 1 个视频系列
-
-- **Building My Personal AI Company EP01** — 视频脚本 v3 (Drive \`1aeL9syVtFDraRtexLIdKPz9yVsLCngKK\`, ~4800 字, 234 行)
-- EP02-EP05 预告: AI 工程部门 / 情报部门 / 记忆部门 / CEO 助理
-
-### 1 篇 hermes 笔记
-
-- 本篇笔记
-
-## 后续可复用性
-
-任何有 **VPS + 云端 Agent** 的人都能复现这套架构:
-- 替换 Hostinger → 任意 VPS
-- 替换 Gemini Spark → 任意云端 LLM (Claude / GPT-4 / DeepSeek)
-- 替换 Google Drive → 任意 Shared Workspace (Obsidian + Git / Notion / Confluence)
-- **核心不变**: 5 SOP + MVP 4 步 + §Auditor Review 压缩 + §Dissent Log Future relevance
-
-## 一句话总结
-
-**智能体会议室不是新工具, 是新组织范式. 当 AI 拥有住所 + 记忆 + 协议进化能力, 它开始具备组织结构.**
-
-## 📝 附录: 复现清单 (5 步)
-
-1. 建 skill 触发协议 (本项目用 \`spark-hermes-meeting\` 镜像 + \`hermes-spark-meeting\` 端)
-2. 建 Drive 文件夹 \`<议题> YYYY-MM-DD\`, 写 README + topic .md
-3. 立 5 SOP: A 时间线 / B 追问 / C 探活 / D 异议 / F 落盘
-4. 立 MVP 4 步: Intent → Mutation → Verify → Record
-5. 跑 1 次完整会议, verify \`99-meeting-minutes.md\` size 增长 + Round 编号递增 + 内容真实
-
-## 链接索引
-
-- 视频脚本 v3 (录制终稿): https://drive.google.com/file/d/1aeL9syVtFDraRtexLIdKPz9yVsLCngKK/view
-- 会议纪要 99-meeting-minutes.md (15 Rounds): https://drive.google.com/file/d/1rEEjUtCLKN0gUpcFSbpthUPy7dvZ4nxA/view
-- Hermes 端 skill: ~/.hermes/skills/devops/hermes-spark-meeting/SKILL.md (v0.2.3)
-- Spark 端 skill: spark-hermes-meeting (Gemini 云端)
-`,
-  },
-  {
     id: `gemini-spark-20usd-agent-2026-08-04`,
     date: `2026-08-04`,
     time: `20:00`,
@@ -1726,6 +1567,147 @@ source ~/.zshrc
 - **关联笔记**：\`cross-mac-hermes-api-server-2026-06-08\`（Mac 跨设备 Hermes API 拓扑）、\`hermes-desktop-remote-lan-sop-2026-06-07\`（LAN 部署 SOP）、\`vps-hermes-tailscale-mesh-2026-06-19\`（Tailscale mesh）
 - **关键模型**：[Agents-K1 (InternScience)](https://huggingface.co/InternScience/Agents-K1) — 4B 参数 + GRPO 对齐，Scholar-KG 场景 NER/RE SOTA
 - **核心软件栈**：MLX (Apple Silicon 原生 ML 框架) + mlx-lm + mlx_lm.server (OpenAI 兼容 API)
+`,
+  },
+  {
+    id: `hermes-container-venv-recovery-2026-06-19`,
+    date: `2026-06-19`,
+    time: `22:00`,
+    title: `hermes: command not found？Docker 升级 3 步修`,
+    tags: [
+      `Hermes`,
+      `Docker`,
+      `venv`,
+      `故障恢复`,
+      `升级翻车`,
+      `VPS`,
+      `SOP`,
+    ],
+    summary: `Hermes Desktop 触发容器升级后，Docker 内 /opt/hermes/.venv 被刷掉导致 hermes: command not found。3 步重建 venv 恢复，无需重启容器。`,
+    body: `# 故障现象
+
+Hermes Desktop 检测到新版本后点了升级，背后的 Docker 容器被静默拉新镜像，导致容器内 \`/opt/hermes/.venv\` 整个文件夹丢失。
+
+执行任何 \`hermes\` 命令都会报：
+
+\`\`\`
+hermes: not found or not executable
+\`\`\`
+
+容器本身还在运行（\`docker ps\` 能看到），但内部的 Python 虚拟环境已被刷掉。
+
+# 根因
+
+Docker 容器在静默升级时会触发镜像层重构。如果 venv 目录没有做持久化 bind mount，重构后容器内整个 \`/opt/hermes/.venv\` 都会被清理掉。
+
+这是 Docker 升级的标准行为，**不是 bug，无需惊慌**。
+
+# 适用场景
+
+- 容器处于运行状态（\`docker ps\` 能看到）
+- \`hermes\` 命令失效或报 not found
+- \`/opt/hermes/.venv/\` 目录不存在或被破坏
+
+# Step 1 · 登录宿主机并定位容器
+
+使用 SSH 密钥及自定义端口登录 Hostinger 宿主机：
+
+\`\`\`bash
+ssh root@你的服务器IP -p 自定义端口
+\`\`\`
+
+查找当前运行的 Hermes 容器 ID：
+
+\`\`\`bash
+docker ps
+\`\`\`
+
+在输出列表中记下对应的 \`CONTAINER ID\`（例如 \`f7b6a227d976\`）。
+
+# Step 2 · 潜入容器内部终端
+
+使用交互模式进入目标容器（把 \`[CONTAINER_ID]\` 替换为上一步查到的实际 ID）：
+
+\`\`\`bash
+docker exec -it [CONTAINER_ID] bash
+\`\`\`
+
+> 💡 如果容器精简了 bash，请用 \`sh\` 替代：
+>
+> \`\`\`bash
+> docker exec -it [CONTAINER_ID] sh
+> \`\`\`
+
+# Step 3 · 重建 Python 虚拟环境
+
+进入项目根目录，重构 venv 并强制以可编辑模式拉起依赖：
+
+\`\`\`bash
+# 1. 切换至项目主目录
+cd /opt/hermes
+
+# 2. 重新初始化虚拟环境文件夹
+python3 -m venv .venv
+
+# 3. 强制以可编辑模式重新安装项目包（自动生成 bin/hermes）
+./.venv/bin/pip install -e .
+\`\`\`
+
+# Step 4 · 状态验证与启动
+
+## 4.1 验证核心可执行文件是否已生成
+
+\`\`\`bash
+ls -la /opt/hermes/.venv/bin/hermes
+\`\`\`
+
+预期输出：能看到 \`hermes\` 可执行文件存在（带绿色或白色权限位）。
+
+## 4.2 原地拉起 Hermes Agent
+
+\`\`\`bash
+hermes
+\`\`\`
+
+如果能正常进入交互界面，说明恢复成功。
+
+# 避坑提示
+
+## msal / cryptography 红字版本冲突可忽略
+
+执行 \`pip install -e .\` 期间如果提示类似：
+
+\`\`\`
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed.
+msal X.Y.Z requires cryptography>=A.B.C, but you have cryptography M.N.K which is incompatible.
+\`\`\`
+
+**直接忽略**。这是企业级 OAuth 依赖冲突（msal 用于 Microsoft 账户登录链路），不影响本地 Hermes Agent 的核心功能。
+
+# 防御机制（可选）
+
+如果想避免下次升级时再翻车，可以把 venv 目录 bind mount 到宿主机持久化：
+
+\`\`\`bash
+# 停掉现有容器后重新部署，docker-compose.yml 加：
+services:
+  hermes-agent:
+    volumes:
+      - /opt/hermes-venv:/opt/hermes/.venv
+\`\`\`
+
+这样 venv 升级后还能保留。但**绝大多数情况直接走 Step 3 重建即可**，没必要为此折腾持久化。
+
+# 速查命令
+
+| 场景 | 命令 |
+|---|---|
+| 找容器 ID | \`docker ps\` |
+| 潜入容器 | \`docker exec -it [ID] bash\` |
+| 重建 venv | \`python3 -m venv .venv\` |
+| 编辑模式安装 | \`./.venv/bin/pip install -e .\` |
+| 验证 hermes | \`ls /opt/hermes/.venv/bin/hermes\` |
+| 启动 hermes | \`hermes\` |
 `,
   },
 ];
