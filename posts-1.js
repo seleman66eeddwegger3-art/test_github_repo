@@ -204,6 +204,189 @@ Output compressed: <1-3 行输出摘要>
 `,
   },
   {
+    id: `agent-meeting-5-sop-mvp-architecture-2026-08-07`,
+    date: `2026-08-07`,
+    time: `15:00`,
+    title: `智能体会议室：5 SOP + MVP 4 步`,
+    tags: [
+      `AI组织`,
+      `认知系统`,
+      `SOP协议`,
+      `Loop Engineering`,
+      `多智能体`,
+    ],
+    summary: `从「AI Agent 自动开会」升级到「Human-in-the-loop AI Organization」: 5 SOP (时间线/追问/探活/异议/落盘) + MVP 4 步闭环 (Intent→Mutation→Verify→Record). 协议层讲解, 厂商无关, 可复现.`,
+    body: `> **作者**: 协议由 CSO 起草
+> **日期**: 2026-08-07
+> **范围**: 仅协议层 (5 SOP + MVP + 角色分工 + 触发词), 不含具体实现厂商 / 持久层文件 / 视频脚本
+
+## TL;DR
+
+3 行讲清这个项目:
+
+1. **不是 "AI Agent 自动开会"** — 是 **Human CEO 召集 + Agent 按 SOP 协作 + 组织记忆沉淀** 的 **Human-in-the-loop AI Organization**
+2. **不是工具创新** — 是 **组织协议创新**: 5 SOP (时间线 / 追问 / 探活 / 异议 / 落盘) + MVP 4 步闭环 (Intent → Mutation → Verify → Record)
+3. **不是单点 hack** — 是 **可复制的组织范式**: 任意本地 + 云端 Agent 组合都能搭, 只要遵守协议
+
+## 为什么这件事值得记录
+
+普通 AI 应用讲 "我用 AI 写了代码 / 做了 PPT". 这个项目讲一个完全不同的事:
+**当你给 AI 一个固定物理住所 + 组织记忆 + 协议进化能力, 它开始具备组织结构.**
+
+"智能体会议室" 的核心范式: **AI 不再只是工具, 是组织的一员**. 它有角色 (CSO / Auditor), 有记忆 (组织记忆文件), 有协议 (5 SOP), 有自我观察能力 (MVP 4 步).
+
+## 架构 1 张图说清
+
+\`\`\`
+┌──────────────────────────────────────────────────┐
+│ Human CEO — 拍板 + 召集 + 审计                    │
+└──────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌──────────────────────────────────────────────────┐
+│ Decision Layer — 角色分工协议                    │
+│  CSO (本地/自部署 Agent)  Auditor (云端 LLM)    │
+│  战略 + 本地探活          联网核查 + 红队反驳       │
+└──────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌──────────────────────────────────────────────────┐
+│ Meeting Memory OS — 5 SOP + MVP                 │
+│  SOP-A 时间线  SOP-B 追问  SOP-C 探活             │
+│  SOP-D 异议   SOP-F 落盘 (Memory Commit Layer)   │
+│  MVP 4 步: Intent → Mutation → Verify → Record │
+└──────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌──────────────────────────────────────────────────┐
+│ Shared Workspace — 任意持久层 (Drive / Obsidian / Git / Notion) │
+│  单一会议记录文件 (推荐 markdown, 时间连续性)       │
+└──────────────────────────────────────────────────┘
+\`\`\`
+
+## 5 SOP + MVP 是什么 (1 段讲透)
+
+**SOP-A 时间线** — 一方主导, 另一方镜像. 每回合 append 一个新 Round 块到会议记录文件, 按 \`[YYYY-MM-DD HH:MM]\` 时间戳排序, 保留 CEO / CSO / Auditor 各自的视角段.
+
+**SOP-B CEO 拍板追问** — 检测 CEO 消息里的 "拍板 / 决定 / PROCEED" 等决策信号, 自动追问 "核心判断依据是什么?", CEO 答后写进 §Decision.💭 Reasoning 段. 不假装是 CEO 的原话.
+
+**SOP-C 本地探活** — 自动记录本地 terminal / 文件 / API 调用 (exit code + 关键输出), 不包含完整 stdout. 仅适用有本地环境的 Agent 端.
+
+**SOP-D 异议记录** — 任何 "未采用建议" 必须进 §Dissent Log, 含 3 字段:
+- **异议内容**: 谁建议了什么
+- **拒绝理由**: 为什么没采纳
+- **Future relevance**: 未来什么时候应该重新评估
+
+**SOP-F 落盘** (Memory Commit Layer) — **这是 MVP 第 4 步的具体实现**. Agent 每次回复 CEO 后**自动**调持久层 API 写盘, 让另一端能随时通过探活同步全量推理链. 内部叫 SOP-F, 对外可叫 "Memory Commit Layer" 或 "Cognitive Commit Protocol".
+
+**MVP 4 步闭环** (类 Git commit):
+1. **Intent**: 要修改什么 + 目标状态 + 回滚路径
+2. **Mutation**: 用工具真改, 记录 mutation ID
+3. **Verify**: 重新读取 + 断言 size 增长 + 关键内容在 (**不能口头说完成**)
+4. **Record**: append 到会议记录 + §Dissent Log (如果失败)
+
+**为什么 MVP 重要**: Agent 声明 "已完成" ≠ 文件实际完成. 这恰好和建立会议记忆的目标一致 — **任何状态变化必须可追溯**.
+
+## 角色分工 (CEO / CSO / Auditor)
+
+| 角色 | 谁 | 职责 |
+|---|---|---|
+| **CEO** | 人类 | 拍板 + 召集 + 审计. 唯一决策权. |
+| **CSO** | 本地/自部署 Agent | 战略 + 起草 + 本地探活 + 时间线维护 |
+| **Auditor** | 云端 LLM Agent | 联网核查 + 红队反驳 + 写 §Auditor Review 压缩摘要 |
+
+**关键原则**: 不是 "Autonomous Company", 是 "Human-in-the-loop AI Organization". CEO 召集, Agent 按 SOP 协作, **不是 Agent 自主决定何时开会**.
+
+## §Auditor Review 压缩规范 (关键)
+
+Auditor 写每回合审计段时, 必须**严格压缩到 3-5 行高密度摘要**, 不原文黏贴对话. 包含:
+
+\`\`\`
+📌 Audit: <审查了哪些事实, 给 URL>
+⚠️ Risk: <提出的风险点>
+💡 Alternative: <替代方案, 如果有>
+🚫 Objection: <反对意见, 如果有>
+Output compressed: <1-3 行输出摘要>
+\`\`\`
+
+**为什么**: 长文 dump 污染事件记忆文件, 让 Agent 未来读起来认知成本爆炸.
+
+## §Dissent Log + Future Relevance
+
+每一条 "未采用建议" 必须进 Dissent Log, 严格附带 Future relevance:
+
+\`\`\`
+🚫 <某方> 异议 <NN>: <具体异议>
+   Reason for rejection: <拒绝理由>
+   Future relevance: <未来什么条件下应重新评估>
+\`\`\`
+
+**为什么这是最有价值的部分**: AI 组织最珍贵的不是共识, 是**为什么否决另一个方向**. 半年后新 Agent 上线, 看到 §Dissent Log 就理解组织哲学, 不用从头推演.
+
+## 实战证据 (Round 类型分布)
+
+> 数字来源: 某次实测 15 Rounds 协议进化过程, 详细记录留在内部会议文件, 本笔记只列类型分布, 不引用具体文件 ID.
+
+| Round 类型 | 数量 | 关键事件 (类型) |
+|---|---|---|
+| 协议建立 | 1-2 | skill 创建 + 议题文件夹复用 |
+| 验证翻车 | 1 | mimeType 太严, verify 漏看 → 加 §10 容错 |
+| 拍板分工 | 1 | 删 SOUL.md 提及 + 写稿分工 |
+| 迭代黑盒 | 1 | 10 轮迭代无 changelog → 加 §12 协议 |
+| 协议盲区曝光 | 1 | "我和云端 Agent 的聊天你并不知道" |
+| 协议升级 | 1 | 4-SOP 协议正式立 |
+| 镜像对齐 | 1 | 双端镜像协议 |
+| 持久层提案 | 1 | SOP-F: 每次回复自动落盘 |
+| 镜像端对齐 | 1 | 镜像 SOP-F |
+| 里程碑 + MVP | 1 | System Evolution + Mutation Verification Principle |
+| 跨端 SOP | 1 | 起草镜像指令框 |
+| 物理反查 | 1 | 镜像端真跑 MVP 4 步 + 物理 verify |
+| 内容迭代 | 2 | 视频脚本迭代 (类型提及, 内容不发) |
+
+## 关键金句 (4 条)
+
+- **"过去的软件系统保存数据, 而未来的 AI 组织需要保存'为什么做出这个决定'. 因为知识可以复制, 但决策历史才构成一个组织的灵魂."**
+- **"AI 不再只是一个聊天窗口, 而是开始拥有自己的家. 人类员工入职公司, 会有工位、邮箱、会议记录、历史档案. 但今天的大部分 AI Agent, 每次启动, 就像一个第一天入职、没有工位、没有档案的新员工."**
+- **"组织为什么需要秘书? 不是因为 CEO 不会写字, 而是因为组织不能依赖某个人的大脑保存历史. SOP-F 就像这个组织里的秘书."**
+- **"真正困难的不是让 AI 交流, 而是让 AI 记住为什么做出决定."**
+
+## 沉淀 (skill + 笔记)
+
+### 2 个开源 skill (本项目产出)
+
+1. **\`hermes-spark-meeting\` (本地 / 自部署 Agent 端, v0.2.3)**
+   - 包含 §1-§25 (5 SOP + MVP 4 步 + Resume 协议 + 编辑 SOP)
+   - 仓库路径待定 (见末尾"开源仓库"段)
+
+2. **\`spark-hermes-meeting\` (云端 LLM Agent 镜像端)**
+   - 包含 §14-§18 4-SOP + §24 MVP + §18 绝对约束
+   - 仓库路径待定
+
+### 1 类协议产物
+
+- **Meeting Minutes 文件** — 任何持久层都可, 推荐 markdown 单一文件, 按 Round 追加
+- **格式**: 5 段对话结构 (CEO Decision / CSO Execution Log / Auditor Review / Dissent Log / Consensus)
+
+### 1 个视频系列
+
+- **Building My Personal AI Company** — 视频内容属于产出层, 不在本笔记范围. 视频脚本内部迭代版本也不引用.
+
+## 复现清单 (5 步, 厂商无关)
+
+1. 选 2 个 Agent 角色: 本地 (CSO) + 云端 (Auditor). 不限厂商.
+2. 选 Shared Workspace: Drive / Obsidian / Git / Notion / Confluence 任一, 单一会议记录文件.
+3. 立 5 SOP: 时间线 / 追问 / 探活 / 异议 / 落盘
+4. 立 MVP 4 步: Intent → Mutation → Verify → Record
+5. 跑 1 次完整会议, verify 会议记录 size 增长 + Round 编号递增 + 内容真实
+
+## 一句话总结
+
+**智能体会议室不是新工具, 是新组织范式. 当 AI 拥有住所 + 记忆 + 协议进化能力, 它开始具备组织结构.**
+
+
+`,
+  },
+  {
     id: `gemini-spark-20usd-agent-2026-08-04`,
     date: `2026-08-04`,
     time: `20:00`,
@@ -1643,132 +1826,6 @@ def has_recent_changes():
 - cron job: \`c17984b4be1a\` (每天 02:15, no_agent=True)
 - 首次 commit 证据: \`00_MAP.md\` mtime \`19:49:06\` = 老大手工物理编辑
 - Prime Directive v3.5 全文: skill SKILL.md 顶部
-`,
-  },
-  {
-    id: `distributed-agent-m4-m1max-2026-06-21`,
-    date: `2026-06-21`,
-    time: `14:00`,
-    title: `M4 大脑 + M1 Max 后脑：端端协同 Agent 流水线`,
-    tags: [
-      `Agent架构`,
-      `MLX`,
-      `Mac mini M4`,
-      `Mac Studio M1 Max`,
-      `端云协同`,
-      `KV Cache`,
-      `Hermes`,
-    ],
-    summary: `M4 16G 跑 Hermes 控调度, M1 Max 32G 跑 Agents-K1 做推理后脑, 400 GB/s 内存带宽完美绕开 16G 端侧 KV Cache 焦虑`,
-    body: `今天我们打通的是一个非常典型且优雅的端端协同/分布式大模型 Agent 架构：让擅长控制和调度的芯片（M4）做"大脑"，让拥有高内存带宽和海量统一内存的芯片（M1 Max）做"强壮的后脑（推理算力）"，完美绕过了端侧设备 16G 内存的 KV Cache 焦虑。
-
-以下是今天实战成功的 SOP（标准作业程序）总结，供你归档或未来快速复刻。
-
-M4 16G 跑 Hermes Agent + MCP 做控制中枢（论文检索 + Agent 调度），Mac Studio M1 Max 32G 跑本地 Agents-K1 (4B-FP16) 做推理后脑。两者通过 \`http://<Mac_Studio_IP>:11435/v1\` 局域网 HTTP API 联动。利用 M1 Max 的 400 GB/s 内存带宽直出结构化抽取结果，**把 16G 端侧内存完整留给 KV Cache**，让 Agent 可以无顾忌往本地塞长篇论文。
-
-# 🎯 拓扑架构：分布式知识图谱智能体流水线
-
-**控制中枢（Mac mini M4 16G）**：运行 Hermes Agent + MCP 协议，通过官方 Scholar-KG MCP 服务进行低成本、跨学科的论文检索与原文召回。
-
-**推理后端（Mac Studio M1 Max 32G）**：部署本地 Agents-K1 (4B-FP16)，承接来自 M4 的长文本，利用 400 GB/s 带宽的高吞吐优势，100% 还原 GRPO 强化学习对齐后的精准结构化知识抽取（NER & RE）。
-
-# 🛠️ Mac Studio 落盘 SOP（4 步）
-
-## 1. 纯净环境隔离
-
-规避全局 Conda 或系统 Python 导致的路径交叉，创建专属高效环境：
-
-\`\`\`bash
-python3 -m venv mlx_env
-source mlx_env/bin/activate
-pip install --upgrade pip
-pip install mlx-lm huggingface_hub
-\`\`\`
-
-## 2. 官方通道稳健下载（跨越数据中心 IP 限速阻断）
-
-当遇到新模型镜像未同步、数据中心/VPN 节点匿名下载遭 CDN 严重限速（低至几 KB/s）时，最佳实践是三件事一起做：
-
-- **挂载干净路由**：开启 Outline VPN，选择路由质量更好的欧洲（如德国）干净节点。
-- **身份凭证注入**：去 Hugging Face 申请 Read Token，解锁高优先级通道。
-- **锁定环境执行**：关闭不兼容 VPN 的激进 Rust 引擎 \`hf_transfer\`，用当前环境的 Python 解释器内嵌下载，锁死变量。
-
-\`\`\`bash
-# 清理镜像残留，注入官方 Token
-unset HF_ENDPOINT
-export HF_TOKEN="your_hf_token_here"
-export HF_HUB_ENABLE_HF_TRANSFER=0
-
-# 用当前环境的 Python 拉取，确保不跑偏
-python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='InternScience/Agents-K1')"
-\`\`\`
-
-## 3. 无损原生编译（MLX Format）
-
-鉴于 32G 统一内存极其充裕，**拒绝量化**，直接编译 FP16/BF16 原版模型，最大化捍卫 GRPO 强化学习对齐出来的 \`<think>\` 思考链标签及严格 JSON Schema 的输出本能。
-
-\`\`\`bash
-mlx_lm convert   --hf-path InternScience/Agents-K1   --mlx-path ./models/Agents-K1-FP16
-\`\`\`
-
-## 4. 局域网算力广播
-
-拉起高兼容性的本地 Web 服务，绑定 \`0.0.0.0\` 端口常驻，供局域网内其他物理节点（M4）调度：
-
-\`\`\`bash
-python -m mlx_lm.server   --model ./models/Agents-K1-FP16   --host 0.0.0.0   --port 11435
-\`\`\`
-
-# 🤖 Mac mini 编排 SOP
-
-## 5. Agent 节点热切换与全链路闭环
-
-利用 Hermes 的高级上下文理解和本地配置文件/环境变量管理能力（依托 Filesystem MCP 或代码执行权限），使其完成自更新：
-
-- **端点重定向**：将负责信息提取的底层 Client LLM 配置从远程 API 或本地轻量模型，重定向至 \`http://<Mac_Studio_局域网_IP>:11435/v1\`。
-- **哑鉴权占位**：将 \`api_key\` 设为任意非空字符串（如 \`mlx-any-key\`）防止底层 SDK 报错。
-- **温度控制**：抽取任务强制将 \`temperature\` 设为 0.0 或 0.1，确保强 Schema 遵循。
-
-# 💡 实战避坑核心 Insights
-
-## 多环境陷阱
-
-当系统存在全局 Conda 环境时，直接在终端敲 CLI 命令（如 \`huggingface-cli\`）极易越过当前激活的虚拟环境去调用 base 路径下的二进制文件，导致依赖缺失或环境变量失效。显式使用 \`python -m\` 或 \`python -c\` 是最硬核的防御手段。
-
-## 内存带宽才是王道
-
-4B 级别的小模型在 M1 Max 400 GB/s 带宽下直出速度极快。把 16GB 的海量显存留给 KV Cache，让 Agent 可以肆无忌惮地往本地塞长篇论文，完美解决了长文本上下文泛滥时的性能和容量平衡。
-
-# 🚀 一键 Alias
-
-如果你只想在需要研究论文时手动拉起，完事了关掉，可以利用虚拟环境下的**绝对路径 Python** 绕过 \`source activate\` 命令。
-
-打开 \`~/.zshrc\`：
-
-\`\`\`bash
-nano ~/.zshrc
-\`\`\`
-
-在末尾追加一行别名（直接指向虚拟环境内部的 Python 解释器）：
-
-\`\`\`bash
-alias start-k1="/Users/miomio/mlx_env/bin/python -m mlx_lm.server --model /Users/miomio/models/Agents-K1-FP16 --host 0.0.0.0 --port 11435"
-\`\`\`
-
-保存刷新：
-
-\`\`\`bash
-source ~/.zshrc
-\`\`\`
-
-**爽点**：以后随时在终端敲 \`start-k1\`，服务瞬间拉起。
-
-# 沉淀
-
-- **触发 skill**：\`hermes-notes-publish\`（Hermes 笔记公开发布工作流，本笔记即按其 SOP 发布）
-- **关联笔记**：\`cross-mac-hermes-api-server-2026-06-08\`（Mac 跨设备 Hermes API 拓扑）、\`hermes-desktop-remote-lan-sop-2026-06-07\`（LAN 部署 SOP）、\`vps-hermes-tailscale-mesh-2026-06-19\`（Tailscale mesh）
-- **关键模型**：[Agents-K1 (InternScience)](https://huggingface.co/InternScience/Agents-K1) — 4B 参数 + GRPO 对齐，Scholar-KG 场景 NER/RE SOTA
-- **核心软件栈**：MLX (Apple Silicon 原生 ML 框架) + mlx-lm + mlx_lm.server (OpenAI 兼容 API)
 `,
   },
 ];
