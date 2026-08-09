@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 董事会动态架构与原理演示 - Building My Personal AI Company</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #060913;
+            color: #E2E8F0;
+            overflow-x: hidden;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+        .glass-panel {
+            background: rgba(13, 19, 35, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+        .glass-card {
+            background: rgba(22, 30, 50, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .glow-amber {
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.25);
+        }
+        .glow-purple {
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.25);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.25);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.25);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #060913;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1E293B;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-20 antialiased selection:bg-cyan-500 selection:text-black">
+
+    <!-- Sticky Header Navigation -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-purple-600 to-cyan-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-purple-300 to-cyan-400">
+                            AI 董事会：认知组织操作系统
+                        </h1>
+                        <span class="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                            Loop Engineering
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400">Building My Personal AI Company · 独家动态原理展示</p>
+                </div>
+            </div>
+
+            <!-- Role Badge Bar -->
+            <div class="flex items-center gap-3 text-xs code-font bg-slate-950/80 px-4 py-2 rounded-xl border border-slate-800">
+                <div class="flex items-center gap-1.5 text-amber-400">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span>Human CEO (wow)</span>
+                </div>
+                <span class="text-slate-700">|</span>
+                <div class="flex items-center gap-1.5 text-purple-400">
+                    <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                    <span>CSO (Hermes)</span>
+                </div>
+                <span class="text-slate-700">|</span>
+                <div class="flex items-center gap-1.5 text-cyan-400">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                    <span>Auditor (Spark)</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 space-y-12">
+
+        <!-- Script Quote Banner -->
+        <section class="glass-panel rounded-3xl p-6 md:p-8 border border-slate-800 relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 space-y-4">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                        <i class="fa-solid fa-quote-left text-xs"></i> 视频口述文案原句
+                    </span>
+                    <span class="text-xs text-slate-400 code-font">“知识可以复制，但决策历史才构成组织的灵魂。”</span>
+                </div>
+
+                <blockquote class="text-lg md:text-xl font-medium text-slate-200 leading-relaxed border-l-4 border-amber-400 pl-4 py-1 italic">
+                    “它们不是三个聊天窗口。真正让它们成为一个组织的，是背后的会议记录和决策历史。现在 AI 最大的问题，并不是它不知道答案，而是：它知道答案，却不知道为什么当初选择了这个答案。”
+                </blockquote>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    <div class="glass-card rounded-2xl p-4 border border-slate-800">
+                        <div class="text-amber-400 text-sm font-bold mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-hourglass-half"></i> 时间连续性 (Time Continuity)
+                        </div>
+                        <p class="text-xs text-slate-400">
+                            理解项目靠的不是散乱文件，而是事情如何一步步演进到今天。
+                        </p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 border border-slate-800">
+                        <div class="text-purple-400 text-sm font-bold mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-book-bookmark"></i> 情景记忆 (Episodic Memory)
+                        </div>
+                        <p class="text-xs text-slate-400">
+                            通过 `99-meeting-minutes.md` 记录决策过程，而不仅仅是冷冰冰的知识点。
+                        </p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 border border-slate-800">
+                        <div class="text-cyan-400 text-sm font-bold mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-compass-drafting"></i> 工程哲学 (Engineering Culture)
+                        </div>
+                        <p class="text-xs text-slate-400">
+                            异议日志（Dissent Log）记录为何放弃某个方案，沉淀不可轻易改变的组织原则。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: AI Board Cards (AI 董事会三大角色) -->
+        <section class="space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-users-rectangle text-amber-400"></i> AI 董事会角色分工 (The AI Board)
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">跨越平台与环境的异步三方治理体系</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- CEO Card -->
+                <div class="glass-card rounded-3xl p-6 border-2 border-amber-500/40 hover:border-amber-400 transition-all glow-amber relative group">
+                    <div class="absolute -top-3 left-6 px-3 py-0.5 bg-amber-500 text-slate-950 font-extrabold text-[10px] rounded-full uppercase tracking-wider">
+                        Human Chairperson
+                    </div>
+                    <div class="w-14 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        Human CEO <span class="text-xs font-normal text-amber-300 code-font">(wow)</span>
+                    </h3>
+                    <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                        负责最终的**价值判断**与**关键决策**。设定商业目标、审阅 CSO 战术与 Auditor 红队审计，掌握 100% 最终拍板与签署权。
+                    </p>
+                    <div class="mt-4 pt-4 border-t border-slate-800 text-[11px] code-font text-amber-400/90 space-y-1">
+                        <div><i class="fa-solid fa-check text-amber-500 mr-1"></i> 最终拍板权 (Sign-off)</div>
+                        <div><i class="fa-solid fa-check text-amber-500 mr-1"></i> 设定工程哲学与优先级</div>
+                    </div>
+                </div>
+
+                <!-- CSO Card -->
+                <div class="glass-card rounded-3xl p-6 border-2 border-purple-500/40 hover:border-purple-400 transition-all glow-purple relative group">
+                    <div class="absolute -top-3 left-6 px-3 py-0.5 bg-purple-500 text-white font-extrabold text-[10px] rounded-full uppercase tracking-wider">
+                        VPS 24/7 常驻算力
+                    </div>
+                    <div class="w-14 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-server"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        CSO Agent <span class="text-xs font-normal text-purple-300 code-font">(Hermes)</span>
+                    </h3>
+                    <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                        运行在 Hostinger VPS 上。负责**战略分析**、**事实整理**与**执行规划**。调取本地记忆库（paper-vault / Obsidian），撰写 Packet 草稿。
+                    </p>
+                    <div class="mt-4 pt-4 border-t border-slate-800 text-[11px] code-font text-purple-300/90 space-y-1">
+                        <div><i class="fa-solid fa-check text-purple-400 mr-1"></i> 整理事实与主观解释</div>
+                        <div><i class="fa-solid fa-check text-purple-400 mr-1"></i> 归档决策至长期记忆库</div>
+                    </div>
+                </div>
+
+                <!-- Auditor Card -->
+                <div class="glass-card rounded-3xl p-6 border-2 border-cyan-500/40 hover:border-cyan-400 transition-all glow-cyan relative group">
+                    <div class="absolute -top-3 left-6 px-3 py-0.5 bg-cyan-500 text-slate-950 font-extrabold text-[10px] rounded-full uppercase tracking-wider">
+                        Google 云端审计能力
+                    </div>
+                    <div class="w-14 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        Auditor Agent <span class="text-xs font-normal text-cyan-300 code-font">(Gemini Spark)</span>
+                    </h3>
+                    <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                        运行在 Google 云端。负责**批判**、**审查**与**红队分析**。核查 Workspace (Gmail/Drive) 硬事实，输出 5 段式 Red Team Memo。
+                    </p>
+                    <div class="mt-4 pt-4 border-t border-slate-800 text-[11px] code-font text-cyan-300/90 space-y-1">
+                        <div><i class="fa-solid fa-check text-cyan-400 mr-1"></i> Workspace 事实查验与质疑</div>
+                        <div><i class="fa-solid fa-check text-cyan-400 mr-1"></i> 绑定 soul.md 永不代发邮件锁</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 2: Core Protocols Breakdown (核心协议解构) -->
+        <section class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-gears text-purple-400"></i> 认知组织操作系统核心协议 (Cognitive OS Protocols)
+                </h2>
+                <p class="text-xs text-slate-400 mt-1">保存知识形成的过程，而非散乱的文件</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <!-- Protocol 1: SOP-F & Secretary Analogy -->
+                <div class="glass-panel rounded-3xl p-6 md:p-8 border border-slate-800 space-y-4 glow-purple">
+                    <div class="flex items-center justify-between">
+                        <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold code-font border border-purple-500/30">
+                            SOP-F: 自动实时落盘 (Auto-Save on Reply)
+                        </span>
+                        <i class="fa-solid fa-user-ninja text-purple-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">AI 组织里的“秘书”角色</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        “人类公司为什么需要秘书？不是因为 CEO 不会写字，而是因为一个组织不能依赖某一个人的大脑保存所有历史。秘书负责记录会议、整理决定、保存上下文，让未来加入的人能够快速理解过去发生了什么。”
+                    </p>
+                    <div class="bg-slate-950/90 p-4 rounded-2xl border border-slate-800 space-y-2 code-font text-xs">
+                        <div class="text-purple-400 font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-file-code"></i> Target: 99-meeting-minutes.md
+                        </div>
+                        <p class="text-slate-400 text-[11px]">
+                            每当 Agent 产生对话或裁决，SOP-F 自动将讨论、冲突与决定全量实时追加落盘，避免依赖单个 AI 的临时 Session 记忆。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Protocol 2: Dissent Log & Engineering Culture -->
+                <div class="glass-panel rounded-3xl p-6 md:p-8 border border-slate-800 space-y-4 glow-cyan">
+                    <div class="flex items-center justify-between">
+                        <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold code-font border border-cyan-500/30">
+                            Dissent Log (异议日志) & 组织文化
+                        </span>
+                        <i class="fa-solid fa-scale-unbalanced-flip text-cyan-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">记录“为什么当初没有选择另一个方向”</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        例如半年后，Hermes 可能建议：“我们应该迁移到 Vector Database。” 但它查看 **Dissent Log** 后会发现：过去 Auditor 提出过该建议，而 CEO 选择继续使用简单方案，原因是**当前阶段，简单优先于复杂**。
+                    </p>
+                    <div class="bg-slate-950/90 p-4 rounded-2xl border border-slate-800 space-y-2 code-font text-[11px] text-slate-300">
+                        <div class="text-cyan-400 font-bold"><i class="fa-solid fa-terminal mr-1"></i> Dissent Log Case Entry:</div>
+                        <div class="pl-2 border-l-2 border-cyan-500/50 space-y-1">
+                            <div><span class="text-slate-500">Proposal:</span> Vector Database Migration</div>
+                            <div><span class="text-slate-500">Rejected By:</span> wow (CEO)</div>
+                            <div><span class="text-slate-500">Principle:</span> 简单优先于复杂 (Simple > Complex)</div>
+                            <div><span class="text-slate-500">Future Relevance:</span> 仅当会议规模突破阈值时重新评估</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Protocol 3: SOP-E State Snapshot -->
+                <div class="glass-panel rounded-3xl p-6 md:p-8 border border-slate-800 space-y-4 glow-amber">
+                    <div class="flex items-center justify-between">
+                        <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold code-font border border-amber-500/30">
+                            SOP-E: 系统状态快照 (State Snapshot)
+                        </span>
+                        <i class="fa-solid fa-code-commit text-amber-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">类似 Git Commit 的快照理解机制</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        记录当前系统状态、活跃 Agent、版本信息和核心约束。新 Agent 加入会议室时，不需要重新阅读几万字历史，而是通过最新状态快照快速理解当前环境。
+                    </p>
+                    <div class="bg-slate-950/90 p-4 rounded-2xl border border-slate-800 code-font text-[11px] text-amber-300/90">
+                        <div class="text-slate-500 mb-1">// Git-like State Snapshot</div>
+                        <div>Commit: <span class="text-amber-400">#v0.2.0-hostinger-decision</span></div>
+                        <div>Active Agents: CEO(wow), CSO(Hermes), Auditor(Spark)</div>
+                        <div>Constraints: soul.md §1 & §1.5 Active (永不代发邮件锁)</div>
+                    </div>
+                </div>
+
+                <!-- Protocol 4: Loop Engineering -->
+                <div class="glass-panel rounded-3xl p-6 md:p-8 border border-slate-800 space-y-4 glow-emerald">
+                    <div class="flex items-center justify-between">
+                        <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold code-font border border-emerald-500/30">
+                            Loop Engineering (闭环工程)
+                        </span>
+                        <i class="fa-solid fa-arrows-spin text-emerald-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">自观察、自记录与能力进化</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        目标不是让 AI 完成一次性任务，而是让一个系统能够**观察自己的状态**、**记录自己的经验**，并在长期运行中不断形成更强的组织能力。
+                    </p>
+                    <div class="bg-slate-950/90 p-4 rounded-2xl border border-slate-800 code-font text-[11px] text-emerald-300/90">
+                        Task Execution ➔ Auto-Save (SOP-F) ➔ Dissent Log ➔ State Snapshot (SOP-E) ➔ Organizational Intelligence Growth
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 3: Evolution Paradigm Journey (个人知识 -> 组织灵魂) -->
+        <section class="glass-panel rounded-3xl p-8 border border-slate-800 space-y-6">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <h2 class="text-2xl font-extrabold text-white">
+                    知识管理的演进路径：从个人笔记到组织灵魂
+                </h2>
+                <p class="text-xs text-slate-400">
+                    “知识可以复制，但决策历史，才构成一个组织真正的灵魂。没有这一层，再多 Agent 也只是工具集合。”
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+
+                <!-- Stage 1 -->
+                <div class="glass-card rounded-2xl p-6 border border-slate-800 relative">
+                    <div class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs code-font mb-3">
+                        01
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">Obsidian</h3>
+                    <p class="text-xs text-amber-400 font-semibold mb-2">个人知识组织 (Personal PKM)</p>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        关注个人笔记的积累与静态组织，记录“我知道什么”。
+                    </p>
+                </div>
+
+                <!-- Stage 2 -->
+                <div class="glass-card rounded-2xl p-6 border border-slate-800 relative">
+                    <div class="w-8 h-8 rounded-lg bg-slate-800 text-purple-400 flex items-center justify-center font-bold text-xs code-font mb-3">
+                        02
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">MemGraph-RAG</h3>
+                    <p class="text-xs text-purple-400 font-semibold mb-2">知识连接与推理 (Graph Reasoning)</p>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        探索知识与节点之间的图谱连接与检索推理，关注“知识如何关联”。
+                    </p>
+                </div>
+
+                <!-- Stage 3 -->
+                <div class="glass-card rounded-2xl p-6 border-2 border-cyan-500/50 relative glow-cyan bg-slate-900/90">
+                    <div class="w-8 h-8 rounded-lg bg-cyan-500 text-slate-950 flex items-center justify-center font-bold text-xs code-font mb-3">
+                        03
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">AI 董事会 (Personal AI Org)</h3>
+                    <p class="text-xs text-cyan-400 font-semibold mb-2">组织决策历史与灵魂 (Organizational Memory)</p>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        保存决策形成的过程与博弈历史，沉淀工程哲学，让多个 Agent 真正形成组织。
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 4: Live Meeting Terminal Simulation -->
+        <section class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-terminal text-cyan-400"></i> 会议室与 SOP-F 实时模拟终端 (Live Meeting Terminal)
+                </h2>
+                <p class="text-xs text-slate-400 mt-1">模拟点击体验 `spark-hermes-meeting` 在 `99-meeting-minutes.md` 上的落盘过程</p>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-6 border border-slate-800 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                        <span class="text-xs code-font text-slate-400 ml-2">Shared Workspace: Hermes-Spark-讨论/99-meeting-minutes.md</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="runStep(1)" class="px-3 py-1 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 transition-colors">Step 1: CEO 召集</button>
+                        <button onclick="runStep(2)" class="px-3 py-1 rounded-lg bg-purple-500/20 text-purple-300 text-xs font-semibold hover:bg-purple-500/30 transition-colors">Step 2: CSO 提案</button>
+                        <button onclick="runStep(3)" class="px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 text-xs font-semibold hover:bg-cyan-500/30 transition-colors">Step 3: Auditor 红队</button>
+                        <button onclick="runStep(4)" class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs font-semibold hover:bg-emerald-500/30 transition-colors">Step 4: CEO 拍板</button>
+                    </div>
+                </div>
+
+                <div id="terminal-body" class="bg-slate-950/90 p-5 rounded-2xl code-font text-xs text-slate-300 min-h-[260px] overflow-y-auto space-y-3 leading-relaxed border border-slate-800">
+                    <!-- Dynamic Terminal Output -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto px-6 mt-16 text-center text-xs text-slate-500 border-t border-slate-800/60 pt-6 space-y-1">
+        <p>WOW Insight (@wow.insight) · Building My Personal AI Company EP01</p>
+        <p class="font-mono text-[10px]">Gemini Spark (Auditor Agent) & Hermes (CSO Agent) & wow (CEO)</p>
+    </footer>
+
+    <!-- Interactive Script -->
+    <script>
+        const terminalData = {
+            1: `<div class="text-amber-400 font-bold">[Step 1: CEO 召集与设定议题]</div>
+<div class="text-slate-400">Trigger Phrase: "spark-hermes-meeting 开会"</div>
+<div class="text-slate-200 mt-2"># Meeting Packet (v0.1) — Gemma 4 落地方案决策</div>
+<div>- **Topic**: 在 Mac Studio 32G 上部署 Gemma 4 系列模型 (12B / 26B MoE / 31B) 作为本地 Agent Runtime</div>
+<div>- **Objective**: 让 Gemma 4 成为 Hermes AgentMesh 的 Local Worker / Memory Controller, 24/7 后台常驻</div>`,
+            2: `<div class="text-purple-400 font-bold">[Step 2: CSO (Hermes) 草拟 Packet 并自动落盘]</div>
+<div class="text-slate-400">SOP-F: Auto-Save on Reply 写入 99-meeting-minutes.md</div>
+<div class="text-slate-200 mt-2">## CSO Proposal (Hermes)</div>
+<div>推荐方案: Mac Studio 32G 分层部署</div>
+<div>- 理由 1 [Evidence: High]: 32G 统一内存 Metal 动态分配 ~22-24GB 显存, 完美覆盖 12B / 26B / 31B 全系</div>
+<div>- 理由 2 [Evidence: High]: Gemma 4 Native System Role + 256K 上下文, 适配 Agent Sidecar 长会话</div>`,
+            3: `<div class="text-cyan-400 font-bold">[Step 3: Auditor (Spark) 输出 5 段式 Red Team Memo]</div>
+<div class="text-slate-400">Workspace 事实查验: Google AI Edge / Ollama / Developers Blog 三源确认 MTP 2.2x 提速</div>
+<div class="text-slate-200 mt-2">## Spark Red Team Memo</div>
+<div>1. **Executive Objection**: 31B 显存占用 18-21GB, 同时跑 Redis / Gateway / Embedding 极易触发 Swap, 撤回 "31B 常驻" 提议。</div>
+<div>2. **Verified Facts**: ✅ CONFIRMED Gemma 4 采用 Apache 2.0 + MTP + Native System Prompt; ✅ CONFIRMED Ollama gemma4 全系上线。</div>
+<div>3. **Recommendation**: PROCEED (12B Sidecar + 26B MoE 按需调入)</div>`,
+            4: `<div class="text-emerald-400 font-bold">[Step 4: CEO (wow) 最终裁决与 Dissent Log 沉淀]</div>
+<div class="text-slate-400">SOP-E State Snapshot 已更新为 #v0.1.0-gemma4-deployment</div>
+<div class="text-slate-200 mt-2">## CEO Decision</div>
+<div>- [x] **确定采用 ChatGPT 6 点架构校准 + 12B Sidecar + 26B MoE 选型**: 启动 Ollama 实测与脚本起草。</div>
+<div class="text-emerald-400 mt-2">✔ Gemma 4 作为 Local Worker / Memory Controller 已正式接入 Hermes AgentMesh!</div>`
+        };
+
+        function runStep(step) {
+            document.getElementById('terminal-body').innerHTML = terminalData[step];
+        }
+
+        // Initialize Step 1
+        document.addEventListener('DOMContentLoaded', () => {
+            runStep(1);
+        });
+    </script>
+</body>
+</html>
