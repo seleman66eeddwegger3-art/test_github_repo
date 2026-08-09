@@ -1,6 +1,131 @@
-// Hermes Agent 笔记 — 第 4 页 (共 4 条)
+// Hermes Agent 笔记 — 第 4 页 (共 5 条)
 // 加载方式: <script src="posts-4.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_4 = [
+  {
+    id: `hermes-desktop-remote-gateway-test-false-pass-2026-06-05`,
+    date: `2026-06-05`,
+    time: `12:00`,
+    title: `Hermes Desktop 远程连不上：两层根因`,
+    tags: [
+      `hermes-desktop`,
+      `launchd`,
+      `websocket-1012`,
+      `remote-gateway`,
+      `issue-tracker`,
+      `v0.16-resolved`,
+    ],
+    summary: `Remote 模式 Test 通过≠session 真成立。Test 只验 REST 不验 WebSocket 持久化；Desktop 仍先本地 boot backend，launchd 反复 SIGTERM gateway，桌面卡在 'background gateway didn't come up'。`,
+    body: `# 问题
+
+填 URL + token，**Test remote 绿**——版本号识别正确，REST 通了。**点 Save and reconnect** 之后 Hermes Desktop 卡在 boot：
+
+\`\`\`
+Finding an open local port
+Resolving Hermes…
+[卡住]
+Hermes couldn't start — The background gateway didn't come up / Could not connect to Hermes gateway.
+\`\`\`
+
+不管换不换端口、不管 token 重填几次，**永远 Test 绿 + 实际 session 挂**。
+
+# 根因（两层）
+
+## 表层：WebSocket close 1012
+
+\`~/.hermes/logs/gui.log\` 显示 desktop 连过来的 WebSocket 接受了就被断：
+
+\`\`\`
+tui_gateway.ws: ws accepted peer=127.0.0.1:<port>
+tui_gateway.ws: ws closed ... reason=client_disconnect(code=1012,reason=) ...
+\`\`\`
+
+1012 = "service restart"。同一时刻 \`launchctl list\` 显示：
+
+\`\`\`
+30128  -15  ai.hermes.gateway   # LastExitStatus=15 = SIGTERM
+\`\`\`
+
+launchd 在反复 SIGTERM 你的 messaging gateway——这是 **KeepAlive + 任何 transient error 触发的硬重启循环**。
+
+## 深层：Remote 模式不纯粹
+
+更隐蔽的根因：**即使在 Hermes Desktop 设置里选 "Remote gateway"，Desktop 仍先在本地起 backend**，再尝试切远程：
+
+\`\`\`
+[desktop log]
+Starting Hermes backend via Hermes at /Users/<user>/.hermes/hermes-agent
+\`\`\`
+
+整流程被**本地 boot 阻塞**——本地 boot 哪怕只是慢 2 秒，远程 WebSocket 已经因为 1012 死了。本机这个"desktop 自带 daemon"（绑 127.0.0.1:9120）是个**简化版 dashboard**，没有 messaging gateway 能力。
+
+## 触发链
+
+把根因 + 表象串起来看：
+
+1. \`hermes gateway status\` 报 **"Service definition is stale relative to the current Hermes install"**
+2. launchd KeepAlive 检测到 stale → 触发 SIGTERM
+3. SIGTERM 期间所有 WebSocket → 1012 close
+4. Desktop boot 流程看到 WebSocket 死 → 报 "couldn't start"
+5. 桌面重试 → 又看到 1012 → 又失败 → 死循环
+
+# 修复（短期 workaround）
+
+## A. SSH 隧道（test 通过，但 1012 仍在）
+
+\`\`\`bash
+ssh -N user@studio-ip -L 127.0.0.1:9119:127.0.0.1:9119
+# Desktop 填 http://127.0.0.1:9119
+\`\`\`
+
+**Test 通过**（TCP + REST 通了），但 issue #38115 reporter 验证：实际 session 仍卡 1012 loop。**不根治**。
+
+## B. 绕开 Desktop，走 \`hermes --tui\`（推荐）
+
+\`\`\`bash
+hermes --tui --gateway-url http://<remote-host>:9119 --token <session-token>
+\`\`\`
+
+TUI 直接连远程 messaging gateway，**不经过 Desktop 的本地 boot gate**。这是截至 0.15.1 最稳的远程使用方式。
+
+## C. 等 0.16 修
+
+[#38115](https://github.com/NousResearch/hermes-agent/issues/38115) 2026-06-03 才开，maintainer @alt-glitch 已在跟。**0.16 之前不建议把 desktop 当远程客户端**。
+
+# 预防
+
+1. **不要把 "Test 通过" 当成 session 成立的证据**——Test 只验 REST，不验 WebSocket 握手/session 持久化
+2. **launchd 服务的健康**只看 plist loaded 不够，必看 \`launchctl list | grep ...\` 的 \`LastExitStatus\`（任何非 0 都算有 bug）
+3. **launchd 服务的 SIGTERM 通常不孤立**——一定伴随 \`~/.hermes/logs/gateway.error.log\` 里的 "Shutdown context: signal=SIGTERM" 行
+4. **遇到 "服务上不去" 时 4 个证据一起抓**：launchctl 状态码 + service log SIGTERM + status 命令的 stale warning + 客户端 boot log
+
+# 教训
+
+1. **"Test 绿" ≠ "session 真连上"**——REST 与 WebSocket session 是两层，Test 只 cover 第一层；这是 issue #38115 reporter 提出的核心洞察
+2. **"Remote 模式" 在 Hermes Desktop 0.15.1 里不纯粹**——表面看是 "connect to remote backend"，实际仍 gate 在本地 backend boot
+3. **launchd 的 SIGTERM 不会被 launchctl "loaded" 状态暴露**——只看 \`launchctl list | grep -i hermes\` 的 PID 段是 \`-\`（即"当前没进程"）看不出来，必须看第二列 \`LastExitStatus\`
+4. **面对"绿光"型 bug 信号，先问"它验了什么"**——Test 通过、version 正常、auth OK 都只能证明一部分；要的是端到端的 WebSocket 持久化，不是单次 REST 200
+
+# 沉淀
+
+- **Skill**: \`github-curl-api-pitfalls\` v1.0.0（这次另一组踩坑：hermes redaction + non-login shell + 3 步 scope 验证）
+- **Issue**: [NousResearch/hermes-agent#38115](https://github.com/NousResearch/hermes-agent/issues/38115)
+- **+1 comment**: [issuecomment-4627123330](https://github.com/NousResearch/hermes-agent/issues/38115#issuecomment-4627123330)
+- **复现证据**: 你的 \`launchctl list\` \`LastExitStatus=15\` + \`hermes gateway status\` "Service definition is stale" + 桌面 log "Finding an open local port → Resolving Hermes…"
+## ✅ 已解决（v0.16，2026-06-05 发布）
+
+> **Update 2026-06-07**：用户在另一个 session 升级到 v0.16 后亲自验证，两层根因都被解决。
+
+v0.16.0 release 关键变更（与本 issue 直接相关）：
+
+1. **Hermes Desktop 重写**——全新 native Electron app（macOS/Linux/Windows），从根上解决"本地 boot gate 阻塞远程 session"的隐性架构
+2. **Remote Hermes Connection 重做**——从"Test 绿≠session 通"改为 **OAuth / username-password via WebSocket**，session 持久化是 first-class concern
+3. **#38115 已在 v0.16 关闭**（v0.16 release 一次性 closed 399 issues）
+
+**建议**：升级到 v0.16 → Desktop → Settings → Remote gateway → 配 URL+token → 看 session 是否能持久维持。
+
+v0.15 时代的 workaround（SSH tunnel / \`hermes --tui\`）**仍可用，但不再是唯一选项**。
+`,
+  },
   {
     id: `ha-plist-canonical-gemini-vs-stubborn-2026-06-04`,
     date: `2026-06-04`,

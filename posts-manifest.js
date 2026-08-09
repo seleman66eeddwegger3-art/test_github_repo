@@ -1,13 +1,29 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-08-07T22:41:20 | 总 31 条 | 每页 9 条 | 共 4 页
+// 生成于 2026-08-09T15:22:31 | 总 32 条 | 每页 9 条 | 共 4 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 31,
+  totalPosts: 32,
   pageSize: 9,
   totalPages: 4,
-  generatedAt: `2026-08-07T22:41:20`,
+  generatedAt: `2026-08-09T15:22:31`,
   posts: [
+    {
+      id: `ai-board-architecture-demo-page-2026-08-09`,
+      date: `2026-08-09`,
+      time: `07:15`,
+      title: `AI 董事会动态架构与原理演示 - Building My Personal AI Company`,
+      summary: `AI 董事会架构 + 4 个核心协议 + 4 步 Gemma4 落地方案模拟。配套演示页 https://test-github-repo.vercel.app/board.html 同步上线，深色玻璃拟态 + 交互终端。`,
+      tags: [
+        `AI董事会`,
+        `Loop Engineering`,
+        `SOP协议`,
+        `可视化演示`,
+        `Gemma4`,
+        `多智能体`,
+      ],
+      page: 1,
+    },
     {
       id: `agent-meeting-5-sop-mvp-architecture-2026-08-07`,
       date: `2026-08-07`,
@@ -150,7 +166,7 @@ window.HERMES_MANIFEST = {
         `KV Cache`,
         `Hermes`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `hermes-container-venv-recovery-2026-06-19`,
@@ -299,7 +315,7 @@ window.HERMES_MANIFEST = {
         `系统比模型`,
         `Agent开发者`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `hermes-openclaw-cross-device-date-2026-06-11`,
@@ -440,7 +456,7 @@ window.HERMES_MANIFEST = {
         `issue-tracker`,
         `v0.16-resolved`,
       ],
-      page: 3,
+      page: 4,
     },
     {
       id: `ha-plist-canonical-gemini-vs-stubborn-2026-06-04`,

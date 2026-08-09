@@ -2,6 +2,91 @@
 // 加载方式: <script src="posts-1.js"></script> 或 fetch + new Function
 window.HERMES_PAGE_1 = [
   {
+    id: `ai-board-architecture-demo-page-2026-08-09`,
+    date: `2026-08-09`,
+    time: `07:15`,
+    title: `AI 董事会动态架构与原理演示 - Building My Personal AI Company`,
+    tags: [
+      `AI董事会`,
+      `Loop Engineering`,
+      `SOP协议`,
+      `可视化演示`,
+      `Gemma4`,
+      `多智能体`,
+    ],
+    summary: `AI 董事会架构 + 4 个核心协议 + 4 步 Gemma4 落地方案模拟。配套演示页 https://test-github-repo.vercel.app/board.html 同步上线，深色玻璃拟态 + 交互终端。`,
+    body: `> 配套演示页: https://test-github-repo.vercel.app/board.html
+> 上线时间: 2026-08-09
+
+这是一张**完整可视化**的"AI 董事会"架构演示页——把抽象的 4 协议 (SOP-F / Dissent Log / SOP-E / Loop Engineering) + 3 角色 (CEO / CSO / Auditor) + 3 阶段知识管理演进, 全部装进一个**深色玻璃拟态**的页面, 4 步交互终端可以直接点。
+
+## 这是什么
+
+按 **"协议层" + "案例层"** 两条线:
+
+| 层 | 内容 | 适用读者 |
+|---|---|---|
+| 协议层 | 4 协议 + 3 角色 + 3 阶段 | 想理解 AI 组织架构的 |
+| 案例层 | 4 步模拟 Gemma 4 落地方案 | 想看 SOP 真实跑通的 |
+
+跟 2026-08-07 那条**「智能体会议室 5 SOP + MVP 4 步」**笔记**互补**——那边是抽象协议讲解 (5 SOP / MVP 闭环), 这边是**可视化 + 真实案例**。
+
+## 4 个核心协议 (协议层)
+
+演示页 4 张协议卡, 跟 spark-hermes-meeting skill §14-§18 的 4-SOP 协议一致:
+
+- **SOP-F: 自动实时落盘 (Auto-Save on Reply)** — 每次 Agent 对话/裁决 → 自动落 99-meeting-minutes.md, 不依赖单 Session 记忆
+- **Dissent Log: 异议日志** — 记录"为什么当初没选另一个方向", 沉淀组织原则
+- **SOP-E: 系统状态快照 (State Snapshot)** — 类似 Git Commit, 新 Agent 加入时快速理解当前环境
+- **Loop Engineering: 闭环工程** — 观察 → 记录 → 沉淀 → 进化, 形成组织能力
+
+## 4 步模拟 Gemma 4 落地方案 (新增内容, 跟老 entry 区分)
+
+演示页第 4 节"会议室与 SOP-F 实时模拟终端"是一个**可点击的 4 步终端**——点 Step 1-4 切换内容, 展示真实会议协议跑通全过程。
+
+| Step | 角色 | 真实内容 (来自 Drive Gemma4 99-meeting-minutes.md Round 01-04) |
+|---|---|---|
+| 1 | CEO 召集 | Topic = Mac Studio 32G 部署 Gemma 4 (12B / 26B MoE / 31B) 作为本地 Agent Runtime |
+| 2 | CSO 提案 | Mac Studio 32G 分层部署: 32G 统一内存 Metal 分配 ~22-24GB 显存 |
+| 3 | Auditor 红队 | 31B 显存占用 18-21GB, 同时跑 Redis/Gateway/Embedding 触发 Swap → **撤回"31B 常驻"提议** |
+| 4 | CEO 拍板 | 采纳 **ChatGPT 6 点架构校准** + 12B Sidecar + 26B MoE 按需调入 → 启动 Ollama 实测 |
+
+**3 源事实核验** (Step 3 中引用):
+- Google AI Edge: MTP 2.2x 提速
+- Ollama: Native System Role + 256K 上下文
+- Google Developers Blog: Gemma 4 Agentic Skills
+
+## 知识管理 3 阶段演进
+
+演示页第 3 节是一条**时间路径**:
+
+| 阶段 | 形态 | 关注点 |
+|---|---|---|
+| 01 Obsidian | 个人 PKM | "我知道什么" |
+| 02 MemGraph-RAG | 知识图谱 | "知识如何关联" |
+| 03 AI 董事会 | 组织记忆 | "决策如何形成" |
+
+## 演示页特性
+
+- **深色玻璃拟态** + Tailwind + FontAwesome + Google Fonts
+- **4 步交互终端** — 点击 Step 1-4 切换内容, 不刷新页面
+- **4 张协议卡** + **3 张角色卡** + **3 阶段路径** + **Header 角色徽章条**
+- **移动端响应式** — Header / 卡片 grid / Footer 三段式
+
+## 沉淀
+
+- **skill: \`hermes-spark-meeting\`** — 会议协议 SOP-F + 99-meeting-minutes.md 模板 (§14-§18 4-SOP)
+- **skill: \`cross-agent-decision-packet\`** — CEO/CSO/Auditor 异步决策协议
+- **文件**: \`~/test_github_repo/board.html\` (29284 B, commit \`f11f2b8\`)
+- **配套笔记**: 2026-08-07 智能体会议室 5 SOP (抽象协议讲解) — 见 ## 相关
+
+## 📎 链接
+
+- 演示页: https://test-github-repo.vercel.app/board.html
+- 配套笔记: [智能体会议室 5 SOP + MVP 4 步](detail.html?id=agent-meeting-5-sop-mvp-architecture-2026-08-07)
+`,
+  },
+  {
     id: `agent-meeting-5-sop-mvp-architecture-2026-08-07`,
     date: `2026-08-07`,
     time: `15:00`,
@@ -1624,132 +1709,6 @@ def has_recent_changes():
 - cron job: \`c17984b4be1a\` (每天 02:15, no_agent=True)
 - 首次 commit 证据: \`00_MAP.md\` mtime \`19:49:06\` = 老大手工物理编辑
 - Prime Directive v3.5 全文: skill SKILL.md 顶部
-`,
-  },
-  {
-    id: `distributed-agent-m4-m1max-2026-06-21`,
-    date: `2026-06-21`,
-    time: `14:00`,
-    title: `M4 大脑 + M1 Max 后脑：端端协同 Agent 流水线`,
-    tags: [
-      `Agent架构`,
-      `MLX`,
-      `Mac mini M4`,
-      `Mac Studio M1 Max`,
-      `端云协同`,
-      `KV Cache`,
-      `Hermes`,
-    ],
-    summary: `M4 16G 跑 Hermes 控调度, M1 Max 32G 跑 Agents-K1 做推理后脑, 400 GB/s 内存带宽完美绕开 16G 端侧 KV Cache 焦虑`,
-    body: `今天我们打通的是一个非常典型且优雅的端端协同/分布式大模型 Agent 架构：让擅长控制和调度的芯片（M4）做"大脑"，让拥有高内存带宽和海量统一内存的芯片（M1 Max）做"强壮的后脑（推理算力）"，完美绕过了端侧设备 16G 内存的 KV Cache 焦虑。
-
-以下是今天实战成功的 SOP（标准作业程序）总结，供你归档或未来快速复刻。
-
-M4 16G 跑 Hermes Agent + MCP 做控制中枢（论文检索 + Agent 调度），Mac Studio M1 Max 32G 跑本地 Agents-K1 (4B-FP16) 做推理后脑。两者通过 \`http://<Mac_Studio_IP>:11435/v1\` 局域网 HTTP API 联动。利用 M1 Max 的 400 GB/s 内存带宽直出结构化抽取结果，**把 16G 端侧内存完整留给 KV Cache**，让 Agent 可以无顾忌往本地塞长篇论文。
-
-# 🎯 拓扑架构：分布式知识图谱智能体流水线
-
-**控制中枢（Mac mini M4 16G）**：运行 Hermes Agent + MCP 协议，通过官方 Scholar-KG MCP 服务进行低成本、跨学科的论文检索与原文召回。
-
-**推理后端（Mac Studio M1 Max 32G）**：部署本地 Agents-K1 (4B-FP16)，承接来自 M4 的长文本，利用 400 GB/s 带宽的高吞吐优势，100% 还原 GRPO 强化学习对齐后的精准结构化知识抽取（NER & RE）。
-
-# 🛠️ Mac Studio 落盘 SOP（4 步）
-
-## 1. 纯净环境隔离
-
-规避全局 Conda 或系统 Python 导致的路径交叉，创建专属高效环境：
-
-\`\`\`bash
-python3 -m venv mlx_env
-source mlx_env/bin/activate
-pip install --upgrade pip
-pip install mlx-lm huggingface_hub
-\`\`\`
-
-## 2. 官方通道稳健下载（跨越数据中心 IP 限速阻断）
-
-当遇到新模型镜像未同步、数据中心/VPN 节点匿名下载遭 CDN 严重限速（低至几 KB/s）时，最佳实践是三件事一起做：
-
-- **挂载干净路由**：开启 Outline VPN，选择路由质量更好的欧洲（如德国）干净节点。
-- **身份凭证注入**：去 Hugging Face 申请 Read Token，解锁高优先级通道。
-- **锁定环境执行**：关闭不兼容 VPN 的激进 Rust 引擎 \`hf_transfer\`，用当前环境的 Python 解释器内嵌下载，锁死变量。
-
-\`\`\`bash
-# 清理镜像残留，注入官方 Token
-unset HF_ENDPOINT
-export HF_TOKEN="your_hf_token_here"
-export HF_HUB_ENABLE_HF_TRANSFER=0
-
-# 用当前环境的 Python 拉取，确保不跑偏
-python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='InternScience/Agents-K1')"
-\`\`\`
-
-## 3. 无损原生编译（MLX Format）
-
-鉴于 32G 统一内存极其充裕，**拒绝量化**，直接编译 FP16/BF16 原版模型，最大化捍卫 GRPO 强化学习对齐出来的 \`<think>\` 思考链标签及严格 JSON Schema 的输出本能。
-
-\`\`\`bash
-mlx_lm convert   --hf-path InternScience/Agents-K1   --mlx-path ./models/Agents-K1-FP16
-\`\`\`
-
-## 4. 局域网算力广播
-
-拉起高兼容性的本地 Web 服务，绑定 \`0.0.0.0\` 端口常驻，供局域网内其他物理节点（M4）调度：
-
-\`\`\`bash
-python -m mlx_lm.server   --model ./models/Agents-K1-FP16   --host 0.0.0.0   --port 11435
-\`\`\`
-
-# 🤖 Mac mini 编排 SOP
-
-## 5. Agent 节点热切换与全链路闭环
-
-利用 Hermes 的高级上下文理解和本地配置文件/环境变量管理能力（依托 Filesystem MCP 或代码执行权限），使其完成自更新：
-
-- **端点重定向**：将负责信息提取的底层 Client LLM 配置从远程 API 或本地轻量模型，重定向至 \`http://<Mac_Studio_局域网_IP>:11435/v1\`。
-- **哑鉴权占位**：将 \`api_key\` 设为任意非空字符串（如 \`mlx-any-key\`）防止底层 SDK 报错。
-- **温度控制**：抽取任务强制将 \`temperature\` 设为 0.0 或 0.1，确保强 Schema 遵循。
-
-# 💡 实战避坑核心 Insights
-
-## 多环境陷阱
-
-当系统存在全局 Conda 环境时，直接在终端敲 CLI 命令（如 \`huggingface-cli\`）极易越过当前激活的虚拟环境去调用 base 路径下的二进制文件，导致依赖缺失或环境变量失效。显式使用 \`python -m\` 或 \`python -c\` 是最硬核的防御手段。
-
-## 内存带宽才是王道
-
-4B 级别的小模型在 M1 Max 400 GB/s 带宽下直出速度极快。把 16GB 的海量显存留给 KV Cache，让 Agent 可以肆无忌惮地往本地塞长篇论文，完美解决了长文本上下文泛滥时的性能和容量平衡。
-
-# 🚀 一键 Alias
-
-如果你只想在需要研究论文时手动拉起，完事了关掉，可以利用虚拟环境下的**绝对路径 Python** 绕过 \`source activate\` 命令。
-
-打开 \`~/.zshrc\`：
-
-\`\`\`bash
-nano ~/.zshrc
-\`\`\`
-
-在末尾追加一行别名（直接指向虚拟环境内部的 Python 解释器）：
-
-\`\`\`bash
-alias start-k1="/Users/miomio/mlx_env/bin/python -m mlx_lm.server --model /Users/miomio/models/Agents-K1-FP16 --host 0.0.0.0 --port 11435"
-\`\`\`
-
-保存刷新：
-
-\`\`\`bash
-source ~/.zshrc
-\`\`\`
-
-**爽点**：以后随时在终端敲 \`start-k1\`，服务瞬间拉起。
-
-# 沉淀
-
-- **触发 skill**：\`hermes-notes-publish\`（Hermes 笔记公开发布工作流，本笔记即按其 SOP 发布）
-- **关联笔记**：\`cross-mac-hermes-api-server-2026-06-08\`（Mac 跨设备 Hermes API 拓扑）、\`hermes-desktop-remote-lan-sop-2026-06-07\`（LAN 部署 SOP）、\`vps-hermes-tailscale-mesh-2026-06-19\`（Tailscale mesh）
-- **关键模型**：[Agents-K1 (InternScience)](https://huggingface.co/InternScience/Agents-K1) — 4B 参数 + GRPO 对齐，Scholar-KG 场景 NER/RE SOTA
-- **核心软件栈**：MLX (Apple Silicon 原生 ML 框架) + mlx-lm + mlx_lm.server (OpenAI 兼容 API)
 `,
   },
 ];

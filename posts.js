@@ -4668,6 +4668,85 @@ Output compressed: <1-3 行输出摘要>
 `,
   },
 
+  {
+    id: "ai-board-architecture-demo-page-2026-08-09",
+    date: "2026-08-09",
+    time: "07:15",
+    title: "AI 董事会动态架构与原理演示 - Building My Personal AI Company",
+    tags: ["AI董事会", "Loop Engineering", "SOP协议", "可视化演示", "Gemma4", "多智能体"],
+    summary: 'AI 董事会架构 + 4 个核心协议 + 4 步 Gemma4 落地方案模拟。配套演示页 https://test-github-repo.vercel.app/board.html 同步上线，深色玻璃拟态 + 交互终端。',
+    body: `> 配套演示页: https://test-github-repo.vercel.app/board.html
+> 上线时间: 2026-08-09
+
+这是一张**完整可视化**的"AI 董事会"架构演示页——把抽象的 4 协议 (SOP-F / Dissent Log / SOP-E / Loop Engineering) + 3 角色 (CEO / CSO / Auditor) + 3 阶段知识管理演进, 全部装进一个**深色玻璃拟态**的页面, 4 步交互终端可以直接点。
+
+## 这是什么
+
+按 **"协议层" + "案例层"** 两条线:
+
+| 层 | 内容 | 适用读者 |
+|---|---|---|
+| 协议层 | 4 协议 + 3 角色 + 3 阶段 | 想理解 AI 组织架构的 |
+| 案例层 | 4 步模拟 Gemma 4 落地方案 | 想看 SOP 真实跑通的 |
+
+跟 2026-08-07 那条**「智能体会议室 5 SOP + MVP 4 步」**笔记**互补**——那边是抽象协议讲解 (5 SOP / MVP 闭环), 这边是**可视化 + 真实案例**。
+
+## 4 个核心协议 (协议层)
+
+演示页 4 张协议卡, 跟 spark-hermes-meeting skill §14-§18 的 4-SOP 协议一致:
+
+- **SOP-F: 自动实时落盘 (Auto-Save on Reply)** — 每次 Agent 对话/裁决 → 自动落 99-meeting-minutes.md, 不依赖单 Session 记忆
+- **Dissent Log: 异议日志** — 记录"为什么当初没选另一个方向", 沉淀组织原则
+- **SOP-E: 系统状态快照 (State Snapshot)** — 类似 Git Commit, 新 Agent 加入时快速理解当前环境
+- **Loop Engineering: 闭环工程** — 观察 → 记录 → 沉淀 → 进化, 形成组织能力
+
+## 4 步模拟 Gemma 4 落地方案 (新增内容, 跟老 entry 区分)
+
+演示页第 4 节"会议室与 SOP-F 实时模拟终端"是一个**可点击的 4 步终端**——点 Step 1-4 切换内容, 展示真实会议协议跑通全过程。
+
+| Step | 角色 | 真实内容 (来自 Drive Gemma4 99-meeting-minutes.md Round 01-04) |
+|---|---|---|
+| 1 | CEO 召集 | Topic = Mac Studio 32G 部署 Gemma 4 (12B / 26B MoE / 31B) 作为本地 Agent Runtime |
+| 2 | CSO 提案 | Mac Studio 32G 分层部署: 32G 统一内存 Metal 分配 ~22-24GB 显存 |
+| 3 | Auditor 红队 | 31B 显存占用 18-21GB, 同时跑 Redis/Gateway/Embedding 触发 Swap → **撤回"31B 常驻"提议** |
+| 4 | CEO 拍板 | 采纳 **ChatGPT 6 点架构校准** + 12B Sidecar + 26B MoE 按需调入 → 启动 Ollama 实测 |
+
+**3 源事实核验** (Step 3 中引用):
+- Google AI Edge: MTP 2.2x 提速
+- Ollama: Native System Role + 256K 上下文
+- Google Developers Blog: Gemma 4 Agentic Skills
+
+## 知识管理 3 阶段演进
+
+演示页第 3 节是一条**时间路径**:
+
+| 阶段 | 形态 | 关注点 |
+|---|---|---|
+| 01 Obsidian | 个人 PKM | "我知道什么" |
+| 02 MemGraph-RAG | 知识图谱 | "知识如何关联" |
+| 03 AI 董事会 | 组织记忆 | "决策如何形成" |
+
+## 演示页特性
+
+- **深色玻璃拟态** + Tailwind + FontAwesome + Google Fonts
+- **4 步交互终端** — 点击 Step 1-4 切换内容, 不刷新页面
+- **4 张协议卡** + **3 张角色卡** + **3 阶段路径** + **Header 角色徽章条**
+- **移动端响应式** — Header / 卡片 grid / Footer 三段式
+
+## 沉淀
+
+- **skill: \`hermes-spark-meeting\`** — 会议协议 SOP-F + 99-meeting-minutes.md 模板 (§14-§18 4-SOP)
+- **skill: \`cross-agent-decision-packet\`** — CEO/CSO/Auditor 异步决策协议
+- **文件**: \`~/test_github_repo/board.html\` (29284 B, commit \`f11f2b8\`)
+- **配套笔记**: 2026-08-07 智能体会议室 5 SOP (抽象协议讲解) — 见 ## 相关
+
+## 📎 链接
+
+- 演示页: https://test-github-repo.vercel.app/board.html
+- 配套笔记: [智能体会议室 5 SOP + MVP 4 步](detail.html?id=agent-meeting-5-sop-mvp-architecture-2026-08-07)
+`,
+  },
+
 ];
 
 window.HERMES_POSTS = POSTS;
