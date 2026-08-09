@@ -1,12 +1,12 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-08-09T15:22:31 | 总 32 条 | 每页 9 条 | 共 4 页
+// 生成于 2026-08-09T16:13:46 | 总 32 条 | 每页 9 条 | 共 4 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
   totalPosts: 32,
   pageSize: 9,
   totalPages: 4,
-  generatedAt: `2026-08-09T15:22:31`,
+  generatedAt: `2026-08-09T16:13:46`,
   posts: [
     {
       id: `ai-board-architecture-demo-page-2026-08-09`,
