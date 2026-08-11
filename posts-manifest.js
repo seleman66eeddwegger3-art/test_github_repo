@@ -1,25 +1,25 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-08-09T16:13:46 | 总 32 条 | 每页 9 条 | 共 4 页
+// 生成于 2026-08-11T15:35:22 | 总 32 条 | 每页 9 条 | 共 4 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
   totalPosts: 32,
   pageSize: 9,
   totalPages: 4,
-  generatedAt: `2026-08-09T16:13:46`,
+  generatedAt: `2026-08-11T15:35:22`,
   posts: [
     {
       id: `ai-board-architecture-demo-page-2026-08-09`,
       date: `2026-08-09`,
       time: `07:15`,
-      title: `AI 董事会动态架构与原理演示 - Building My Personal AI Company`,
-      summary: `AI 董事会架构 + 4 个核心协议 + 4 步 Gemma4 落地方案模拟。配套演示页 https://test-github-repo.vercel.app/board.html 同步上线，深色玻璃拟态 + 交互终端。`,
+      title: `AI 董事会动态架构与原理演示`,
+      summary: `用三角色、异议日志和可追溯决策路径，把多智能体协作从聊天变成可复核的组织记忆。公开版仅分享协议，不包含任何环境配置。`,
       tags: [
         `AI董事会`,
-        `Loop Engineering`,
-        `SOP协议`,
+        `三角色协作`,
+        `决策协议`,
+        `组织记忆`,
         `可视化演示`,
-        `Gemma4`,
         `多智能体`,
       ],
       page: 1,

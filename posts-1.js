@@ -5,158 +5,148 @@ window.HERMES_PAGE_1 = [
     id: `ai-board-architecture-demo-page-2026-08-09`,
     date: `2026-08-09`,
     time: `07:15`,
-    title: `AI 董事会动态架构与原理演示 - Building My Personal AI Company`,
+    title: `AI 董事会动态架构与原理演示`,
     tags: [
       `AI董事会`,
-      `Loop Engineering`,
-      `SOP协议`,
+      `三角色协作`,
+      `决策协议`,
+      `组织记忆`,
       `可视化演示`,
-      `Gemma4`,
       `多智能体`,
     ],
-    summary: `AI 董事会架构 + 4 个核心协议 + 4 步 Gemma4 落地方案模拟。配套演示页 https://test-github-repo.vercel.app/board.html 同步上线，深色玻璃拟态 + 交互终端。`,
+    summary: `用三角色、异议日志和可追溯决策路径，把多智能体协作从聊天变成可复核的组织记忆。公开版仅分享协议，不包含任何环境配置。`,
     body: `> 配套演示页: https://test-github-repo.vercel.app/board.html
 > 上线时间: 2026-08-09
 
-这是一张**完整可视化**的"AI 董事会"架构演示页——把抽象的 4 协议 (SOP-F / Dissent Log / SOP-E / Loop Engineering) + 3 角色 (CEO / CSO / Auditor) + 3 阶段知识管理演进, 全部装进一个**深色玻璃拟态**的页面, 4 步交互终端可以直接点。
+这是一张把三角色异步决策协议做成可视化的演示页：主席负责最终裁决，Hermes 负责战略提案与会议上下文，Gemini Spark 负责事实核验、假设攻击与替代方案。页面用可点击的四步终端，把抽象流程变成可追踪的决策路径。
 
 ## 这是什么
 
-按 **"协议层" + "案例层"** 两条线:
+页面分为两条线：
 
 | 层 | 内容 | 适用读者 |
 |---|---|---|
-| 协议层 | 4 协议 + 3 角色 + 3 阶段 | 想理解 AI 组织架构的 |
-| 案例层 | 4 步模拟 Gemma 4 落地方案 | 想看 SOP 真实跑通的 |
+| 协议层 | 角色分工、决策记录、异议日志、状态快照 | 想理解多智能体协作架构的读者 |
+| 案例层 | 一个资源受限方案如何经历提案、红队质询、修订与裁决 | 想看协议如何运行的读者 |
 
-跟 2026-08-07 那条**「智能体会议室 5 SOP + MVP 4 步」**笔记**互补**——那边是抽象协议讲解 (5 SOP / MVP 闭环), 这边是**可视化 + 真实案例**。
+它与“智能体会议室 5 SOP + MVP 4 步”笔记互补：那篇解释抽象协议，这一页展示协议如何在一轮具体决策中运作。
 
-## 4 个核心协议 (协议层)
+## 四个核心协议
 
-演示页 4 张协议卡, 跟 spark-hermes-meeting skill §14-§18 的 4-SOP 协议一致:
+- **自动记录**：重要决策与回应会追加到会议时间线，避免依赖单次会话记忆。
+- **异议日志**：记录没有采用的方案，以及当时为何拒绝它。
+- **状态快照**：让新加入的参与者快速理解当前目标、约束与下一步。
+- **闭环工程**：观察、记录、校验、沉淀，再用经验改进下一次决策。
 
-- **SOP-F: 自动实时落盘 (Auto-Save on Reply)** — 每次 Agent 对话/裁决 → 自动落 99-meeting-minutes.md, 不依赖单 Session 记忆
-- **Dissent Log: 异议日志** — 记录"为什么当初没选另一个方向", 沉淀组织原则
-- **SOP-E: 系统状态快照 (State Snapshot)** — 类似 Git Commit, 新 Agent 加入时快速理解当前环境
-- **Loop Engineering: 闭环工程** — 观察 → 记录 → 沉淀 → 进化, 形成组织能力
+## 四步交互模拟
 
-## 4 步模拟 Gemma 4 落地方案 (新增内容, 跟老 entry 区分)
+演示页的交互终端把一次方案审查压缩为四步：
 
-演示页第 4 节"会议室与 SOP-F 实时模拟终端"是一个**可点击的 4 步终端**——点 Step 1-4 切换内容, 展示真实会议协议跑通全过程。
-
-| Step | 角色 | 真实内容 (来自 Drive Gemma4 99-meeting-minutes.md Round 01-04) |
+| Step | 角色 | 动作 |
 |---|---|---|
-| 1 | CEO 召集 | Topic = Mac Studio 32G 部署 Gemma 4 (12B / 26B MoE / 31B) 作为本地 Agent Runtime |
-| 2 | CSO 提案 | Mac Studio 32G 分层部署: 32G 统一内存 Metal 分配 ~22-24GB 显存 |
-| 3 | Auditor 红队 | 31B 显存占用 18-21GB, 同时跑 Redis/Gateway/Embedding 触发 Swap → **撤回"31B 常驻"提议** |
-| 4 | CEO 拍板 | 采纳 **ChatGPT 6 点架构校准** + 12B Sidecar + 26B MoE 按需调入 → 启动 Ollama 实测 |
+| 1 | Chairperson | 提出一个有明确资源与可靠性约束的方案议题 |
+| 2 | Hermes | 给出分层提案、假设与验证路径 |
+| 3 | Gemini Spark | 检查资源风险、隐藏前提与失败模式，并提出修订建议 |
+| 4 | Chairperson | 依据证据、风险与替代路径作出最终裁决 |
 
-**3 源事实核验** (Step 3 中引用):
-- Google AI Edge: MTP 2.2x 提速
-- Ollama: Native System Role + 256K 上下文
-- Google Developers Blog: Gemma 4 Agentic Skills
+重点不在某个具体模型、设备或部署参数，而在于这条链路：提案不是结论；红队不是反对而反对；裁决必须留下证据、异议与理由。
 
-## 知识管理 3 阶段演进
-
-演示页第 3 节是一条**时间路径**:
+## 知识管理的三个阶段
 
 | 阶段 | 形态 | 关注点 |
 |---|---|---|
-| 01 Obsidian | 个人 PKM | "我知道什么" |
-| 02 MemGraph-RAG | 知识图谱 | "知识如何关联" |
-| 03 AI 董事会 | 组织记忆 | "决策如何形成" |
+| 01 | 个人笔记 | “我知道什么” |
+| 02 | 关联知识 | “知识如何互相支持” |
+| 03 | 组织记忆 | “决策如何形成，以及为什么没有选择其他路径” |
 
 ## 演示页特性
 
-- **深色玻璃拟态** + Tailwind + FontAwesome + Google Fonts
-- **4 步交互终端** — 点击 Step 1-4 切换内容, 不刷新页面
-- **4 张协议卡** + **3 张角色卡** + **3 阶段路径** + **Header 角色徽章条**
-- **移动端响应式** — Header / 卡片 grid / Footer 三段式
+- 深色玻璃拟态界面与可点击的四步交互终端
+- 协议卡、角色卡与知识管理演进路径
+- 移动端响应式布局
+- 协议层与案例层分离：读者可以理解机制，而不需要复制任何人的环境配置
 
 ## 沉淀
 
-- **skill: \`hermes-spark-meeting\`** — 会议协议 SOP-F + 99-meeting-minutes.md 模板 (§14-§18 4-SOP)
-- **skill: \`cross-agent-decision-packet\`** — CEO/CSO/Auditor 异步决策协议
-- **文件**: \`~/test_github_repo/board.html\` (29284 B, commit \`f11f2b8\`)
-- **配套笔记**: 2026-08-07 智能体会议室 5 SOP (抽象协议讲解) — 见 ## 相关
+- **skill: \`hermes-spark-meeting\`** — 三角色会议、决策记录与异议日志协议
+- **skill: \`cross-agent-decision-packet\`** — 异步 CEO / CSO / Auditor 决策包结构
+- **配套笔记**: [智能体会议室 5 SOP + MVP 4 步](detail.html?id=agent-meeting-5-sop-mvp-architecture-2026-08-07)
 
 ## 📎 链接
 
 - 演示页: https://test-github-repo.vercel.app/board.html
 - 配套笔记: [智能体会议室 5 SOP + MVP 4 步](detail.html?id=agent-meeting-5-sop-mvp-architecture-2026-08-07)
 
-
 ---
 
-## 📤 分享技能: Spark-Hermes Meeting (脱敏版)
+## 📤 分享技能: Spark-Hermes Meeting
 
-> 这是 Google Gemini Spark 端的同源 skill, 我做了脱敏处理: 用户真名 → 公开别名 (1 处), mac mini / Trigger Phrase / 文件夹名等保留 (公开 OK).
-> 完整版在 Spark 端, 这里是公开分享版, 读者可拿去给任何 LLM Agent 配置同款三方会议协议.
+> 公开分享版保留可复用的三角色协作协议与品牌名；移除了机器、账户、云端目录、内部文件名和工具调用细节。读者可将其适配到自己的协作环境。
 
-### Spark-Hermes Meeting (脱敏分享版)
+### Spark-Hermes Meeting
 
-\`\`\`
-Spark-Hermes Meeting
-Facilitates asynchronous three-party meetings between mio (CEO/Chairperson), Hermes (CSO), and Gemini Spark (Auditor/Red Team).
+Facilitates asynchronous three-party meetings between a Chairperson, Hermes (CSO), and Gemini Spark (Auditor / Red Team).
 
-When to Use
-Use when the user mentions initiating or continuing a 3-party meeting, or uses trigger phrases like:
+#### When to Use
 
-"spark-hermes 开会"
-"开会"
-"召集会议"
-"meeting"
-"round table"
-"三方会议"
-Roles
-wow: CEO & Chairperson. Sets topic, reviews inputs, makes final decisions.
-Hermes: CSO (Chief Strategy Officer). Local agent on mac mini. Drafts strategic proposals and memory context.
-Gemini Spark: Auditor & Red Team. Performs Workspace fact-checking, assumption attacks, and alternative strategies.
-Pre-execution Check
-Scan mio's Google Drive root directory for folder Hermes-Spark-会议/ or Hermes-Spark-讨论/.
+Use when the user starts or continues a structured three-party meeting. Example triggers:
 
-Look for a subfolder named <Topic> <YYYY-MM-DD>:
+- "spark-hermes 开会"
+- "开会"
+- "召集会议"
+- "meeting"
+- "round table"
+- "三方会议"
 
-Found: Reuse existing folder. Read README.md and the latest topic .md file.
-Not Found: Wait 30-60 seconds if Hermes might still be creating it, or search recent files in Drive.
-Execution Workflow
-Read the topic Markdown packet generated by Hermes in Drive.
+#### Roles
 
-Formulate and output the Spark Red Team Memo in the mandatory 5-section format:
+- **Chairperson**: sets the topic, reviews inputs, and makes final decisions.
+- **Hermes**: drafts strategic proposals and preserves decision context.
+- **Gemini Spark**: fact-checks, attacks assumptions, and proposes alternatives.
 
-Executive Objection: One-sentence core objection/critique.
-Assumption Attack: Logical breakdown of Hermes's assumptions.
-Verified Facts: Fact-checking results using Workspace (Gmail/Drive) + Web Search with clickable URLs ([Title](URL)). Use status tags: ✅ CONFIRMED, ❌ REFUTED, ⚠️ UNKNOWN.
-Alternative Strategies: 1-2 distinct Option B/C strategies.
-Recommendation: Final verdict (PROCEED, MODIFY, or REJECT).
-Report back to mio in a 3-part summary:
+#### Pre-execution Check
 
-What was done
-What was observed/verified
-Next steps for CEO decision
-Absolute Constraints
-Ironclad Email Safety: NEVER send or reply to emails on behalf of mio (even if mio says "OK" or "agree"). Only create drafts or Markdown files.
-MIME Type: Use text/markdown for files (do not convert to Google Docs unless explicitly requested by mio).
-Grounding: Always cite clickable URLs for web and Workspace facts. Never invent or rely on unverified assumptions.
-Turn Boundaries: Wait for Hermes to respond; do NOT auto-append Hermes's response sections.
-\`\`\`
+1. Search the authorized shared workspace for an existing topic folder.
+2. If found, reuse it and read the README plus the latest topic document.
+3. If not found, wait briefly for the coordinating agent to finish initialization, then search recent workspace files again.
 
-### 使用场景
+#### Workflow
 
-- 你有 **CEO (你/用户)** + **CSO Agent** + **Auditor Agent** 三方异步会议需求
-- 想要 **Red Team Memo** 5 段式 (Executive Objection / Assumption Attack / Verified Facts / Alternative Strategies / Recommendation)
-- 想要 **Google Drive 落盘** (\`Hermes-Spark-会议/\` 或 \`Hermes-Spark-讨论/\` 文件夹) + **README + topic .md** 标准结构
-- 想要 **永不代发邮件锁** (skill 内置 Ironclad Email Safety 约束)
+1. Read the topic packet prepared by Hermes.
+2. Produce an auditor memo with five sections:
+   - **Executive Objection** — one-sentence core critique.
+   - **Assumption Attack** — breakdown of key assumptions.
+   - **Verified Facts** — sourced checks, with direct clickable citations and status tags: ✅ confirmed, ❌ refuted, ⚠️ unknown.
+   - **Alternative Strategies** — one or two distinct options.
+   - **Recommendation** — proceed, modify, or reject.
+3. Report back to the Chairperson: what was done, what was verified or observed, and the next decision needed.
 
-### 配套资源
+#### Meeting Timeline Protocol
 
-- 演示页: [board.html](https://test-github-repo.vercel.app/board.html)
-- 抽象协议讲解: [智能体会议室 5 SOP + MVP 4 步](detail.html?id=agent-meeting-5-sop-mvp-architecture-2026-08-07)
-- 真实会议示例: Drive \`Gemma4\` 文件夹 \`99-meeting-minutes.md\` (见演示页 Step 1-4)
+The meeting timeline is a native collaborative document, not a plain-text file.
+
+- Use broad file-type discovery so native documents are not missed.
+- Do not force-convert the timeline into another file type.
+- Append a new round through the document editor or its API.
+- Read the document back after writing, then export it as text only for a secondary content-growth check.
+- Because native-document export can normalize formatting, verify the new round and meaningful content growth; do not require byte-for-byte equality.
+
+Standalone scripts, source packets, and other plain-text documents remain true Markdown files. For those files, use normal upload/download and byte-exact verification.
+
+#### Safety and Quality Constraints
+
+- **Email safety:** Never send or reply to email on behalf of a user. Drafts only.
+- **Evidence:** Cite source URLs for externally checkable facts; do not invent or rely on unverified assumptions.
+- **Turn boundaries:** Wait for Hermes to respond; do not write Hermes’s section on its behalf.
+- **Role boundaries:** Preserve the Chairperson’s decisions verbatim when recording the timeline. Clearly label uncertainty, dissent, and any assistant inference.
+
+#### Why this works
+
+The goal is not to make several agents talk at once. It is to preserve the path to a decision: the proposal, objection, evidence, rejected alternative, and final decision. A future participant can then understand not only *what* was decided, but *why*.
 
 ## 📝 修订记录
 
-- **2026-08-09 07:30** — 追加 \`## 📤 分享技能\` 段 + \`## 📝 修订记录\` 段, 脱敏版 Spark skill 全文 (1 处替换). 保留 mac mini / Trigger Phrase / 文件夹名等公开内容.
+- **2026-08-11** — 全量脱敏该 entry：移除设备规格、部署参数、私有目录、协作平台目录、内部文件名、内部工具调用和具体模型示例；保留公开协议、演示页、品牌名与可复用的三角色 skill。
 `,
   },
   {
