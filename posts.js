@@ -4810,6 +4810,800 @@ The goal is not to make several agents talk at once. It is to preserve the path 
 `,
   },
 
+  {
+    id: "m1-mac-mini-omarchy-native-install-2026-09-25",
+    date: "2026-09-25",
+    time: "16:00",
+    title: "M1 Mac mini 跑通 Omarchy",
+    tags: ["Apple Silicon", "Asahi Linux", "Omarchy", "Arch Linux ARM", "Hyprland", "实机记录"],
+    summary: '一台 2020 M1 Mac mini 实机完成 macOS → Asahi Arch Minimal → Omarchy MX Mac，并验证 Wi-Fi、中文输入、YouTube 4K、录屏、Codex 与 Hermes Desktop。历史手动路线仅作记录，安装请以项目最新说明为准。',
+    body: `最近，我把一台 2020 年的 M1 Mac mini 重新拿了出来。
+
+
+这台机器发布已经很多年了，但这一次，我没有继续让它运行 macOS，也没有安装虚拟机。
+
+
+我直接在 Apple Silicon 上安装了 Asahi Linux，然后装上了 Omarchy。
+
+
+现在这台机器已经可以正常运行：
+
+
+- Omarchy / Hyprland
+- Chromium 和 YouTube 4K
+- 中文输入法
+- Telegram Desktop
+- Codex
+- Hermes Agent / Hermes Desktop
+- 4K 屏幕录制
+- Wi-Fi、SSH 等日常功能
+
+
+而且整个系统是原生 ARM64 Linux，不是在 macOS 里面运行的虚拟机。
+
+
+这篇文章不是 Omarchy 官方教程。
+
+
+它只是记录：我到底是怎么在一台真实的 2020 M1 Mac mini 上，把这件事跑通的。
+
+
+## 先说最重要的：M1 Mac mini 是否支持？
+
+
+我的机器是：
+
+
+2020 Mac mini / Apple M1 / 256GB SSD
+
+
+这里需要特别说明一个边界。
+
+
+Omarchy MX Mac 目前的新安装流程已经比我最初安装时简单很多，项目现在提供了从 macOS 开始的新 Installer。
+
+
+但是，我没有在自己的 M1 Mac mini 上重新测试这个新版 Installer。
+
+
+而且据我目前掌握的信息，开发者实际使用和测试的设备主要是 MacBook。因此，我不会把“M1 Mac mini 已经通过新版 Installer 官方实机验证”写成一个确定事实。
+
+
+我真正能够确认的是另一件事：
+
+
+Omarchy MX Mac 确实可以在 2020 M1 Mac mini 上运行，因为我自己的这台机器已经跑起来了。
+
+
+我实际跑通的路线是：
+
+
+macOS → Asahi Arch Minimal → Omarchy MX Mac
+
+
+而且这台机器不是“能启动就算成功”。
+
+
+我已经在上面正常使用浏览器、4K 视频、中文输入、Codex、Hermes Desktop 和屏幕录制。
+
+
+所以，如果你现在也是 M1 Mac mini，我会建议：
+
+
+首先查看 Omarchy MX Mac 当前最新的 Installer。
+
+
+如果当前 Installer 已经适用于你的机器，这是今天更值得优先尝试的路线。
+
+
+而本文后面保留的是我自己已经实机跑通的手动路线，以及过程中真正遇到的问题。
+
+
+Omarchy MX Mac：
+
+
+https://github.com/maralcbr/omarchy-mx-mac
+
+
+注意：Omarchy MX Mac 和 Asahi Linux 都还在快速更新。不要把本文中的旧安装命令当成永远有效的官方说明。真正安装之前，请再次检查项目最新 README。
+
+
+## 一、我的硬件
+
+
+我的测试机器：
+
+
+- Mac mini 2020
+- Apple M1
+- 256GB 内置 SSD
+- ARM64 / aarch64
+- HDMI 外接显示器
+- USB 键盘
+
+
+我没有使用外置 SSD 安装 Linux。
+
+
+我的 256GB SSD 原本主要给 macOS 使用。
+
+
+最后，我把 macOS 分区缩小到大约：
+
+
+145GB
+
+
+给 Linux 留出了大约：
+
+
+100GB
+
+
+如果你想复制我的环境，我反而建议第一次尝试时不要给自己增加变量。
+
+
+内置 SSD + macOS/Linux 双启动，是我真正验证过的组合。
+
+
+## 二、我第一次其实失败了
+
+
+这一段可能比成功过程更重要。
+
+
+在最终安装成功之前，我曾经尝试过另一条早期 Omarchy Mac / Quattro 路线。
+
+
+有意思的是：
+
+
+Asahi Linux 本身其实已经成功启动了。
+
+
+也就是说，M1 Mac mini 跑 Linux 并不是问题。
+
+
+真正的问题发生在后面的 Omarchy 安装和启动布局迁移阶段。
+
+
+当时系统经过：
+
+
+m1n1 → U-Boot → Linux
+
+
+最后停在黑屏和闪烁光标。
+
+
+我花了一些时间排查，但最后决定不再沿着那条旧路线继续折腾。
+
+
+后来，我换到了 Marcelo Alcantara 维护的 Omarchy MX Mac。
+
+
+同一台 M1 Mac mini。
+
+
+同样是 Apple Silicon。
+
+
+这一次成功了。
+
+
+所以如果你在网上搜索教程，我特别建议注意一件事：
+
+
+不要把不同时间、不同 fork、不同 Installer 的 Omarchy Mac 教程混在一起使用。
+
+
+这个项目变化很快。
+
+
+几个月以前正确的步骤，现在可能已经不是最佳路线。
+
+
+## 三、我真正跑通的路线
+
+
+我实际成功时使用的结构很简单：
+
+
+macOS
+
+
+↓
+
+
+Asahi Arch Minimal
+
+
+↓
+
+
+Arch Linux ARM
+
+
+↓
+
+
+Omarchy MX Mac
+
+
+↓
+
+
+Hyprland / Wayland
+
+
+这也是理解整个系统最重要的一张图。
+
+
+Omarchy 本身并不是突然让普通 Linux 可以运行在 M1 上。
+
+
+真正让 Linux 能够原生运行在 Apple Silicon 上的基础，是 Asahi Linux。
+
+
+Omarchy MX Mac 则是在这个基础上，把 Omarchy 的桌面环境、配置和工作方式带到了 Apple Silicon。
+
+
+## 四、第一步：给 Linux 留空间
+
+
+这是整个过程里最需要谨慎的一步，因为它涉及内置 SSD 分区。
+
+
+开始之前请备份重要数据。
+
+
+我的 256GB Mac mini 最后给 Linux 留了大约 100GB。
+
+
+这是一个我自己使用下来觉得比较舒服的空间。
+
+
+如果只是实验，可能不需要这么多；但如果后面还要安装开发环境、AI Agent、Node、Python、Electron 应用，空间很快就会被用掉。
+
+
+所以我个人不会只留几十 GB。
+
+
+## 五、安装 Asahi Arch Minimal
+
+
+我当时首先从 macOS 开始安装 Asahi Linux。
+
+
+我选择的是：
+
+
+Asahi Arch Minimal
+
+
+而不是一个已经带完整桌面环境的版本。
+
+
+原因很简单：
+
+
+后面的桌面环境交给 Omarchy。
+
+
+安装完成以后，这台 Mac 已经能够原生启动 Arch Linux ARM。
+
+
+进入系统以后，可以检查：
+
+
+uname -m
+
+
+在我的机器上得到的是：
+
+
+aarch64
+
+
+到这里，其实最底层、也是最关键的一关已经过了：
+
+
+Linux 已经真正跑在 M1 上。
+
+
+## 六、先让网络正常工作
+
+
+Minimal 环境不会给你一个漂亮的 macOS 网络设置窗口。
+
+
+如果 Wi-Fi 没有自动连接，可以使用：
+
+
+nmtui
+
+
+进入 NetworkManager 的文本界面。
+
+
+选择：
+
+
+Activate a connection
+
+
+找到自己的 Wi-Fi，然后输入密码。
+
+
+也可以检查：
+
+
+nmcli device
+
+
+确认无线网卡状态。
+
+
+我的 M1 Mac mini 最终 Wi-Fi 可以正常使用，而且现在重启以后会自动连接。
+
+
+我后来甚至把它配置成固定局域网 IP，用来 SSH 和做其他实验。
+
+
+所以至少在我自己的机器上，Wi-Fi 并没有成为长期使用的障碍。
+
+
+## 七、安装 Omarchy MX Mac
+
+
+这是整个过程中变化最快的一部分。
+
+
+我在 2026 年 9 月实际安装时，使用的是当时 Omarchy MX Mac 的 Asahi Quattro 安装路线。
+
+
+安装过程会处理 Omarchy 所需要的大量配置，同时保留 Apple Silicon / Asahi 所需要的底层组件。
+
+
+这也是为什么我不建议把普通 x86 Omarchy 教程里的命令直接复制到 Apple Silicon 上。
+
+
+这里涉及的不只是：
+
+
+Arch Linux
+
+
+还有：
+
+
+Apple Silicon
+Asahi kernel
+启动链
+ARM64 packages
+Omarchy MX Mac
+
+
+它们共同组成了这台机器。
+
+
+如果你今天才开始安装
+
+
+不要机械复制我当时的 Omarchy 安装命令。
+
+
+先进入 Omarchy MX Mac 项目：
+
+
+https://github.com/maralcbr/omarchy-mx-mac
+
+
+查看当前推荐 Installer。
+
+
+新版 Installer 应该优先于本文记录的旧手动流程。
+
+
+本文的价值是告诉你：
+
+
+M1 Mac mini 这条路我已经真实跑通过，但你今天应该使用项目当前最新的安装方式。
+
+
+## 八、第一次真正进入 Omarchy
+
+
+安装完成并重新启动以后，我终于进入了 Omarchy / Hyprland 桌面。
+
+
+这时候我没有马上开始安装一堆软件。
+
+
+我首先确认几个基础东西。
+
+
+检查架构：
+
+
+uname -m
+
+
+检查 kernel：
+
+
+uname -r
+
+
+检查网络：
+
+
+nmcli device status
+
+
+我的最终环境是：
+
+
+Apple M1
+ARM64 / aarch64
+Asahi Linux
+Arch Linux ARM
+Omarchy
+Hyprland
+Wayland
+
+
+到这里，这台 Mac mini 已经不是“在 Mac 上体验 Linux”。
+
+
+它就是一台 Linux 电脑了。
+
+
+## 九、中文输入
+
+
+这是中文用户很快会遇到的问题。
+
+
+我后来安装了 Fcitx5：
+
+
+sudo pacman -S --needed fcitx5-im fcitx5-chinese-addons
+
+
+然后启动 Fcitx5 配置工具，加入：
+
+
+Pinyin
+
+
+配置完成后，我现在已经可以在 Chromium、Telegram 等应用里正常输入中文。
+
+
+## 十、YouTube 4K 能不能看？
+
+
+这是我非常在意的测试。
+
+
+因为“成功启动 Linux”和“这台电脑真的能用”，完全是两件事。
+
+
+我的实际结果是：
+
+
+Chromium 播放 YouTube 4K 视频很流畅。
+
+
+这对我来说是一个很重要的分界线。
+
+
+如果连浏览器视频播放都卡，那它更像一台实验机器。
+
+
+但当 4K 视频、浏览器、输入法、Telegram 都开始正常工作以后，这台 M1 Mac mini 已经进入了真正可用的桌面电脑范围。
+
+
+## 十一、屏幕录制：这是我真正遇到的一个坑
+
+
+Omarchy 原本的录屏方案在我的 Apple Silicon / Asahi 环境里并不适合。
+
+
+最后我改用了：
+
+
+wf-recorder
+
+
+实际测试输出：
+
+
+H.264
+3840 × 2160
+约 60fps
+
+
+而且录制过程很流畅。
+
+
+后来我又让 Codex 把 wf-recorder 接回 Omarchy 自己的 Capture 菜单。
+
+
+现在我仍然可以：
+
+
+Capture → Screenrecord
+
+
+甚至保留状态栏录制指示和停止录制逻辑。
+
+
+整个修改都放在用户配置下面，没有直接修改 Omarchy 的系统文件。
+
+
+这也是我后来开始真正理解所谓“AI-native computer”的地方。
+
+
+## 十二、我开始让 Codex 修改这台电脑
+
+
+一开始我还是自己查命令、改配置。
+
+
+后来我逐渐改变了方法。
+
+
+例如屏幕录制出问题以后，我不是继续 Google 十几个帖子，而是让 Codex 直接检查：
+
+
+- 当前机器是什么架构
+- Omarchy 的录屏脚本在哪里
+- Hyprland 的快捷键怎么定义
+- Omarchy menu 怎么扩展
+- 哪些文件属于系统
+- 哪些文件允许用户覆盖
+
+
+然后让它：
+
+
+检查 → 备份 → 修改 → 测试 → 验证
+
+
+最终 Codex 帮我把 Apple Silicon 专用的录屏方案完整接回了 Omarchy。
+
+
+而且没有破坏原来的系统结构。
+
+
+这件事情让我觉得 Omarchy 真正有意思的地方，并不是桌面长得漂亮。
+
+
+而是 Linux 本身大量状态就是：
+
+
+配置文件
+脚本
+CLI
+systemd
+文本
+代码
+
+
+这些东西天然容易被 Agent 阅读、理解和修改。
+
+
+过去我们是：
+
+
+人操作电脑，再打开一个 AI 软件。
+
+
+而现在开始出现另一种感觉：
+
+
+AI 本身正在变成操作电脑的一层。
+
+
+## 十三、Hermes Desktop 也跑起来了
+
+
+后来我又继续折腾。
+
+
+Hermes Agent 的 CLI 本来就可以运行。
+
+
+但我还想看看它的 Desktop GUI 能不能在：
+
+
+M1 + Asahi + Arch ARM + Hyprland + Wayland
+
+
+这种环境里跑起来。
+
+
+最终，它成功了。
+
+
+Hermes Desktop 的 ARM64 Electron 应用在这台机器上完成构建并正常运行。
+
+
+所以现在这台 2020 M1 Mac mini 上，我同时有：
+
+
+Codex + Hermes
+
+
+这已经不是我最开始想象中的“旧 Mac 装 Linux玩玩”。
+
+
+它逐渐变成了一台真正用于 Agent 实验的电脑。
+
+
+## 十四、不要看到更新就马上升级
+
+
+这是我现在使用这台机器最重要的原则之一：
+
+
+如果已经稳定，不要为了追版本号随便升级底层系统。
+
+
+因为这里不是普通的 x86 Arch PC。
+
+
+整个环境里面同时存在：
+
+
+Apple Silicon
+Asahi kernel
+Apple 启动链
+Arch Linux ARM
+Omarchy MX Mac
+Hyprland
+
+
+所以涉及：
+
+
+- kernel
+- boot
+- Asahi
+- Omarchy 大版本
+
+
+我都会先检查更新到底会改什么。
+
+
+有时候我甚至会先让 Codex 阅读更新脚本，再决定是否执行。
+
+
+AI-native 并不意味着让 AI 莽撞地修改系统。
+
+
+恰恰相反。
+
+
+它意味着：
+
+
+在真正修改电脑之前，可以先让 AI 帮你理解这次修改到底会发生什么。
+
+
+## 十五、如果今天让我重新装一次
+
+
+如果现在让我拿另一台 M1 Mac 从零开始，我不会机械重复 9 月 18 日的所有步骤。
+
+
+我会这样做：
+
+
+1. 完整备份 macOS 和重要文件。
+2. 确认自己的具体 Mac 型号在当前 Asahi Linux / Omarchy MX Mac 支持范围内。
+3. 在内置 SSD 留出足够空间，我自己会留约 100GB。
+4. 优先检查 Omarchy MX Mac 当前最新 Installer。
+5. 确认 Installer 来自官方项目。
+6. 先完成最基础的 Omarchy 安装。
+7. 先测试显示、Wi-Fi、键盘、浏览器和视频播放。
+8. 确认系统稳定以后，再安装 Codex、Hermes 和其他工具。
+
+
+如果你也是 2020 M1 Mac mini，还有一个额外提醒：
+
+
+我的手动 Omarchy MX Mac 路线已经实机成功；但我没有重新格式化这台已经稳定工作的机器，只为了替新版 Installer 做一次测试。
+
+
+所以新版 Installer 在 M1 Mac mini 上的表现，我不会替开发者做保证。
+
+
+但至少我们已经知道：
+
+
+M1 Mac mini 本身并不是这条路线的障碍。
+
+
+## 最后：这台旧 Mac 到底变成了什么？
+
+
+我一开始只是很好奇：
+
+
+2020 年的第一代 M1 Mac mini，到了 2026 年还能不能变成一台有意思的电脑？
+
+
+最后得到的是：
+
+
+M1 Mac mini
+     ↓
+Asahi Linux
+     ↓
+Arch Linux ARM
+     ↓
+Omarchy / Hyprland
+     ↓
+Codex + Hermes
+     ↓
+AI-native desktop
+
+
+而且它不是概念图。
+
+
+这就是现在摆在我桌子上的那台电脑。
+
+
+它可以上网，可以看 4K 视频，可以录 4K 屏幕，可以输入中文，可以跑 Codex，也可以运行 Hermes Desktop。
+
+
+更有意思的是，我现在已经开始让 Agent 帮我维护和修改这台电脑本身。
+
+
+所以如果你也有一台已经闲置的 M1 Mac，我觉得 Omarchy MX Mac 至少提供了一个非常有意思的新选择。
+
+
+但请记住：
+
+
+不要把这篇文章当成永远不会变化的官方安装说明。
+
+
+它是一份 2020 M1 Mac mini 的真实成功案例和实机记录。
+
+
+真正动手之前，请首先查看：
+
+
+Omarchy MX Mac
+https://github.com/maralcbr/omarchy-mx-mac
+
+
+以及当前 Asahi Linux 对你具体 Mac 型号的支持情况。
+
+
+如果项目更新了更简单、更安全的安装方式，优先使用新的官方流程。
+
+
+我的这份记录，留给那些想知道：
+
+
+“M1 Mac mini 到底能不能真的把 Omarchy 跑起来？”
+
+
+的人。
+
+
+答案至少在我这台机器上是：
+
+
+可以。
+`,
+  },
+
 ];
 
 window.HERMES_POSTS = POSTS;

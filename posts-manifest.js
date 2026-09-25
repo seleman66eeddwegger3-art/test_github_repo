@@ -1,13 +1,29 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-08-11T15:35:22 | 总 32 条 | 每页 9 条 | 共 4 页
+// 生成于 2026-09-25T15:29:35 | 总 33 条 | 每页 9 条 | 共 4 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 32,
+  totalPosts: 33,
   pageSize: 9,
   totalPages: 4,
-  generatedAt: `2026-08-11T15:35:22`,
+  generatedAt: `2026-09-25T15:29:35`,
   posts: [
+    {
+      id: `m1-mac-mini-omarchy-native-install-2026-09-25`,
+      date: `2026-09-25`,
+      time: `16:00`,
+      title: `M1 Mac mini 跑通 Omarchy`,
+      summary: `一台 2020 M1 Mac mini 实机完成 macOS → Asahi Arch Minimal → Omarchy MX Mac，并验证 Wi-Fi、中文输入、YouTube 4K、录屏、Codex 与 Hermes Desktop。历史手动路线仅作记录，安装请以项目最新说明为准。`,
+      tags: [
+        `Apple Silicon`,
+        `Asahi Linux`,
+        `Omarchy`,
+        `Arch Linux ARM`,
+        `Hyprland`,
+        `实机记录`,
+      ],
+      page: 1,
+    },
     {
       id: `ai-board-architecture-demo-page-2026-08-09`,
       date: `2026-08-09`,
@@ -149,7 +165,7 @@ window.HERMES_MANIFEST = {
         `AI Agent`,
         `Hermes`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `distributed-agent-m4-m1max-2026-06-21`,
@@ -299,7 +315,7 @@ window.HERMES_MANIFEST = {
         `Agent时代`,
         `99视角`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `build2026-three-node-collab-2026-06-12`,
@@ -440,7 +456,7 @@ window.HERMES_MANIFEST = {
         `ai-playlist`,
         `taste-profile`,
       ],
-      page: 3,
+      page: 4,
     },
     {
       id: `hermes-desktop-remote-gateway-test-false-pass-2026-06-05`,
