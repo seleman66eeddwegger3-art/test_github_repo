@@ -1,13 +1,28 @@
 // Hermes Agent 笔记 — 轻量 manifest (无 body)
-// 生成于 2026-09-25T15:29:35 | 总 33 条 | 每页 9 条 | 共 4 页
+// 生成于 2026-10-01T21:30:37 | 总 34 条 | 每页 9 条 | 共 4 页
 // 主页用: totalPosts/totalPages + 渲染卡片 (title/summary/tags)
 // 详情页用: 查 id → page 字段 → fetch 对应 posts-N.js
 window.HERMES_MANIFEST = {
-  totalPosts: 33,
+  totalPosts: 34,
   pageSize: 9,
   totalPages: 4,
-  generatedAt: `2026-09-25T15:29:35`,
+  generatedAt: `2026-10-01T21:30:37`,
   posts: [
+    {
+      id: `flova-ai-cat-vlog-prompts-2026-10-01`,
+      date: `2026-10-01`,
+      time: `21:30`,
+      title: `Flova AI：我家猫的一天，提示词分享`,
+      summary: `上传真实布偶猫照片作为参考，把“猫的一天”拆成两段各 30 秒生成。分享两段实际使用的提示词：优先保持角色一致，延续竖屏手机自拍感，用动作、猫叫和环境音讲故事。`,
+      tags: [
+        `Flova AI`,
+        `AI 视频`,
+        `提示词`,
+        `角色一致性`,
+        `猫咪 Vlog`,
+      ],
+      page: 1,
+    },
     {
       id: `m1-mac-mini-omarchy-native-install-2026-09-25`,
       date: `2026-09-25`,
@@ -150,7 +165,7 @@ window.HERMES_MANIFEST = {
         `cron`,
         `state-machine`,
       ],
-      page: 1,
+      page: 2,
     },
     {
       id: `obsidian-prime-directive-v3-5-graph-2026-06-24`,
@@ -299,7 +314,7 @@ window.HERMES_MANIFEST = {
         `Agent形态`,
         `mechanic-01视角`,
       ],
-      page: 2,
+      page: 3,
     },
     {
       id: `agent-cron-vs-systemd-timer-layered-2026-06-12`,
@@ -441,7 +456,7 @@ window.HERMES_MANIFEST = {
         `auth-gate`,
         `env-file`,
       ],
-      page: 3,
+      page: 4,
     },
     {
       id: `apple-music-5-scenario-playlist-2026-06-06`,

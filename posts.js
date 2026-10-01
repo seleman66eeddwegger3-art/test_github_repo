@@ -5604,6 +5604,93 @@ https://github.com/maralcbr/omarchy-mx-mac
 `,
   },
 
+  {
+    id: "flova-ai-cat-vlog-prompts-2026-10-01",
+    date: "2026-10-01",
+    time: "21:30",
+    title: "Flova AI：我家猫的一天，提示词分享",
+    tags: ["Flova AI", "AI 视频", "提示词", "角色一致性", "猫咪 Vlog"],
+    summary: '上传真实布偶猫照片作为参考，把“猫的一天”拆成两段各 30 秒生成。分享两段实际使用的提示词：优先保持角色一致，延续竖屏手机自拍感，用动作、猫叫和环境音讲故事。',
+    body: `这次我用的是 Flova AI 网页端，没有通过 Codex。
+
+我上传了几张我家布偶猫的真实照片作为角色参考，然后把一支「猫的一天」拆成两段各 30 秒来生成。第一段生成出来以后，竖屏效果意外地很适合这种自拍 Vlog，所以第二段继续保持 9:16 和同样的手机自拍视频风格。
+
+这里最重要的要求不是“电影感”，而是角色一致性：始终是同一只布偶猫、同一张脸、同样的毛色和身体比例。整个视频没有人类对白、旁白、字幕或背景音乐，主要靠猫的动作、叫声和环境音来讲故事。
+
+下面是两段实际跑通后使用的提示词，大家可以直接拿去改成自己的猫。
+
+## Part 1｜0–30 秒
+
+\`\`\`text
+Create a realistic “day in the life” cat vlog featuring the same Ragdoll cat from the reference images.
+
+The entire video should feel like a casual smartphone selfie vlog filmed by the cat itself, with the cat appearing to hold the phone with its paw.
+
+Keep the same cat identity throughout the video. The cat’s facial features, fur pattern, body proportions, eye color, and overall appearance should remain consistent with the reference images.
+
+No human speech, dialogue, narration, voiceover, subtitles, captions, text, logos, watermarks, or background music.
+
+Tell the story only through the cat’s actions, body language, meows, purrs, chirps, yawns, and natural environmental sounds.
+
+Use realistic smartphone footage: natural handheld shake, imperfect framing, occasional autofocus changes, front-camera distortion, unfiltered colors, and natural lighting.
+
+Avoid cinematic camera movements, third-person shots, tripod shots, beauty-grade styling, or overly polished commercial visuals.
+
+0–10s — Wake Up
+The cat wakes up sleepily at home, looking into the phone camera. It stretches, yawns, blinks slowly, and starts its day.
+
+10–20s — Breakfast
+The cat goes to eat breakfast while continuing the casual selfie-vlog feeling. Show natural eating behavior and small reactions to the food.
+
+20–30s — Playtime
+The cat becomes more energetic and plays around the home. Keep the phone-selfie perspective and make the movement feel spontaneous and slightly imperfect.
+
+Maintain the same Ragdoll cat identity throughout all shots.
+\`\`\`
+
+## Part 2｜30–60 秒
+
+\`\`\`text
+Continue the same realistic “day in the life” cat vlog with the same Ragdoll cat.
+
+Continue in vertical 9:16 format and preserve the same casual handheld smartphone selfie-vlog style established in the first part.
+
+The cat should still appear to be filming itself with a phone held in its paw.
+
+Keep the cat’s identity highly consistent: same face, blue eyes, fur pattern, markings, body proportions, and overall appearance.
+
+No human speech, dialogue, narration, voiceover, subtitles, captions, text, logos, watermarks, or background music.
+
+Use only the cat’s natural vocalizations, actions, body language, and realistic environmental sounds.
+
+Keep the footage natural and imperfect: handheld movement, slight camera shake, imperfect framing, occasional autofocus changes, front-camera distortion, natural lighting, and unfiltered colors.
+
+Avoid cinematic camera movements, third-person shots, tripod shots, beauty-grade styling, or overly polished commercial visuals.
+
+30–40s — Exploring
+The cat explores around the home with curiosity, checking different corners and objects while continuing to vlog its day.
+
+40–50s — Afternoon Adventure
+The cat continues its little afternoon adventure, moving through the environment and reacting naturally to things around it. Keep the mood playful and observational.
+
+50–60s — Evening & Bedtime
+The day winds down. The same cat becomes visibly tired, settles into a comfortable resting place, yawns, relaxes, and finally rests or falls asleep.
+
+End with the same Ragdoll cat clearly visible and resting peacefully.
+
+Do not end on an empty room, a human, human feet, or slippers.
+
+Maintain the same cat identity as the highest priority throughout the entire sequence.
+\`\`\`
+
+平台：Flova AI
+形式：竖屏 9:16
+时长：2 × 30 秒
+参考：真实猫咪照片
+
+`,
+  },
+
 ];
 
 window.HERMES_POSTS = POSTS;
